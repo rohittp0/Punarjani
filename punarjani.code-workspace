@@ -1,31 +1,17 @@
 {
-	"folders": [
-		{
-			"path": "."
-        }
-    ],
-	"settings":
-	{
+	"folders": [{
+		"path": "."
+	}],
+	"settings": {
 		"editor.snippetSuggestions": "inline",
-		"files.excludea":
-		{
+		"files.exclude": {
 			".github": true,
 			"**/.git": true,
-			"**/*.log": true,
 			"**/package-lock.json": true,
-			"**/favicon.ico": true,
-			"test-data": true,
-			".firebaserc": true,
 			".gitignore": true,
 			".jsbeautifyrc": true,
-			"firebase.json": true,
-			"firestore.indexes.json": true,
-			"tsconfig.json": true,
 			"package.json": false,
 			".eslintrc.json": true,
-			"rollup-plugins": true,
-			"dist": true,
-			"rollup.config.js": ,
 			".vscode": true,
 			"Procfile": true,
 			"**/node_modules": true,
@@ -34,68 +20,15 @@
 			".env": true
 		},
 		"beautify.ignore": ["**/*.js"],
-		"beautify.config":
-		{
-			"html":
-			{
-				"allowed_file_extensions": ["htm", "html", "xhtml", "shtml", "xml", "svg", "dust"],
-				"brace_style": "expand",
-				"end_with_newline": true,
-				"indent_with_tabs": true,
-				"indent_handlebars": true,
-				"indent_inner_html": false,
-				"indent_scripts": "keep",
-				"max_preserve_newlines": 2,
-				"preserve_newlines": true,
-				"unformatted": ["a", "span", "code", "pre", "sub", "sup", "em", "strong", "b", "i", "u", "strike", "big", "small", "pre", "h1",
-                    "h2", "h3", "h4", "h5", "h6"
-                ],
-				"wrap_line_length": 0
-			},
-			"css":
-			{
-				"allowed_file_extensions": ["css", "scss", "sass", "less"],
-				"end_with_newline": true,
-				"indent_with_tabs": true,
-				"newline_between_rules": true,
-				"selector_separator": " ",
-				"selector_separator_newline": true,
-				"preserve_newlines": true,
-				"max_preserve_newlines": 2
-			},
-			"js":
-			{
-				"allowed_file_extensions": ["json", "jshintrc", "jsbeautifyrc", "ts"],
-				"brace_style": "expand,preserve-inline",
-				"break_chained_methods": false,
-				"e4x": false,
-				"end_with_newline": true,
-				"indent_level": 0,
-				"indent_with_tabs": true,
-				"jslint_happy": true,
-				"keep_array_indentation": true,
-				"keep_function_indentation": true,
-				"max_preserve_newlines": 0,
-				"preserve_newlines": true,
-				"space_after_anon_function": false,
-				"space_before_conditional": true,
-				"space_in_empty_paren": false,
-				"space_in_paren": false,
-				"unescape_strings": false,
-				"wrap_line_length": 0
-			}
-		},
 		"eslint.format.enable": true,
 		"eslint.codeActionsOnSave.mode": "problems",
 		"editor.formatOnSave": true,
-		"[javascript]":
-		{
+		"[javascript]": {
 			"editor.defaultFormatter": "dbaeumer.vscode-eslint"
 		}
 
 	},
-	"extensions":
-	{
+	"extensions": {
 		"recommendations": [
 			"anseki.vscode-color",
 			"christian-kohler.npm-intellisense",
