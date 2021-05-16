@@ -47,4 +47,7 @@ client.on("message", message =>
 });
 
 //Login to discord using TOKEN
-client.login(process.env.BOT_TOKEN);
+if(process.env.BOT_TOKEN)
+	client.login(process.env.BOT_TOKEN);
+else 
+	console.error("Discord-Bot Token missing."); // Print error message if token is missing.	
