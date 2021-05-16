@@ -1,0 +1,35 @@
+{
+  "name": "punarjani",
+  "type": "module",
+  "version": "1.0.0",
+  "description": "",
+  "engines": {
+    "node": "16.x"
+  },
+  "main": "src/index.js",
+  "scripts": {
+    "start": "node src/index.js",
+    "lint": "node ./node_modules/eslint/bin/eslint.js --color ./src",
+    "fix": "node ./node_modules/eslint/bin/eslint.js --color --fix ./src",
+    "watch": "nodemon dist/index.js",
+    "deploy": "git add . && git commit -m Heroku && git push && heroku open",
+    "test": "echo \"No tests specified\""
+  },
+  "keywords": [
+    "BFH",
+    "NodeJS",
+    "CoWin",
+    "Corona virus"
+  ],
+  "author": "Rohit T P, Sanu Mohammed, Sunith V S",
+  "license": "ISC",
+  "devDependencies": {
+    "eslint": "^7.26.0",
+    "nodemon": "^2.0.7"
+  },
+  "dependencies": {
+    "express": "^4.17.1",
+    "firebase-admin": "^9.8.0",
+    "fs": "^0.0.1-security"
+  }
+}
