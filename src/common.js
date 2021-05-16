@@ -18,8 +18,6 @@
  */
 
 import admin from "firebase-admin";
-import fs from "fs";
-import { join } from "path";
 
 /**
  * Returns an instance of firebase admin after initalising it using
@@ -30,8 +28,8 @@ import { join } from "path";
  */
 function getApp()
 {
-	// Read the service account credentials from file.
-	const serviceAccount = JSON.parse(fs.readFileSync(join(process.cwd(), "serviceAccountKey.json"), "utf-8"));
+	// Read the service account credentials from enviornment variables.
+	const serviceAccount = JSON.parse(process.env.FIREBASE_KEY || "");
 
 	// Login to firebase server then exports the loggin instance so we can use it in other files. 
 	return admin.initializeApp(

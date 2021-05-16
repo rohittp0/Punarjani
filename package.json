@@ -29,7 +29,6 @@
   },
   "dependencies": {
     "discord.js": "^12.5.3",
-    "firebase-admin": "^9.8.0",
-    "fs": "^0.0.1-security"
+    "firebase-admin": "^9.8.0"
   }
 }
