@@ -6,7 +6,7 @@
     ],
 	"settings":
 	{
-		"files.exclude":
+		"files.excludea":
 		{
 			".github": true,
 			"**/.git": true,

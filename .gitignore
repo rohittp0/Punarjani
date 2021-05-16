@@ -13,5 +13,8 @@ docker-compose.yml
 #Other
 public/js/*.js
 dist/
+
+# Secure Files
 .credentials/
 serviceAccountKey.json
+.env

@@ -33,7 +33,9 @@
 		"comma-spacing": "warn",
 		"eol-last": "warn",
 		"eqeqeq": "error",
-		"no-bitwise": "error"
+		"no-bitwise": "error",
+		"no-var": "error",
+		"prefer-const": "error"
 	},
 	"ignorePatterns": ["**/node_modules"]
 }
