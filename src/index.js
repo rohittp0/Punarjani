@@ -37,9 +37,12 @@ const commands =
 client.on("message", message => 
 {
 	// Check if the message starts with prefix and is not send by bot it's self.
-	if (!message.content.startsWith(prefix) || message.author.bot) return;
-
+	if (!message.content.startsWith(prefix) || message.author.bot || message.content.length < 2) 
+		return;
+	
+	// Removes prefix from input string then splits into words. 	
 	const args = message.content.slice(prefix.length).trim().split(/ +/);
+	// Gets the commad to command variable.
 	const command = args.shift()?.toLowerCase();
 
 	commands.find(cmd => cmd.name === command)?.handler(client, message, args);

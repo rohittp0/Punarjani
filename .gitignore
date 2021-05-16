@@ -1,6 +1,7 @@
 # Node build artifacts
 node_modules
 npm-debug.log
+**/node_modules/
 
 # Local development
 *.dev
@@ -10,11 +11,6 @@ npm-debug.log
 Dockerfile
 docker-compose.yml
 
-#Other
-public/js/*.js
-dist/
-
 # Secure Files
-.credentials/
 serviceAccountKey.json
 .env

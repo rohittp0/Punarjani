@@ -23,6 +23,7 @@ import {Client, Message} from "discord.js";
 /**
  * This function handles the user registration for Punarjani.
  * 
+ * @author Rohit T P
  * @param {Client} client The discord client
  * @param {Message} message The message that initiated this command.
  * @param {Array<string>} args Array containing district, age and user id.
@@ -30,6 +31,6 @@ import {Client, Message} from "discord.js";
  */
 export default function register(client, message, args) 
 {
-	console.log(client, args, message);
+	console.log(args);
 	return true;
 }

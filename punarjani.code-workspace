@@ -17,7 +17,8 @@
 			"**/node_modules": true,
 			"serviceAccountKey.json": true,
 			"jsconfig.json": true,
-			".env": true
+			".env": true,
+			"LICENSE": true
 		},
 		"beautify.ignore": ["**/*.js"],
 		"eslint.format.enable": true,
