@@ -35,7 +35,8 @@
 		"eqeqeq": "error",
 		"no-bitwise": "error",
 		"no-var": "error",
-		"prefer-const": "error"
+		"prefer-const": "error",
+		"brace-style": ["error", "allman"]
 	},
 	"ignorePatterns": ["**/node_modules"]
 }

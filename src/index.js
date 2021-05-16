@@ -1,27 +1,50 @@
-/* <one line to give the program's name and a brief idea of what it does.>
-    Copyright (C) <year>  <name of author>
+/**
+ * Punarjani is a discord bot that notifies you about slot availablity at
+ * CoWin vaccination centers.
+ * Copyright (C) 2021  Rohit T P
+ * 
+ *  This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU Affero General Public License as published
+ * by the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ * 
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU Affero General Public License for more details.
+ * 
+ * You should have received a copy of the GNU Affero General Public License
+ * along with this program.  If not, see <https://www.gnu.org/licenses/>. 
+ */
 
-    This program is free software: you can redistribute it and/or modify
-    it under the terms of the GNU Affero General Public License as published
-    by the Free Software Foundation, either version 3 of the License, or
-    (at your option) any later version.
+import Discord from "discord.js";
+import register from "./register.js";
 
-    This program is distributed in the hope that it will be useful,
-    but WITHOUT ANY WARRANTY; without even the implied warranty of
-    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-    GNU Affero General Public License for more details.
+// Create an instance of Client 
+const client = new Discord.Client();
+// Define a prefix to use when sending commands to bot.
+const prefix = process.env.PREFIX || "!";
+// An array of commands and functions to handle them.
+const commands = 
+[
+	{ name: "register", handler: register }
+];
 
-    You should have received a copy of the GNU Affero General Public License
-    along with this program.  If not, see <https://www.gnu.org/licenses/>.*/
-import express from "express";
-// eslint-disable-next-line no-unused-vars
-import { app } from "./common.js";
+/**
+ * Add an on message handler to the discord bot. This handler will be 
+ * the starting point for most of the functions handled by the bot.
+ */
+client.on("message", message => 
+{
+	// Check if the message starts with prefix and is not send by bot it's self.
+	if (!message.content.startsWith(prefix) || message.author.bot) return;
 
+	const args = message.content.slice(prefix.length).trim().split(/ +/);
+	const command = args.shift()?.toLowerCase();
 
-// Get the port number to be used for hosting defined in .env file.
-const PORT = process.env.PORT || 5000;
+	commands.find(cmd => cmd.name === command)?.handler(client, message, args);
 
-// Use express to handle get and post requests.
-express() // Set ./public as static folder.
-	.get("/", (_req,res) => res.end("Ok")) 
-	.listen(PORT, () => console.log(`Listening on ${ PORT }`));
+});
+
+//Login to discord using TOKEN
+client.login(process.env.BOT_TOKEN);

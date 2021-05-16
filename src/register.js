@@ -17,28 +17,19 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>. 
  */
 
-import admin from "firebase-admin";
-import fs from "fs";
-import { join } from "path";
+// eslint-disable-next-line no-unused-vars
+import {Client, Message} from "discord.js";
 
 /**
- * Returns an instance of firebase admin after initalising it using
- * credentials stored in serviceAccountKey.json
+ * This function handles the user registration for Punarjani.
  * 
- * @author Rohit T P
- * @returns {admin.app.App} Initalised Firebase App
+ * @param {Client} client The discord client
+ * @param {Message} message The message that initiated this command.
+ * @param {Array<string>} args Array containing district, age and user id.
+ * @returns {Boolean} Indicates operation success or failure.
  */
-function getApp()
+export default function register(client, message, args) 
 {
-	// Read the service account credentials from file.
-	const serviceAccount = JSON.parse(fs.readFileSync(join(process.cwd(), "serviceAccountKey.json"), "utf-8"));
-
-	// Login to firebase server then exports the loggin instance so we can use it in other files. 
-	return admin.initializeApp(
-		{
-			credential: admin.credential.cert(serviceAccount),
-			databaseURL: "https://punarjani-cowin-default-rtdb.firebaseio.com"
-		});
+	console.log(client, args, message);
+	return true;
 }
-
-export const app = getApp();
