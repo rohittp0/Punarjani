@@ -19,6 +19,7 @@
 
 import Discord from "discord.js";
 import register from "./register.js";
+import help from "./help.js";
 
 // Create an instance of Client 
 const client = new Discord.Client();
@@ -27,7 +28,7 @@ const prefix = process.env.PREFIX || "!";
 // An array of commands and functions to handle them.
 const commands = 
 [
-	{ name: "register", handler: register }
+	{ name: "register", handler: register }  ,{ name: "help", handler: help }
 ];
 
 /**
