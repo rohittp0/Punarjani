@@ -2,7 +2,10 @@
   "name": "punarjani",
   "type": "module",
   "version": "1.0.0",
-  "description": "",
+  "description": "Find Cowin vaccination slots near you ASAP !! ",
+  "repository": {
+    "url": "https://github.com/rohittp0/Punarjani.git"
+  },
   "engines": {
     "node": "16.x"
   },
@@ -11,14 +14,15 @@
     "start": "node src/index.js",
     "lint": "node ./node_modules/eslint/bin/eslint.js --color ./src",
     "fix": "node ./node_modules/eslint/bin/eslint.js --color --fix ./src",
-    "watch": "nodemon -r dotenv/config src/index.js",
+    "watch": "node ./node_modules/nodemon/bin/nodemon -r dotenv/config src/index.js",
     "test": "echo \"No tests specified\""
   },
   "keywords": [
     "BFH",
     "NodeJS",
     "CoWin",
-    "Corona virus"
+    "Corona virus",
+    "punarjani"
   ],
   "author": "Rohit T P, Sanu Mohammed, Sunith V S",
   "license": "ISC",
@@ -28,8 +32,8 @@
     "nodemon": "^2.0.7"
   },
   "dependencies": {
+    "axios": "^0.21.1",
     "discord.js": "^12.5.3",
-    "firebase-admin": "^9.8.0",
-    "node-fetch": "^2.6.1"
+    "firebase-admin": "^9.8.0"
   }
 }

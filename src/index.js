@@ -18,6 +18,7 @@
  */
 
 import Discord from "discord.js";
+// Importing command handlers.
 import register from "./register.js";
 import help from "./help.js";
 
@@ -28,14 +29,15 @@ const prefix = process.env.PREFIX || "!";
 // An array of commands and functions to handle them.
 const commands = 
 [
-	{ name: "register", handler: register }  ,{ name: "help", handler: help }
+	{ name: "register", handler: register }, 
+	{ name: "help",     handler: help     }
 ];
 
 /**
  * Add an on message handler to the discord bot. This handler will be 
  * the starting point for most of the functions handled by the bot.
  */
-client.on("message", message => 
+client.on("message", async (message) =>
 {
 	// Check if the message starts with prefix and is not send by bot it's self.
 	if (!message.content.startsWith(prefix) || message.author.bot || message.content.length < 2) 
@@ -46,8 +48,10 @@ client.on("message", message =>
 	// Gets the commad to command variable.
 	const command = args.shift()?.toLowerCase();
 
-	commands.find(cmd => cmd.name === command)?.handler(client, message, args);
+	const result = await commands.find(cmd => cmd.name === command)
+		?.handler(client, message, args);
 
+	console.log(`Excecution ${result}`);
 });
 
 //Login to discord using TOKEN

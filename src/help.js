@@ -27,10 +27,10 @@ import {Client, Message} from "discord.js";
  * @param {Client} client The discord client
  * @param {Message} message The message that initiated this command.
  * @param {Array<string>} args Array containing district, age and user id.
- * @returns {Boolean} Indicates operation success or failure.
+ * @returns {Promise<Boolean>} Indicates operation success or failure.
  */
-export default function help(client, message, args) 
+// eslint-disable-next-line no-unused-vars
+export default async function help(client, message, args) 
 {
-	
-	return client=1,message=1,args==[];
+	return true;
 }
