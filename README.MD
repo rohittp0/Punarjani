@@ -1,5 +1,5 @@
 # PUNARJANI 
- <p align="center"> <img src="https://user-images.githubusercontent.com/78996425/118526312-bca98580-b75d-11eb-9503-d3134dd9b18c.jpeg" width="200" height="200" /> 
+ <p align="center"> <img src="https://user-images.githubusercontent.com/78996425/118625708-de4f4f00-b7e7-11eb-8041-e92ca4dc19c3.png" width="290" height="250" /> 
    
  OVERVIEW ON THIS PROJECT :\
  From kicking and banning people to giving roles for specific amounts of time, this Discord bot can be helpful for anyone.\
@@ -17,9 +17,9 @@
 6. User can Navigate to COWIN site if slot available.
 
 ## Authors :
-<h3><a href="https://github.com/rohittp0"> 1. ROHIT TP</a>         => Main coder</h3>
-<h3><a href="https://github.com/sunithvs"> 2. SUNITH VS</a>        => Assistant coder</h3> 
-<h3><a href="https://github.com/sanumuhammedc"> 3. SANU MUHAMMED C</a>  => Code Checker</h3>
+#### <a href="https://github.com/rohittp0"> 1. ROHIT TP</a>         => Main coder
+#### <a href="https://github.com/sunithvs"> 2. SUNITH VS</a>        => Assistant coder 
+#### <a href="https://github.com/sanumuhammedc"> 3. SANU MUHAMMED C</a>  => Code Checker
 
 
 

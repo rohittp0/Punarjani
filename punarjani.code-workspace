@@ -26,7 +26,17 @@
 		"editor.formatOnSave": true,
 		"[javascript]": {
 			"editor.defaultFormatter": "dbaeumer.vscode-eslint"
-		}
+		},
+		"cSpell.words": [
+			"Affero",
+			"Procfile",
+			"Punarjani",
+			"Rohit",
+			"cowin",
+			"dbaeumer",
+			"firestore",
+			"jsbeautifyrc"
+		]
 
 	},
 	"extensions": {
@@ -37,6 +47,7 @@
 			"dbaeumer.vscode-eslint",
 			"ecmel.vscode-html-css",
 			"HookyQR.beautify",
+			"streetsidesoftware.code-spell-checker"
 		]
 	}
 }

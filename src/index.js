@@ -1,3 +1,4 @@
+/* eslint-disable no-mixed-spaces-and-tabs */
 /**
  * Punarjani is a discord bot that notifies you about slot availablity at
  * CoWin vaccination centers.
@@ -21,41 +22,44 @@ import Discord from "discord.js";
 // Importing command handlers.
 import register from "./register.js";
 import help from "./help.js";
-
+import slots from "./slots";
+ 
 // Create an instance of Client 
 const client = new Discord.Client();
 // Define a prefix to use when sending commands to bot.
 const prefix = process.env.PREFIX || "!";
 // An array of commands and functions to handle them.
 const commands = 
-[
-	{ name: "register", handler: register }, 
-	{ name: "help",     handler: help     }
-];
-
+ [
+ 	{ name: "register", handler: register }, 
+ 	{ name: "help",     handler: help     },
+ 	// eslint-disable-next-line no-mixed-spaces-and-tabs
+ 	{ name: "slots",    handler: slots    },
+ ];
+ 
 /**
- * Add an on message handler to the discord bot. This handler will be 
- * the starting point for most of the functions handled by the bot.
- */
+  * Add an on message handler to the discord bot. This handler will be 
+  * the starting point for most of the functions handled by the bot.
+  */
 client.on("message", async (message) =>
 {
-	// Check if the message starts with prefix and is not send by bot it's self.
-	if (!message.content.startsWith(prefix) || message.author.bot || message.content.length < 2) 
-		return;
-	
-	// Removes prefix from input string then splits into words. 	
-	const args = message.content.slice(prefix.length).trim().split(/ +/);
-	// Gets the commad to command variable.
-	const command = args.shift()?.toLowerCase();
-
-	const result = await commands.find(cmd => cmd.name === command)
-		?.handler(client, message, args);
-
-	console.log(`Excecution ${result}`);
+	 // Check if the message starts with prefix and is not send by bot it's self.
+	 if (!message.content.startsWith(prefix) || message.author.bot || message.content.length < 2) 
+		 return;
+	 
+	 // Removes prefix from input string then splits into words. 	
+	 const args = message.content.slice(prefix.length).trim().split(/ +/);
+	 // Gets the commad to command variable.
+	 const command = args.shift()?.toLowerCase();
+ 
+	 const result = await commands.find(cmd => cmd.name === command)
+		 ?.handler(client, message, args);
+ 
+	 console.log(`Excecution ${result}`);
 });
-
+ 
 //Login to discord using TOKEN
 if(process.env.BOT_TOKEN)
-	client.login(process.env.BOT_TOKEN);
+	 client.login(process.env.BOT_TOKEN);
 else 
-	console.error("Discord-Bot Token missing."); // Print error message if token is missing.	
+	 console.error("Discord-Bot Token missing."); // Print error message if token is missing.		
