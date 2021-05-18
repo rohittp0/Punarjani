@@ -25,6 +25,8 @@ const Texts =
 	helpInfo: "Don't worry you can always ask for !help 😉",
 	tryAgain: "Don't worry you can try again later 🤘",
 	infoCollected: "That's I need to know 👍 I will write it in my 📖 and let you know.",
+	regSuccess: "Your registration has been completed 🎊 Welcome to Punarjani 🙋",
+	regFailed: "Sorry your registration failed 😞 Looks like I forgot how to write 😵",
 	stateQuery: 
 	[ 
 		"Select The Sate", 
@@ -35,10 +37,45 @@ const Texts =
 		"Select The District",
 		"Select your preferred district. Only showing districts from the state you selected."
 	],
+	existingUser:
+	[
+		"You have already registered at ",
+		" with age as ",
+		"\nIf you want to edit this use !edit"
+	],
 	ageError: "Did you really forget your age, or are you trolling me 🤔",
 	stateError: "Registration has been canceled due to invalid state selection 😭",
 	districtError: "Registration has been canceled due to invalid district selection 😭"
 };
+
+/**
+ * Helper function to sanitize required parameters.
+ * 
+ * @author Rohit T P
+ * @param {any[]} args The arguments to be checked.
+ * @param {string} uid The user id of the message author.
+ * @param {FirebaseFirestore.Firestore} firestore An instance of firestore 
+ * @returns {Promise<string|boolean>} Error message if any or false.
+ */
+async function checkArgs(args, uid, firestore) 
+{
+	// This check would accept 18.123 but I think it is feature not a bug.
+	if(!(Number(args[0]) >= 18)) // Check if the arguments passed contains a valid age.
+		return `${Texts.ageError}\n${Texts.helpInfo}`;	
+	
+	// Check if user has already registered.
+	const docs = await firestore.collection("users").where("userID", "==", uid).get();
+	if(!docs.empty)
+	{   // If the user already has a registration get details related to it.
+		const dist = docs.docs[0].get("district")?.name;
+		const age = docs.docs[0].get("age");
+		
+		// Return the error message.
+		return `${Texts.existingUser[0]}${dist}${Texts.existingUser[1]}${age}${Texts.existingUser[2]}`;
+	}
+
+	return false;
+}
 
 /**
  * Helper function to create embed from passed data.
@@ -82,7 +119,8 @@ function getEmbeds(title, description, avatar, options)
 async function getState(user, channel) 
 {
 	// Get the list of state name and id from cowin API.
-	const response = await sendRequest("https://cdn-api.co-vin.in/api/v2/admin/location/states");
+	const response = await sendRequest("https://cdn-api.co-vin.in/api/v2/admin/location/states")
+		.catch(() => ({states: []}));
 
 	const states = response.states // Format the response we got from the API to an object array.
 		.map((/** @type {any} */ state) => ({id: state.state_id, name: state.state_name}));	
@@ -91,7 +129,7 @@ async function getState(user, channel)
 	const embeds = getEmbeds(Texts.stateQuery[0], Texts.stateQuery[1], user.displayAvatarURL(), states);	
 	embeds.forEach(async (embed) =>await channel.send(embed));
 
-	// Define a function to filter the replys from the user.
+	// Define a function to filter the replies from the user.
 	const numberFilter = (/** @type {Discord.Message} */ response) => 
 	// Check if the reply is from the correct user and also a valid option. 
 		response.author.id === user.id && !isNaN(Number(response.content));
@@ -117,7 +155,8 @@ async function getState(user, channel)
 async function getDistrict(user, channel, state) 
 {
 	// Get the list of district name and id from cowin API.
-	const response = await sendRequest(`https://cdn-api.co-vin.in/api/v2/admin/location/districts/${state.id}`);
+	const response = await sendRequest(`https://cdn-api.co-vin.in/api/v2/admin/location/districts/${state.id}`)
+		.catch(() => ({districts: []}));
 
 	const districts = response.districts // Format the response we got from the API to an object array.
 		.map((/** @type {any} */ dist) => ({id: dist.district_id, name: dist.district_name}));	
@@ -155,9 +194,15 @@ async function getDistrict(user, channel, state)
  */
 export default async function register(client, message, args) 
 {
-	// This check would accept 18.123 but I think it is feature not a bug.
-	if(!(Number(args[0]) >= 18)) // Check if the arguments passed contains a valid age.
-		return message.reply(`${Texts.ageError}\n${Texts.helpInfo}`), false;	
+	// Get an instance of firestore to access the database.
+	const firestore = getApp().firestore();
+
+	// Checks the arguments to see if everything is ok.
+	const errorMessage = await checkArgs(args, message.author.id, firestore)
+		.catch(() => "Something went wrong.");
+	// If there is some error send it to user and exit.
+	if(errorMessage)
+		return message.reply(`<@${message.author.id}> ${errorMessage}`), false;
 
 	// Get the state name and ID of the user.	
 	const state = await getState(message.author, message.channel);
@@ -171,20 +216,29 @@ export default async function register(client, message, args)
 		return message.reply(`${Texts.districtError}\n${Texts.tryAgain}`), false;
 
 	// Send a message to the user that data collection has been completed.	
-	message.reply(Texts.infoCollected);
-	
-	// Get an instance of firebase app to write data to database.
-	const app = getApp();
+	message.reply(`<@${message.author.id}> ${Texts.infoCollected}`);
 
-	app.firestore().collection("users").add(
+	// Write the collected user data to cloud firestore.
+	const done =  await firestore.collection("users").add(
 		{
 			userID: message.author.id,
 			userName: message.author.username,
 			age: Number(args[0]),
 			district,
 			state
-		});
+		})
+		.then(()=>true)
+		.catch((error) => (console.error(error), false));
+	
+	// Generate a status message 	
+	const status = `<@${message.author.id}>` + 
+			( done ?  Texts.regSuccess : `${Texts.regFailed}\n${Texts.tryAgain}`);
+	
+	// Send the generated status message to the message channel and as dm to user.		
+	message.author.dmChannel?.send(status);
+	await message.reply(status);	
 
-	return true;
+	// Return weather everything went well or not.
+	return done;
 }
 
