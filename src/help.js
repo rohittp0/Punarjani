@@ -19,6 +19,17 @@
 
 import Discord from "discord.js";
 
+const BOT_AVATAR = "";
+
+/**
+ * The list of commands, their format and an example.
+ * TODO: Add what each command does. eg register lets the user save their details to our database.
+ */
+const COMMAND_LIST = 
+{
+	register: { format: "!register age", example: "!register 25", action: "what happens when user use this?" },
+	slots: { format: "!slots date", example: "!slots may 19", action: "what happens when user use this?" }
+};
 
 /**
  * This function generate a embed for !help 
@@ -33,12 +44,12 @@ function helpEmbed()
 		.setColor("#f9cf03")
 		.setTitle("Welcome to Punarjani !help ")
 		.setDescription("Are you facing any difficulties 🤔 . Don't worry I'm here to help you 🥳")
-		.setThumbnail("https://user-images.githubusercontent.com/78996425/118526312-bca98580-b75d-11eb-9503-d3134dd9b18c.jpeg")
+		.setThumbnail(BOT_AVATAR)
 		.addFields({ name:"How can we chat ? ", value: "\0" })
 		.addFields({ name:"👉 You can call me by !help", value: "\0" })
-		.addFields({ name:"👉 Send me !help  queries-name   I will tell you how it works ", value: "\0" })
+		.addFields({ name:"👉 Send me !help  command-name and I will tell you how it works ", value: "\0" })
 		.setTimestamp()
-		.setFooter("Always happy to help you");
+		.setFooter("Always happy to help");
 
 	
 	return embedObject;
@@ -58,15 +69,15 @@ function getEmbed(command, description, example)
 	const embedObject = new Discord.MessageEmbed()
 		.setColor("#f9cf03")
 		.setTitle("Help")
-		.setDescription("Welcome to Punarjani help \n\n\n")
-		.setThumbnail("https://user-images.githubusercontent.com/78996425/118526312-bca98580-b75d-11eb-9503-d3134dd9b18c.jpeg")
+		.setDescription("Welcome to Punarjani help")
+		.setThumbnail(BOT_AVATAR)
 		.addFields(
 			{ name: `How ${command} works`, value: description },
 			{ name: "Example", value: example },
 			
 		)
 		.setTimestamp()
-		.setFooter("Always happy to help you");
+		.setFooter("Always happy to help");
 
 		
 	return embedObject;
@@ -83,28 +94,16 @@ function getEmbed(command, description, example)
  */
 // eslint-disable-next-line no-unused-vars
 export default async function help (message, args) 
-{	
+{
+	// @ts-ignore
+	if(!args[0] || args[0].length < 2 || !COMMAND_LIST[args[0].replace("!", "")])
+		return await message.channel.send(helpEmbed()).catch(), true;		
 	
-	if(typeof(args[0])==="undefined")
-	{ // checking the command is only !help or not
+	const commandName = args[0].replace("!", "");
+	// @ts-ignore Removing ! so that !register and register are the same.
+	const command = COMMAND_LIST[commandName];	
 
-		const embed =helpEmbed();
-		await message.channel.send(embed);	
+	await message.channel.send(getEmbed(commandName, command.format, command.example)).catch();
 	
-	}
-	else if(args[0]==="register")
-	{
-
-		const embed =getEmbed("!register", "!register age", "!register 25");
-		await message.channel.send(embed);	
-
-	}
-
-
-	
-	
-	
-	//const reply = await message.channel.send(embeding);
-	//reply.channel.send(embeding);
 	return true;
 }
