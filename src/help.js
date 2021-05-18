@@ -18,7 +18,36 @@
  */
 
 // eslint-disable-next-line no-unused-vars
-import {Client, Message} from "discord.js";
+import {Channel, Client, Message} from "discord.js";
+import Discord from "discord.js"
+
+/**
+ * @author Sunith V S
+ * 
+ * 
+ * @returns {Discord.MessageEmbed}
+ */
+ function getEmbed(){ 
+		const helpEmbed = new Discord.MessageEmbed()
+		.setColor('#f9cf03')
+		.setTitle('Help')
+		.setDescription('Welcome to Punarjani help')
+		.setThumbnail('https://i.imgur.com/wSTFkRM.png')
+		.addFields(
+			{ name: 'Regular field title', value: 'Some value here' },
+			{ name: '\u200B', value: '\u200B' },
+			{ name: 'Inline field title', value: 'Some value here', inline: true },
+			{ name: 'Inline field title', value: 'Some value here', inline: true },
+		)
+		.addField('Inline field title', 'Some value here', true)
+		.setImage('https://i.imgur.com/wSTFkRM.png')
+		.setTimestamp()
+		.setFooter('Some footer text here', 'https://i.imgur.com/wSTFkRM.png');
+
+		
+		return helpEmbed;
+ }
+
 
 /**
  * This function handles the user registration for Punarjani.
@@ -30,7 +59,10 @@ import {Client, Message} from "discord.js";
  * @returns {Promise<Boolean>} Indicates operation success or failure.
  */
 // eslint-disable-next-line no-unused-vars
-export default async function help(client, message, args) 
-{
+export default async function help (client, message, args) 
+{	
+	const embeding =getEmbed();
+	const reply = await message.channel.send(embeding);
+	//reply.channel.send(embeding);
 	return true;
 }
