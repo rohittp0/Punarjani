@@ -27,7 +27,7 @@ import axios from "axios";
  * @author Rohit T P
  * @returns {admin.app.App} Initalised Firebase App
  */
-function getApp()
+export function getApp()
 {
 	// Read the service account credentials from enviornment variables.
 	const serviceAccount = JSON.parse(process.env.FIREBASE_KEY || "");
@@ -41,9 +41,13 @@ function getApp()
 }
 
 /**
- * @param {string} url The url to get
+ * Sends get request to cowin rest api specified by the url passed.
+ * 
+ * @author Rohit T P
+ * @param {string} url The url to get.
+ * @returns {Promise<{[key: string]: any}>} Response JSON converted to JS object.  
  */
-async function axioGet(url) 
+export async function sendRequest(url) 
 {
 	const result = await axios.get(url, 
 		{
@@ -63,6 +67,3 @@ async function axioGet(url)
 
 	return result.data;
 }
-
-export const app = getApp();
-export const sendRequest = axioGet;
