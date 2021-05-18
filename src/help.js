@@ -19,7 +19,7 @@
 
 // eslint-disable-next-line no-unused-vars
 import {Channel, Client, Message} from "discord.js";
-import Discord from "discord.js"
+import Discord from "discord.js";
 
 
 
@@ -30,17 +30,18 @@ import Discord from "discord.js"
  * 
  * @returns {Discord.MessageEmbed} 
  */
- function helpEmbed(){ 
+function helpEmbed()
+{ 
 	const embedObject = new Discord.MessageEmbed()
-	.setColor('#f9cf03')
-	.setTitle('Welcome to Punarjani !help ')
-	.setDescription('Are you facing any difficulties 🤔 . Don\'t worry I\'m here to help you 🥳')
-	.setThumbnail("https://user-images.githubusercontent.com/78996425/118526312-bca98580-b75d-11eb-9503-d3134dd9b18c.jpeg")
-	.addFields({ name:'How can we chat ? ' , value: "\0" })
-	.addFields({ name:'👉 You can call me by !help' , value: "\0" })
-	.addFields({ name:'👉 Send me !help  queries-name   I will tell you how it works ' , value: "\0" })
-	.setTimestamp()
-	.setFooter('Always happy to help you');
+		.setColor("#f9cf03")
+		.setTitle("Welcome to Punarjani !help ")
+		.setDescription("Are you facing any difficulties 🤔 . Don't worry I'm here to help you 🥳")
+		.setThumbnail("https://user-images.githubusercontent.com/78996425/118526312-bca98580-b75d-11eb-9503-d3134dd9b18c.jpeg")
+		.addFields({ name:"How can we chat ? ", value: "\0" })
+		.addFields({ name:"👉 You can call me by !help", value: "\0" })
+		.addFields({ name:"👉 Send me !help  queries-name   I will tell you how it works ", value: "\0" })
+		.setTimestamp()
+		.setFooter("Always happy to help you");
 
 	
 	return embedObject;
@@ -58,23 +59,24 @@ import Discord from "discord.js"
  * @param {string} example Example of that particular
  * @returns {Discord.MessageEmbed}
  */
- function getEmbed(command,description,example){ 
-		const embedObject = new Discord.MessageEmbed()
-		.setColor('#f9cf03')
-		.setTitle('Help')
-		.setDescription('Welcome to Punarjani help \n\n\n')
+function getEmbed(command, description, example)
+{ 
+	const embedObject = new Discord.MessageEmbed()
+		.setColor("#f9cf03")
+		.setTitle("Help")
+		.setDescription("Welcome to Punarjani help \n\n\n")
 		.setThumbnail("https://user-images.githubusercontent.com/78996425/118526312-bca98580-b75d-11eb-9503-d3134dd9b18c.jpeg")
 		.addFields(
 			{ name: `How ${command} works`, value: description },
-			{ name: 'Example', value: example },
+			{ name: "Example", value: example },
 			
 		)
 		.setTimestamp()
-		.setFooter('Always happy to help you');
+		.setFooter("Always happy to help you");
 
 		
-		return embedObject;
- }
+	return embedObject;
+}
 
 
 /**
@@ -90,15 +92,18 @@ import Discord from "discord.js"
 export default async function help (client, message, args) 
 {	
 	
-	if(typeof(args[0])=='undefined'){ // checking the command is only !help or not
+	if(typeof(args[0])==="undefined")
+	{ // checking the command is only !help or not
 
 		const embeding =helpEmbed();
-		const reply = await message.channel.send(embeding);	
+		await message.channel.send(embeding);	
 	
-	}else if(args[0]=='register'){
+	}
+	else if(args[0]==="register")
+	{
 
-		const embeding =getEmbed('!register','!register age','!register 25');
-		const reply = await message.channel.send(embeding);	
+		const embeding =getEmbed("!register", "!register age", "!register 25");
+		await message.channel.send(embeding);	
 
 	}
 
