@@ -1,5 +1,5 @@
 /**
- * Punarjani is a discord bot that notifies you about slot availablity at
+ * Punarjani is a discord bot that notifies you about slot availability at
  * CoWin vaccination centers.
  * Copyright (C) 2021  Rohit T P
  * 
@@ -21,18 +21,18 @@ import admin from "firebase-admin";
 import axios from "axios";
 
 /**
- * Returns an instance of firebase admin after initalising it using
+ * Returns an instance of firebase admin after initalizing it using
  * credentials stored in serviceAccountKey.json
  * 
  * @author Rohit T P
- * @returns {admin.app.App} Initalised Firebase App
+ * @returns {admin.app.App} Initialized Firebase App
  */
 export function getApp()
 {
-	// Read the service account credentials from enviornment variables.
+	// Read the service account credentials from environment variables.
 	const serviceAccount = JSON.parse(process.env.FIREBASE_KEY || "");
 
-	// Login to firebase server then exports the loggin instance so we can use it in other files. 
+	// Login to firebase server then exports the logging instance so we can use it in other files. 
 	return admin.initializeApp(
 		{
 			credential: admin.credential.cert(serviceAccount),

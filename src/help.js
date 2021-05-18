@@ -1,5 +1,5 @@
 /**
- * Punarjani is a discord bot that notifies you about slot availablity at
+ * Punarjani is a discord bot that notifies you about slot availability at
  * CoWin vaccination centers.
  * Copyright (C) 2021  Sunith V S
  * 
@@ -17,10 +17,7 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>. 
  */
 
-// eslint-disable-next-line no-unused-vars
-import {Channel, Client, Message} from "discord.js";
 import Discord from "discord.js";
-
 
 
 /**
@@ -47,15 +44,12 @@ function helpEmbed()
 	return embedObject;
 }
 
-
-
-
 /**
  * This function generate a embed (General template)  
  * @author Sunith V S
  * 
  * @param {string} command The command
- * @param {string} description Discription about the command]
+ * @param {string} description Description about the command]
  * @param {string} example Example of that particular
  * @returns {Discord.MessageEmbed}
  */
@@ -83,27 +77,26 @@ function getEmbed(command, description, example)
  * This function handle the !help command and send corresponding embed
  * 
  * @author Sunith V S
- * @param {Client} client The discord client
- * @param {Message} message The message that initiated this command.
+ * @param {Discord.Message} message The message that initiated this command.
  * @param {Array<string>} args Array containing district, age and user id.
  * @returns {Promise<Boolean>} Indicates operation success or failure.
  */
 // eslint-disable-next-line no-unused-vars
-export default async function help (client, message, args) 
+export default async function help (message, args) 
 {	
 	
 	if(typeof(args[0])==="undefined")
 	{ // checking the command is only !help or not
 
-		const embeding =helpEmbed();
-		await message.channel.send(embeding);	
+		const embed =helpEmbed();
+		await message.channel.send(embed);	
 	
 	}
 	else if(args[0]==="register")
 	{
 
-		const embeding =getEmbed("!register", "!register age", "!register 25");
-		await message.channel.send(embeding);	
+		const embed =getEmbed("!register", "!register age", "!register 25");
+		await message.channel.send(embed);	
 
 	}
 

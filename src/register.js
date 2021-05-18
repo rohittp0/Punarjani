@@ -187,12 +187,11 @@ async function getDistrict(user, channel, state)
  * This function handles the user registration for Punarjani.
  * 
  * @author Rohit T P
- * @param {Discord.Client} client The discord client
  * @param {Discord.Message} message The message that initiated this command.
  * @param {Array<string>} args Array containing age.
  * @returns {Promise<Boolean>} Indicates operation success or failure.
  */
-export default async function register(client, message, args) 
+export default async function register(message, args) 
 {
 	// Get an instance of firestore to access the database.
 	const firestore = getApp().firestore();
