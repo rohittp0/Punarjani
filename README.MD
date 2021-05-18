@@ -17,7 +17,7 @@
 6. User can Navigate to COWIN site if slot available.
 
 ## Authors :
-### 1.  Rohit TP - Main coder
+### 1.  Rohit TP - Main coder 
 ### 2.  Sunith VS- Assistant coder 
 ### 3. Sanu Muhammed-Code Checker
 
