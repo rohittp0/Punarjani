@@ -53,10 +53,10 @@ async function axioGet(url)
 				Host: "cdn-api.co-vin.in",
 				"User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/90.0.4430.93 Safari/537.36"
 			},
-			proxy: {
-				host: "104.211.201.68",
-				port: 3128
-			}
+			// proxy: {
+			// 	host: "104.211.201.68",
+			// 	port: 3128
+			// }
 			
 		}
 	);
