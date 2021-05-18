@@ -19,7 +19,7 @@
 
 import Discord from "discord.js";
 
-const BOT_AVATAR = "";
+const BOT_AVATAR = "https://raw.githubusercontent.com/rohittp0/Punarjani/main/bot-avatar.png";
 
 /**
  * The list of commands, their format and an example.
