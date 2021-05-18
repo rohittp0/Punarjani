@@ -21,6 +21,8 @@
 import {Channel, Client, Message} from "discord.js";
 import Discord from "discord.js"
 
+
+
 /**
  * This function generate a embed for !help 
  * @author Sunith V S
@@ -43,6 +45,8 @@ import Discord from "discord.js"
 	
 	return embedObject;
 }
+
+
 
 
 /**
