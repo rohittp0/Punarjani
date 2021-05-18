@@ -22,27 +22,27 @@ import {Channel, Client, Message} from "discord.js";
 import Discord from "discord.js"
 
 /**
+ * This function generate a embed (Gereral templet)  
  * @author Sunith V S
  * 
- * 
+ * @param {string} command The command
+ * @param {string} discription Discription about the command]
+ * @param {string} example Example of that particular
  * @returns {Discord.MessageEmbed}
  */
- function getEmbed(){ 
+ function getEmbed(command,discription,example){ 
 		const helpEmbed = new Discord.MessageEmbed()
 		.setColor('#f9cf03')
 		.setTitle('Help')
-		.setDescription('Welcome to Punarjani help')
-		.setThumbnail('https://i.imgur.com/wSTFkRM.png')
+		.setDescription('Welcome to Punarjani help \n\n\n')
+		.setThumbnail("https://user-images.githubusercontent.com/78996425/118526312-bca98580-b75d-11eb-9503-d3134dd9b18c.jpeg")
 		.addFields(
-			{ name: 'Regular field title', value: 'Some value here' },
-			{ name: '\u200B', value: '\u200B' },
-			{ name: 'Inline field title', value: 'Some value here', inline: true },
-			{ name: 'Inline field title', value: 'Some value here', inline: true },
+			{ name: `How ${command} works`, value: discription },
+			{ name: 'Example', value: example },
+			
 		)
-		.addField('Inline field title', 'Some value here', true)
-		.setImage('https://i.imgur.com/wSTFkRM.png')
 		.setTimestamp()
-		.setFooter('Some footer text here', 'https://i.imgur.com/wSTFkRM.png');
+		.setFooter('Always happy to help you');
 
 		
 		return helpEmbed;
@@ -50,7 +50,7 @@ import Discord from "discord.js"
 
 
 /**
- * This function handles the user registration for Punarjani.
+ * This function handle the !help command and send coresponding embed
  * 
  * @author Sunith V S
  * @param {Client} client The discord client
@@ -61,8 +61,24 @@ import Discord from "discord.js"
 // eslint-disable-next-line no-unused-vars
 export default async function help (client, message, args) 
 {	
-	const embeding =getEmbed();
-	const reply = await message.channel.send(embeding);
+	
+	if(typeof(args[0])=='undefined'){ // checking the command is only !help or not
+
+		const embeding =getEmbed('!help','!help command','!help register');
+		const reply = await message.channel.send(embeding);	
+	
+	}else if(args[0]=='register'){
+
+		const embeding =getEmbed('!register','!register age','!register 25');
+		const reply = await message.channel.send(embeding);	
+
+	}
+
+
+	
+	
+	
+	//const reply = await message.channel.send(embeding);
 	//reply.channel.send(embeding);
 	return true;
 }
