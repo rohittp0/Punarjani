@@ -18,7 +18,8 @@
 			"serviceAccountKey.json": true,
 			"jsconfig.json": true,
 			".env": true,
-			"LICENSE": true
+			"LICENSE": true,
+			"bot-avatar.png": true
 		},
 		"beautify.ignore": ["**/*.js"],
 		"eslint.format.enable": true,
