@@ -22,22 +22,46 @@ import {Channel, Client, Message} from "discord.js";
 import Discord from "discord.js"
 
 /**
- * This function generate a embed (Gereral templet)  
+ * This function generate a embed for !help 
+ * @author Sunith V S
+ * 
+ * 
+ * @returns {Discord.MessageEmbed} 
+ */
+ function helpEmbed(){ 
+	const embedObject = new Discord.MessageEmbed()
+	.setColor('#f9cf03')
+	.setTitle('Welcome to Punarjani !help ')
+	.setDescription('Are you facing any difficulties 🤔 . Don\'t worry I\'m here to help you 🥳')
+	.setThumbnail("https://user-images.githubusercontent.com/78996425/118526312-bca98580-b75d-11eb-9503-d3134dd9b18c.jpeg")
+	.addFields({ name:'How can we chat ? ' , value: "\0" })
+	.addFields({ name:'👉 You can call me by !help' , value: "\0" })
+	.addFields({ name:'👉 Send me !help  queries-name   I will tell you how it works ' , value: "\0" })
+	.setTimestamp()
+	.setFooter('Always happy to help you');
+
+	
+	return embedObject;
+}
+
+
+/**
+ * This function generate a embed (General template)  
  * @author Sunith V S
  * 
  * @param {string} command The command
- * @param {string} discription Discription about the command]
+ * @param {string} description Discription about the command]
  * @param {string} example Example of that particular
  * @returns {Discord.MessageEmbed}
  */
- function getEmbed(command,discription,example){ 
-		const helpEmbed = new Discord.MessageEmbed()
+ function getEmbed(command,description,example){ 
+		const embedObject = new Discord.MessageEmbed()
 		.setColor('#f9cf03')
 		.setTitle('Help')
 		.setDescription('Welcome to Punarjani help \n\n\n')
 		.setThumbnail("https://user-images.githubusercontent.com/78996425/118526312-bca98580-b75d-11eb-9503-d3134dd9b18c.jpeg")
 		.addFields(
-			{ name: `How ${command} works`, value: discription },
+			{ name: `How ${command} works`, value: description },
 			{ name: 'Example', value: example },
 			
 		)
@@ -45,12 +69,12 @@ import Discord from "discord.js"
 		.setFooter('Always happy to help you');
 
 		
-		return helpEmbed;
+		return embedObject;
  }
 
 
 /**
- * This function handle the !help command and send coresponding embed
+ * This function handle the !help command and send corresponding embed
  * 
  * @author Sunith V S
  * @param {Client} client The discord client
@@ -64,7 +88,7 @@ export default async function help (client, message, args)
 	
 	if(typeof(args[0])=='undefined'){ // checking the command is only !help or not
 
-		const embeding =getEmbed('!help','!help command','!help register');
+		const embeding =helpEmbed();
 		const reply = await message.channel.send(embeding);	
 	
 	}else if(args[0]=='register'){
