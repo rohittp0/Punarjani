@@ -18,7 +18,7 @@
  */
 
 import Discord from "discord.js";
-import {sendRequest, getApp} from "./common.js";
+import {sendRequest, app} from "./common.js";
 
 const Texts = 
 {
@@ -194,7 +194,7 @@ async function getDistrict(user, channel, state)
 export default async function register(message, args) 
 {
 	// Get an instance of firestore to access the database.
-	const firestore = getApp().firestore();
+	const firestore = app.firestore();
 
 	// Checks the arguments to see if everything is ok.
 	const errorMessage = await checkArgs(args, message.author.id, firestore)

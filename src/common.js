@@ -20,6 +20,13 @@
 import admin from "firebase-admin";
 import axios from "axios";
 
+// Login to firebase server then exports the logging instance so we can use it in other files. 
+export const app = admin.initializeApp(
+	{
+		credential: admin.credential.cert(JSON.parse(process.env.FIREBASE_KEY || "")),
+		databaseURL: "https://punarjani-cowin-default-rtdb.firebaseio.com"
+	});
+
 /**
  * Returns an instance of firebase admin after initalizing it using
  * credentials stored in serviceAccountKey.json
@@ -27,18 +34,6 @@ import axios from "axios";
  * @author Rohit T P
  * @returns {admin.app.App} Initialized Firebase App
  */
-export function getApp()
-{
-	// Read the service account credentials from environment variables.
-	const serviceAccount = JSON.parse(process.env.FIREBASE_KEY || "");
-
-	// Login to firebase server then exports the logging instance so we can use it in other files. 
-	return admin.initializeApp(
-		{
-			credential: admin.credential.cert(serviceAccount),
-			databaseURL: "https://punarjani-cowin-default-rtdb.firebaseio.com"
-		});
-}
 
 /**
  * Sends get request to cowin rest api specified by the url passed.
