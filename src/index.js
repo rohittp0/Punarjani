@@ -22,7 +22,7 @@ import Discord from "discord.js";
 // Importing command handlers.
 import register from "./register.js";
 import help from "./help.js";
-import slots from "./slots";
+import slots from "./slots.js";
  
 // Create an instance of Client 
 const client = new Discord.Client();
