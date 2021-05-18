@@ -1,5 +1,3 @@
-/* eslint-disable no-undef */
-// @ts-nocheck
 /**
  * Punarjani is a discord bot that notifies you about slot availablity at
  * CoWin vaccination centers.
@@ -21,32 +19,12 @@
 
 // eslint-disable-next-line no-unused-vars
 import {Client, Message} from "discord.js";
-// eslint-disable-next-line no-unused-vars
 import {sendRequest} from "./common.js";
 
-const Texts = 
-{
-	helpInfo: "Don't worry you can always ask for !help 😉",
-	ageError: "Did you really forget your age, or are you trolling me 🤔.",
-	sateQuery: 
-	[ 
-		"Select The Sate", 
-		"Select the state from where you wan't to get vaccinated. Don't worry you can change it latter." 
-	]
-};
-
-const fetchOptions = { 
-	method: "GET",
-	headers: {
-		accept: "application/json",
-		"Accept-Language": "hi_IN",
-		Host: "cdn-api.co-vin.in",
-		"User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/90.0.4430.93 Safari/537.36"
-	}
-};
 
 /**
  * @author SANU MUHAMMED C
+ *
  * @param {string} title
  * @param {string} description
  * @param {any[]} options
@@ -72,35 +50,15 @@ function getEmbeding(title, description, options)
  * @author SANU MUHAMMED C
  * @param {Client} client The discord client
  * @param {Message} message The message that initiated this command.
- * @param {Array<string>} args Array containing district, age and user id.
+ * @param {Array<string>} args The arguments passed.
  * @returns {Promise<Boolean>} Indicates operation success or failure.
  */
 // eslint-disable-next-line no-unused-vars
 export default async function slots(client, message, args) 
 {
-	if(!(Number(args[0]) >= 18))
-		return message.reply(`${Texts.ageError}\n${Texts.helpInfo}`), false;
-
-	const response = await fetch("https://cdn-api.co-vin.in/api/v2/appointment/sessions/public/calendarByDistrict?district_id=512&date=31-03-2021", fetchOptions)
-		.then((res) => res.json());
+	const response = await sendRequest("https://cdn-api.co-vin.in/api/v2/appointment/sessions/public/calendarByDistrict?district_id=512&date=31-03-2021");	
 	
-	const states = response.states
-		.map((/** @type {any} */ state) => ({id: state.state_id, name: state.state_name}));	
-		
-	const embeding = getEmbeding(Texts.sateQuery[0], Texts.sateQuery[1], states);	
-	const reply = await message.channel.send(embeding);
-
-	// @ts-ignore
-	const numberFilter = (response) => !isNaN(response.content);
-
-	const choise = await reply.channel.awaitMessages(numberFilter, {max: 1, errors: ["time"]})
-		.then((collected) => [ Number(collected.first()?.content), collected.first()?.author ])
-		.catch(() => [NaN, {}]);
-
-	const state = states.find((/** @type {{ id: number; }} */ state) => state.id === choise[0])?.name;	
-
-	// @ts-ignore
-	reply.channel.send(`@${choise[1]?.username} selected ${state}`);
-
+	const centers = response.sessions.map((session) => ({ id: session.center_id, name: session.name, address: session.address, slots: session.available_capacity }));
+        
 	return true;
 }
