@@ -41,7 +41,7 @@ const commands =
 	{ name: "help",     handler: help     },
 	{ name: "slots",    handler: slots    },
 	{ name: "edit",     handler: edit     }, 
-  { name: "info",     handler: info     }
+	{ name: "info",     handler: info     }
 ];
 
 active.onDisconnect().remove();

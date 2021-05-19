@@ -65,7 +65,8 @@ export const TEXTS =
 export const APIS = 
 {
 	states: "https://cdn-api.co-vin.in/api/v2/admin/location/states",
-	districts: "https://cdn-api.co-vin.in/api/v2/admin/location/districts/"
+	districts: "https://cdn-api.co-vin.in/api/v2/admin/location/districts/",
+	byDistrict: "https://cdn-api.co-vin.in/api/v2/appointment/sessions/public/findByDistrict?district_id="
 };
 
 // Login to firebase server then exports the logging instance so we can use it in other files. 

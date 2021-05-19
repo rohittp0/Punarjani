@@ -19,11 +19,9 @@
 
 // eslint-disable-next-line no-unused-vars
 import Discord from "discord.js";
-import {sendRequest} from "./common.js";
+import {APIS, sendRequest, TEXTS} from "./common.js";
 
 const BOT_AVATAR = "https://raw.githubusercontent.com/rohittp0/Punarjani/main/bot-avatar.png";
-const COWIN_API_URL = "https://cdn-api.co-vin.in/api/v2/appointment/sessions/public/findByDistrict?district_id=";
-const DIST_ID = 512; // TODO: Automatically get this from database.
 //add user's age from the database here......
 
 /**
@@ -40,9 +38,14 @@ const DIST_ID = 512; // TODO: Automatically get this from database.
  */
 function getDate(dateString) 
 {
-	const date = dateString ? new Date(dateString) : new Date();
-	if(date.getFullYear() < 2021)
-		date.setFullYear(new Date().getFullYear());
+	const today = new Date();
+	const date = new Date(dateString || "").getDate() ? new Date(dateString || "") : today;
+	
+	if(date.getFullYear() < today.getFullYear())
+		date.setFullYear(today.getFullYear());
+	
+	if(date.getMonth() < today.getMonth() || (date.getMonth() === today.getMonth() && date.getDate() < today.getDate()))
+		date.setFullYear(today.getFullYear() + 1);	
 		
 	return `${date.getDate()}-${date.getMonth()+1}-${date.getFullYear()}`;
 }
@@ -51,28 +54,27 @@ function getDate(dateString)
  *this function generate an embed containing the vaccination center and available slots 
  * @author Sunith V S
  * @param {string} center The string containing name of the vaccination center 
- * @param {any}	slots the number of available slots ( can we change any to number ? )
+ * @param {number}	slots the number of available slots
+ * @param {string} address The address of the center
+ * @param {string} date Date on which slot is available.
  * @returns {Discord.MessageEmbed} Embed including number of slots ,vaccination center and redirecting link to cowin website 
  */
-
-
-function slotsAvailableEmbed(center, slots)
+function getEmbed(center, slots, address, date)
 {
 	const embedObject = new Discord.MessageEmbed()
-		.setDescription("\0")
+		.setDescription("Click the ☝️ to go to CoWin site.")
 		.setURL("https://www.cowin.gov.in/home")  //url for redirecting user  to cowin website
 		.setColor("#f9cf03")
-		.setTitle("Slots available  for vaccine registration book now ")
+		.setTitle(center)
 		.setThumbnail(BOT_AVATAR)
 		.addFields(
-			{ name: "Vaccination center", value: `${center}` },
-			{ name: "Available slots", value: `${slots}`  }
+			{ name: "Vaccination center", value: center },
+			{ name: "Available Dose", value: slots  },
+			{ name: "Address", value: address }
 			
 		)
-		.setTimestamp()
-		.setFooter("Book your slots now");
+		.setFooter(`Slots available on ${date}`);
 
-		
 	return embedObject;
 }
 
@@ -83,38 +85,41 @@ function slotsAvailableEmbed(center, slots)
  * @author Sanu Muhammed C
  * @param {Discord.Message} message The message that initiated this command.
  * @param {Array<string>} args The arguments passed.
+ * @param {{firestore: () => FirebaseFirestore.Firestore}} app The firebase app
  * @returns {Promise<Boolean>} Indicates operation success or failure.
  */
 // eslint-disable-next-line no-unused-vars
-export default async function slots(message, args) 
+export default async function slots(message, args, app) 
 {
-	const response = await sendRequest(`${COWIN_API_URL}${DIST_ID}&date=${getDate(args.join(" "))}`);	// response contains all fields 
-	const centers = response.sessions.map((/** @type {{[key: string]: any}} */ session) => // Used to get required fields from the response
-		({ 
-			id: session.center_id, // Actually no use .......
-			name: session.name, 
-			address: session.address, 
-			slots: session.available_capacity,
-			age: session.min_age_limit,
-			district:session.district
-		}));
-		// Not included the check for the age 
-	if(centers.length!==0)
+	// Get an instance of firestore to access the database.
+	const firestore = app.firestore();
+ 
+	// Check if user has already registered.
+	const user = (await firestore.collection("users").where("userID", "==", message.author.id).get()).docs[0];
+		
+	// If there is some error send it to user and exit.
+	if(!user || !user.exists)
+		return message.reply(TEXTS.notRegistered), false;	
+
+	const date = getDate(args.join(" "));	
+	const response = await sendRequest(`${APIS.byDistrict}${user.get("district").id}&date=${date}`);
+	
+	/** @type {Promise<any>[]} The promises got when sending embeds. */
+	const promises = [];
+
+	// @ts-ignore
+	response.sessions.forEach(({min_age_limit, available_capacity, name, address, date}) => 
 	{
-			
-		let index=0; // control variable to the loop 
-			
-		for (index = 0 ; index < centers.length; index++) 
+		console.log(min_age_limit);
+		if(user.get("age") >= Number(min_age_limit) && Number(available_capacity) > 0)
+			promises.push(new Promise((resolve)=>
+				resolve(message.channel.send(getEmbed(name, available_capacity, address, date)))));
+	});
+	
+	if(promises.length!==0)
+		Promise.all(promises);
+	else
+		message.reply(`No slots available in ${user.get("district").name} for ${date}`);	
 		
-			await message.channel.send(slotsAvailableEmbed(centers[index].name, centers[index].slots)).catch();
-				
-		// loop for embedding all slots available
-
-	
-	}
-
-		
-	
-	
 	return true;
 }
