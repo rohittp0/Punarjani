@@ -23,7 +23,7 @@ import {sendRequest} from "./common.js";
 
 const COWIN_API_URL = "https://cdn-api.co-vin.in/api/v2/appointment/sessions/public/findByDistrict?district_id=";
 const DIST_ID = 512; // TODO: Automatically get this from database.
-const DIST_NAME='Malappuram';// TODO: Convert DIST_ID to corresponding name
+const AGE=46;// TODO: Convert DIST_ID to corresponding name
 
 /**
  * Converts date from human readable format to the format required by cowin API.
@@ -53,6 +53,8 @@ function getDate(dateString)
  * @param {number} slots Number of slots available
  * @returns {Discord.MessageEmbed} Embed including number of slots and redirecting link to cowin website 
  */
+
+
 function slotsAvailableEmbed(slots){
 	const embedObject = new Discord.MessageEmbed()
 		.setColor("#f9cf03")
@@ -85,19 +87,18 @@ function slotsAvailableEmbed(slots){
 export default async function slots(message, args) 
 {
 	const response = await sendRequest(`${COWIN_API_URL}${DIST_ID}&date=${getDate(args.join(" "))}`);	
-	
-	const centers = response.sessions.map((/** @type {{[key: string]: any}} */ session) => 
+	let centers = response.sessions.map((/** @type {{[key: string]: any}} */ session) => // Used to get required filed from the response
 		({ 
 			id: session.center_id, 
 			name: session.name, 
 			address: session.address, 
-			slots: session.available_capacity 
+			slots: session.available_capacity,
+			age: session.min_age_limit
 		}));
 
-	console.log(centers);	
+	console.log(centers)
+	centers=centers.filter( (/** @type {any} */ center) =>   AGE > 10  ); //dummy command
 
-
-    await message.channel.send(slotsAvailableEmbed(512)).catch();
-	
+	console.log(centers)
 	return true;
 }
