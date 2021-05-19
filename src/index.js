@@ -24,6 +24,7 @@ import register from "./register.js";
 import help from "./help.js";
 import slots from "./slots.js";
 import edit from "./edit.js";
+import info from "./info.js";
  
 // Create an instance of Client 
 const client = new Discord.Client();
@@ -40,9 +41,11 @@ const commands =
 	{ name: "help",     handler: help     },
 	{ name: "slots",    handler: slots    },
 	{ name: "edit",     handler: edit     }, 
+  { name: "info",     handler: info     }
 ];
 
 active.onDisconnect().remove();
+
  
 /**
   * Add an on message handler to the discord bot. This handler will be 
