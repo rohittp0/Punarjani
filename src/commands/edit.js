@@ -18,7 +18,7 @@
  */
 
 import Discord from "discord.js";
-import {APIS, getEmbeds, sendRequest, TEXTS, askPolar} from "./common.js";
+import {APIS, getEmbeds, sendRequest, TEXTS, askPolar} from "../common.js";
 
 const emojiTable = 
 [

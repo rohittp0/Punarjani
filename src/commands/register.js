@@ -19,7 +19,7 @@
 
 // eslint-disable-next-line no-unused-vars
 import Discord from "discord.js";
-import {sendRequest, getEmbeds, TEXTS, APIS} from "./common.js";
+import {sendRequest, getEmbeds, TEXTS, APIS} from "../common.js";
 
 /**
  * Helper function to sanitize required parameters.

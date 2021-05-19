@@ -20,11 +20,11 @@
 import Discord from "discord.js";
 import { getApp, TEXTS } from "./common.js";
 // Importing command handlers.
-import register from "./register.js";
-import help from "./help.js";
-import slots from "./slots.js";
-import edit from "./edit.js";
-import info from "./info.js";
+import register from "./commands/register.js";
+import help from "./commands/help.js";
+import slots from "./commands/slots.js";
+import edit from "./commands/edit.js";
+import info from "./commands/info.js";
  
 // Create an instance of Client 
 const client = new Discord.Client();

@@ -19,7 +19,7 @@
 
 // eslint-disable-next-line no-unused-vars
 import Discord from "discord.js";
-import {APIS, sendRequest, TEXTS} from "./common.js";
+import {APIS, sendRequest, TEXTS} from "../common.js";
 
 const BOT_AVATAR = "https://raw.githubusercontent.com/rohittp0/Punarjani/main/bot-avatar.png";
 //add user's age from the database here......
