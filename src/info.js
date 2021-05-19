@@ -20,51 +20,33 @@
 import Discord from "discord.js";
 
 const BOT_AVATAR = "https://raw.githubusercontent.com/rohittp0/Punarjani/main/bot-avatar.png";
- 
 
- 
-/**
-  * This function generate a embed for !help 
-  * @author SANU MUHAMMED C
-  * 
-  * 
-  * @returns {Discord.MessageEmbed} 
-  */
-function infoEmbed()
-{ 
-	const embedObject = new Discord.MessageEmbed()
-		.setColor("#f9cf03")
-		.setTitle("Hello awesome human 👋\nIam PUNARJANI 😇")
-		.setDescription("Iam here to help you ease the process of messaging on DISCORD in the this worse scenario of COVID 19 pandemic, to avail the facility of Covid vaccination ASAP 🤩 !!!\n\n❎ My services:\n\n👉I can give you hourly updates on slots available in COWIN site.\n👉You will be able to register early so that you never miss a chance to take vaccine\n👉you can even manually check the slots in any districts\n👉I can can Navigate you to COWIN site if slot available\nAnd lot more .....\n\n")
-		.setThumbnail(BOT_AVATAR)
-		.addFields({ name:"I can help you to book vaccine slots and thus protect you from Covid-19, thank me later 🤭", value: "\0" })
-		.addFields({ name:"I was created as a part of 'build from home' event conducted by tinker hub🤖", value: "\0" })
-		.addFields({ name:"Creators❤️:\nRohit TP\nSunith VS\nSanuMuhammed C\n", value: "\0" })
-		.addFields({ name:"You can add me to your server so that I can work for you😎\nTo add me in your server visit 👉 https://discord.com/oauth2/authorize?client_id=843422427185807380&scope=bot&permissions=445504🌐", value: "\0" })
-		.setTimestamp()
-		.setFooter("Use me 👽 and get well👍");
- 
-     
-	return embedObject;
-}
- 
-
- 
- 
 /**
   * This function handle the !info command and send corresponding embed
   * 
   * @author SANU MUHAMMED C
   * @param {Discord.Message} message The message that initiated this command.
-  * @param {Array<string>} args Array containing district, age and user id.
   * @returns {Promise<Boolean>} Indicates operation success or failure.
   */
-// eslint-disable-next-line no-unused-vars
-export default async function info (message, args) 
+export default async function info (message) 
 {
 	
-	await message.channel.send(infoEmbed()).catch();
-     
-	return true;
+	return message.channel.send(new Discord.MessageEmbed()
+		.setColor("#f9cf03")
+		.setTitle("Hello awesome human 👋\nI am Punarjani 😇")
+		.setDescription(`I am here to help you get CoWin slot ASAP 🤩 !!!\n
+❎ My services:\n
+👉 I can give you hourly updates on slots available in COWIN site.
+👉 You will be able to register early so that you never miss a chance to take vaccine
+👉 You can even manually check the slots in any districts
+👉 I can can Navigate you to COWIN site if slot available
+And lot more .....\n\n`
+		)
+		.addFields({ name:"I was created as a part of 'build from home' event conducted by tinker hub🤖", value: "\0" })
+		.addFields({ name:"Creators❤️ \nRohit TP\nSunith VS\nSanu Muhammed C\n", value: "\0" })
+		.addFields({ name:"To add me to your server visit 👉 https://discord.com/oauth2/authorize?client_id=843422427185807380&scope=bot&permissions=445504", value: "\0" })
+		.setFooter("Use me 👽 be well 👍")
+		.setThumbnail(BOT_AVATAR))
+		.then(() => true);
 }
  
