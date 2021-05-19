@@ -26,7 +26,7 @@ export const TEXTS =
 	helpInfo: "Don't worry you can always ask for !help 😉",
 	tryAgain: "Don't worry you can try again later 🤘",
 	generalError: "Oops something went wrong 😵‍💫",
-	infoCollected: "That's I need to know 👍 I will write it in my 📖 and let you know.",
+	infoCollected: "That's all I need to know 👍 I will write it in my 📖 and let you know.",
 	regSuccess: "Your registration has been completed 🎊 Welcome to Punarjani 🙋",
 	regFailed: "Sorry your registration failed 😞 Looks like I forgot how to write 😵",
 	profileDesc: "I found this written in my 📖 about you.",
@@ -58,7 +58,8 @@ export const TEXTS =
 	ageError: "Did you really forget your age, or are you trolling me 🤔",
 	stateError: "Registration has been canceled due to invalid state selection 😭",
 	districtError: "Registration has been canceled due to invalid district selection 😭",
-	notRegistered: "Looks like you haven't registered yet. Use !register to get yourself registered."
+	notRegistered: "Looks like you haven't registered yet. Use !register to get yourself registered.",
+	runningError: "You asked me to do something else complete it first."
 };
 
 export const APIS = 

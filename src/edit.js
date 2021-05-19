@@ -226,7 +226,7 @@ export default async function edit(message, args, app)
 	const user = (await firestore.collection("users").where("userID", "==", message.author.id).get()).docs[0];
 	
 	// If there is some error send it to user and exit.
-	if(!user.exists)
+	if(!user || !user.exists)
 		return message.reply(TEXTS.notRegistered), false;
 
 	const menu = await message.channel.send(await menuEmbed);
