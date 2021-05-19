@@ -17,36 +17,9 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>. 
  */
 
+// eslint-disable-next-line no-unused-vars
 import Discord from "discord.js";
-import {sendRequest, app} from "./common.js";
-
-const Texts = 
-{
-	helpInfo: "Don't worry you can always ask for !help 😉",
-	tryAgain: "Don't worry you can try again later 🤘",
-	infoCollected: "That's I need to know 👍 I will write it in my 📖 and let you know.",
-	regSuccess: "Your registration has been completed 🎊 Welcome to Punarjani 🙋",
-	regFailed: "Sorry your registration failed 😞 Looks like I forgot how to write 😵",
-	stateQuery: 
-	[ 
-		"Select The Sate", 
-		"Select the state from where you want to get vaccinated. Don't worry you can change it latter." 
-	],
-	districtQuery:
-	[
-		"Select The District",
-		"Select your preferred district. Only showing districts from the state you selected."
-	],
-	existingUser:
-	[
-		"You have already registered at ",
-		" with age as ",
-		"\nIf you want to edit this use !edit"
-	],
-	ageError: "Did you really forget your age, or are you trolling me 🤔",
-	stateError: "Registration has been canceled due to invalid state selection 😭",
-	districtError: "Registration has been canceled due to invalid district selection 😭"
-};
+import {sendRequest, getEmbeds, TEXTS, APIS} from "./common.js";
 
 /**
  * Helper function to sanitize required parameters.
@@ -61,7 +34,7 @@ async function checkArgs(args, uid, firestore)
 {
 	// This check would accept 18.123 but I think it is feature not a bug.
 	if(!(Number(args[0]) >= 18)) // Check if the arguments passed contains a valid age.
-		return `${Texts.ageError}\n${Texts.helpInfo}`;	
+		return `${TEXTS.ageError}\n${TEXTS.helpInfo}`;	
 	
 	// Check if user has already registered.
 	const docs = await firestore.collection("users").where("userID", "==", uid).get();
@@ -71,41 +44,10 @@ async function checkArgs(args, uid, firestore)
 		const age = docs.docs[0].get("age");
 		
 		// Return the error message.
-		return `${Texts.existingUser[0]}${dist}${Texts.existingUser[1]}${age}${Texts.existingUser[2]}`;
+		return `${TEXTS.existingUser[0]}${dist}${TEXTS.existingUser[1]}${age}${TEXTS.existingUser[2]}`;
 	}
 
 	return false;
-}
-
-/**
- * Helper function to create embed from passed data.
- * 
- * @author Rohit T P
- * @param {string} title The title of the embed.
- * @param {string} description The description of the embed.
- * @param {string} avatar The url to an image to use as avatar.
- * @param {{name: string, id: number}[]} options An object containing options to list.
- * @returns {Discord.MessageEmbed[]} The embed created using given data.
- */
-function getEmbeds(title, description, avatar, options) 
-{
-	const embeds = [];
-	const fields = options.map((option) => 
-		({ name: `${option.name} - ${option.id}`, value: "_", inline: true }));
-	
-	while(fields.length)
-		embeds.push(new Discord.MessageEmbed()
-			.setThumbnail(avatar)
-			.setColor("#0099ff")
-			.addFields(fields.splice(0, 25)));
-	
-	embeds[0].setTitle(title)
-		.setDescription(description);
-	
-	embeds[embeds.length-1].setTimestamp()
-		.setFooter("Reply within 1 minute", avatar); 	
-		
-	return embeds;	
 }
 
 /**
@@ -119,14 +61,14 @@ function getEmbeds(title, description, avatar, options)
 async function getState(user, channel) 
 {
 	// Get the list of state name and id from cowin API.
-	const response = await sendRequest("https://cdn-api.co-vin.in/api/v2/admin/location/states")
+	const response = await sendRequest(APIS.states)
 		.catch(() => ({states: []}));
 
 	const states = response.states // Format the response we got from the API to an object array.
 		.map((/** @type {any} */ state) => ({id: state.state_id, name: state.state_name}));	
 	
 	// Create embeds with the state list and user's avatar and send it.	
-	const embeds = getEmbeds(Texts.stateQuery[0], Texts.stateQuery[1], user.displayAvatarURL(), states);	
+	const embeds = getEmbeds(TEXTS.stateQuery[0], TEXTS.stateQuery[1], user.displayAvatarURL(), states);	
 	embeds.forEach(async (embed) =>await channel.send(embed));
 
 	// Define a function to filter the replies from the user.
@@ -162,7 +104,7 @@ async function getDistrict(user, channel, state)
 		.map((/** @type {any} */ dist) => ({id: dist.district_id, name: dist.district_name}));	
 	
 	// Create embeds with the district list and user's avatar and send it.	
-	const embeds = getEmbeds(Texts.districtQuery[0], Texts.districtQuery[1], user.displayAvatarURL(), districts);	
+	const embeds = getEmbeds(TEXTS.districtQuery[0], TEXTS.districtQuery[1], user.displayAvatarURL(), districts);	
 	embeds.forEach(async (embed) =>await channel.send(embed));
 
 	// Define a function to filter the replies from the user.
@@ -189,16 +131,17 @@ async function getDistrict(user, channel, state)
  * @author Rohit T P
  * @param {Discord.Message} message The message that initiated this command.
  * @param {Array<string>} args Array containing age.
+ * @param {{firestore: () => FirebaseFirestore.Firestore}} app The firebase app
  * @returns {Promise<Boolean>} Indicates operation success or failure.
  */
-export default async function register(message, args) 
+export default async function register(message, args, app) 
 {
 	// Get an instance of firestore to access the database.
 	const firestore = app.firestore();
 
 	// Checks the arguments to see if everything is ok.
 	const errorMessage = await checkArgs(args, message.author.id, firestore)
-		.catch(() => "Something went wrong.");
+		.catch(() => TEXTS.generalError);
 	// If there is some error send it to user and exit.
 	if(errorMessage)
 		return message.reply(`<@${message.author.id}> ${errorMessage}`), false;
@@ -207,15 +150,15 @@ export default async function register(message, args)
 	const state = await getState(message.author, message.channel);
 
 	if(!state) // Check if the user selected a valid state.
-		return message.reply(`${Texts.stateError}\n${Texts.tryAgain}`), false;	
+		return message.reply(`${TEXTS.stateError}\n${TEXTS.tryAgain}`), false;	
 	
 	const district = await getDistrict(message.author, message.channel, state);	
 
 	if(!district) // Check if the user selected a valid state.
-		return message.reply(`${Texts.districtError}\n${Texts.tryAgain}`), false;
+		return message.reply(`${TEXTS.districtError}\n${TEXTS.tryAgain}`), false;
 
 	// Send a message to the user that data collection has been completed.	
-	message.reply(`<@${message.author.id}> ${Texts.infoCollected}`);
+	message.reply(`<@${message.author.id}> ${TEXTS.infoCollected}`);
 
 	// Write the collected user data to cloud firestore.
 	const done =  await firestore.collection("users").add(
@@ -224,14 +167,15 @@ export default async function register(message, args)
 			userName: message.author.username,
 			age: Number(args[0]),
 			district,
-			state
+			state,
+			avatar: message.author.displayAvatarURL()
 		})
 		.then(()=>true)
 		.catch((error) => (console.error(error), false));
 	
 	// Generate a status message 	
 	const status = `<@${message.author.id}>` + 
-			( done ?  Texts.regSuccess : `${Texts.regFailed}\n${Texts.tryAgain}`);
+			( done ?  TEXTS.regSuccess : `${TEXTS.regFailed}\n${TEXTS.tryAgain}`);
 	
 	// Send the generated status message to the message channel and as dm to user.		
 	message.author.dmChannel?.send(status);
