@@ -33,6 +33,8 @@ export const TEXTS =
 	ageQuestion: "Hmm you look soo young, tell me your real age?",
 	confirmDele: "Are you sure you want to delete your account? 😨",
 	noDelete: "Oof that was close 😌, I was really scared.",
+	cantTalk: "Some one told my developers that I am too noisy 😡 now I am banned from talking here 😭 ",
+	goToDM: "We can still chat in DM 😉,But you have to swear you won't complain on me 🤫",
 	stateQuery: 
 	[ 
 		"Select The Sate", 

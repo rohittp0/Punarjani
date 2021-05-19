@@ -56,7 +56,7 @@ client.on("message", async (message) =>
 	// Check if the message starts with prefix and is not send by bot it's self.
 	if (!message.content.startsWith(prefix) || message.author.bot || message.content.length < 2) 
 		return;
-	
+
 	const userRef = active.child(message.author.id); 	
 	// Check if the user is doing something else
 	const running = new Promise((resolve) => userRef.once("value", snapshot => resolve(snapshot.exists())));	
@@ -65,6 +65,9 @@ client.on("message", async (message) =>
 	const args = message.content.slice(prefix.length).trim().split(/ +/);
 	// Gets the command to command variable.
 	const command = args.shift()?.toLowerCase();
+
+	if(message.channel.type !== "dm" && command !== "help" && command !== "info")
+		return message.reply(TEXTS.cantTalk+TEXTS.goToDM);	
 
 	// Don't run if user has some other commands running for him/her/they
 	if(command !== "help" && await running)
