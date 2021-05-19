@@ -18,7 +18,7 @@
  */
 
 import Discord from "discord.js";
-import {APIS, app, getEmbeds, sendRequest, TEXTS, askPolar} from "./common.js";
+import {APIS, getEmbeds, sendRequest, TEXTS, askPolar} from "./common.js";
 
 const emojiTable = 
 [
@@ -41,8 +41,7 @@ const emojiTable =
 async function setState(doc, channel) 
 {
 	// Get the list of state name and id from cowin API.
-	const response = await sendRequest(APIS.states)
-		.catch(() => ({states: []}));
+	const response = await sendRequest(APIS.states).catch(() => ({states: []}));
 
 	const states = response.states // Format the response we got from the API to an object array.
 		.map((/** @type {any} */ state) => ({id: state.state_id, name: state.state_name}));	
@@ -113,13 +112,13 @@ async function setDistrict(doc, channel)
 	if(!district)
 		return await channel.send(`<@${doc.get("userID")}> You selected an invalid district`), false;
 
-	const status = await doc.ref.update({district}).catch(undefined);	
+	const status = await doc.ref.update({district});
 
 	if(!status)
 		return await channel.send(`<@${doc.get("userID")}> ${TEXTS.generalError} ${TEXTS.tryAgain}`), false; 
 	
 	// Send an reply to the user.
-	await channel.send(`<@${doc.get("userID")}> You are now in ${district.name}`).catch(console.error);
+	await channel.send(`<@${doc.get("userID")}> You are now in ${district.name}`);
 	
 	return true;
 }
@@ -151,7 +150,7 @@ async function setAge(doc, channel)
 	if(!status)
 		return await channel.send(`<@${doc.get("userID")}> ${TEXTS.generalError} ${TEXTS.tryAgain}`), false; 
 	
-	await channel.send(`<@${doc.get("userID")}> You are now officially ${age} years old 🎂`).catch(console.error);	
+	await channel.send(`<@${doc.get("userID")}> You are now officially ${age} years old 🎂`);	
 
 	return true;	
 }
@@ -205,9 +204,11 @@ async function deleteUser(doc, channel)
  * 
  * @author Rohit T P
  * @param {Discord.Message} message The message that initiated this command.
+ * @param {string[]} args The arguments.
+ * @param {{firestore: () => FirebaseFirestore.Firestore}} app The firebase app
  * @returns {Promise<Boolean>} Indicates operation success or failure.
  */
-export default async function edit(message) 
+export default async function edit(message, args, app) 
 {
 	// Start creating an embed in background.
 	const menuEmbed = new Promise((resolve) => resolve(new Discord.MessageEmbed()
@@ -243,7 +244,7 @@ export default async function edit(message)
 	if(handler) 
 		done = await handler(user, message.channel).catch(() => false);
 	
-	if(!done) await message.reply("Edit Canceled").catch(console.error);
+	if(!done) await message.reply("Edit Canceled");
 	
 	return done;
 }

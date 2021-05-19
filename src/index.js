@@ -19,13 +19,17 @@
  */
 
 import Discord from "discord.js";
+import { getApp } from "./common.js";
 // Importing command handlers.
 import register from "./register.js";
 import help from "./help.js";
 import slots from "./slots.js";
+import edit from "./edit.js";
  
 // Create an instance of Client 
 const client = new Discord.Client();
+// Create an instance of firebase app
+const app = getApp();
 // Define a prefix to use when sending commands to bot.
 const prefix = process.env.PREFIX || "!";
 // An array of commands and functions to handle them.
@@ -34,6 +38,7 @@ const commands =
  	{ name: "register", handler: register }, 
  	{ name: "help",     handler: help     },
  	{ name: "slots",    handler: slots    },
+ 	{ name: "edit",     handler: edit     }, 
  ];
  
 /**
@@ -52,7 +57,7 @@ client.on("message", async (message) =>
 	 const command = args.shift()?.toLowerCase();
  
 	 const result = await commands.find(cmd => cmd.name === command)
-		 ?.handler(message, args);
+		 ?.handler(message, args, app).catch(console.error);
  
 	 console.log(`Execution ${result}`);
 });
