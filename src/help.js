@@ -26,13 +26,14 @@ const BOT_AVATAR = "https://raw.githubusercontent.com/rohittp0/Punarjani/main/bo
  * TODO: Add what each command does. eg register lets the user save their details to our database.
  */
 const COMMAND_LIST = 
-{
-	register: { format: "!register age", example: "!register 25", action: "what happens when user use this?" },
-	slots: { format: "!slots date", example: "!slots may 19", action: "what happens when user use this?" },
-	edits: { format: "!edits", example: "!edits", action: "what happens when user use this?" },
-	info: { format: "!info", example: "!info", action: "what happens when user use this?" }
-
-};
+[
+	{
+		name: "register", 
+		info: "A new user can use !register command to register in Punarjani.", 
+		format: "!register <your-age>",
+		details: "For example !register 19 starts registration for a person 19 years old."
+	}
+];
 
 /**
  * This function generate a embed for !help 
@@ -48,9 +49,11 @@ function helpEmbed()
 		.setTitle("Welcome to Punarjani !help ")
 		.setDescription("Are you facing any difficulties 🤔 . Don't worry I'm here to help you 🥳")
 		.setThumbnail(BOT_AVATAR)
-		.addFields({ name:"How can we chat ? ", value: "\0" })
-		.addFields({ name:"👉 You can call me by !help", value: "\0" })
-		.addFields({ name:"👉 Send me !help  command-name and I will tell you how it works ", value: "\0" })
+		.addFields({ name:"How can we chat ? ", value: "\0" },
+			{ name:"👉 You can call me by !help", value: "\0" },
+			{ name:"👉 Send !help all to show all available commands.", value: "\0" },
+			{ name:"👉 Send me !help  <command name> and I will tell you how it works ", value: "\0" }
+		)
 		.setTimestamp()
 		.setFooter("Always happy to help");
 
@@ -62,26 +65,23 @@ function helpEmbed()
  * This function generate a embed (General template)  
  * @author Sunith V S
  * 
- * @param {string} command The command
- * @param {string} description Description about the command]
- * @param {string} example Example of that particular
+ * @param {string} name The command name
+ * @param {string} info Description about the command
+ * @param {string} format The format of that command
+ * @param {string | undefined} details Some extra details.
  * @returns {Discord.MessageEmbed}
  */
-function getEmbed(command, description, example)
+function getEmbed(name, info, format, details)
 { 
 	const embedObject = new Discord.MessageEmbed()
 		.setColor("#f9cf03")
-		.setTitle("Help")
-		.setDescription("Welcome to Punarjani help")
+		.setTitle(`${name[0].toUpperCase()}${name.substr(1)}`)
+		.setDescription(info)
 		.setThumbnail(BOT_AVATAR)
-		.addFields(
-			{ name: `How ${command} works`, value: description },
-			{ name: "Example", value: example },
-			
-		)
-		.setTimestamp()
-		.setFooter("Always happy to help");
+		.addField("Format", format);
 
+	if(details)
+		embedObject.addField("Extra Info", details);	
 		
 	return embedObject;
 }
@@ -95,18 +95,25 @@ function getEmbed(command, description, example)
  * @param {Array<string>} args Array containing district, age and user id.
  * @returns {Promise<Boolean>} Indicates operation success or failure.
  */
-// eslint-disable-next-line no-unused-vars
-export default async function help (message, args) 
+export default function help (message, args) 
 {
-	// @ts-ignore
-	if(!args[0] || args[0].length < 2 || !COMMAND_LIST[args[0].replace("!", "")])
-		return await message.channel.send(helpEmbed()).catch(), true;		
-	
-	const commandName = args[0].replace("!", "");
-	// @ts-ignore Removing ! so that !register and register are the same.
-	const command = COMMAND_LIST[commandName];	
+	const arg = (args[0] || "!").replace("!", "").toLowerCase().trim();
+	const command = COMMAND_LIST.find((cmd) => cmd.name === arg);
 
-	await message.channel.send(getEmbed(commandName, command.format, command.example)).catch();
-	
-	return true;
+	if(arg === "all")
+	{
+		let names = "";
+		COMMAND_LIST.forEach(({name, format})=>names+= `${name} => ${format}\n`);
+		return message.reply(`Available commands are,\n${names} Use !help <command-name> for more details.`)
+			.then(() => true);
+	}
+
+	if(args[0] && !command)
+		message.reply(`${args[0]} is not a valid command. Check out Punarjani help`);
+
+	if(!command)
+		return message.channel.send(helpEmbed()).then(() => true);		
+
+	return message.channel.send(getEmbed(command.name, command.info, command.format, command.details))
+		.then(() => true);	
 }
