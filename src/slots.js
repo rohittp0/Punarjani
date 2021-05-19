@@ -23,7 +23,7 @@ import {sendRequest} from "./common.js";
 
 const COWIN_API_URL = "https://cdn-api.co-vin.in/api/v2/appointment/sessions/public/findByDistrict?district_id=";
 const DIST_ID = 512; // TODO: Automatically get this from database.
-
+const DIST_NAME='Malappuram';// TODO: Convert DIST_ID to corresponding name
 
 /**
  * Converts date from human readable format to the format required by cowin API.
@@ -47,6 +47,33 @@ function getDate(dateString)
 }
 
 /**
+ *This function generate a embed for !slot if slot available 
+ * This function uses the global const variables DIST_ID and DIST_NAME
+ * @author Sunith V S
+ * @param {number} slots Number of slots available
+ * @returns {Discord.MessageEmbed} Embed including number of slots and redirecting link to cowin website 
+ */
+function slotsAvailableEmbed(slots){
+	const embedObject = new Discord.MessageEmbed()
+		.setColor("#f9cf03")
+		.setTitle("Available slots for vaccine registration ")
+		//.setThumbnail(BOT_AVATAR)
+		.addFields(
+			{ name: `Wow 🤩 ${slots} slots available in your district ${DIST_NAME}`, value: '\0' },
+			{ name: "To show the vaccination centers enter !slots centres ", value: '\0' },
+			
+		)
+		.setTimestamp()
+		.setFooter("Always happy to help");
+
+		
+	return embedObject;
+
+
+}
+
+
+/**
  * This function handles manual checking of COWIN slots available  for users district in Punarjani.
  * 
  * @author Sanu Muhammed C
@@ -68,6 +95,9 @@ export default async function slots(message, args)
 		}));
 
 	console.log(centers);	
-        
+
+
+    await message.channel.send(slotsAvailableEmbed(512)).catch();
+	
 	return true;
 }
