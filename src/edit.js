@@ -22,9 +22,9 @@ import {APIS, app, getEmbeds, sendRequest, TEXTS, askPolar} from "./common.js";
 
 const emojiTable = 
 [
-	{ emoji:"1️⃣", option:"1️⃣ Change State", handler: setState },
-	{ emoji:"2️⃣", option:"2️⃣ Change District", handler: setDistrict },
-	{ emoji:"3️⃣", option:"3️⃣ Change Age", handler: setAge },
+	{ emoji:"🇸", option:"🇸 Change State", handler: setState },
+	{ emoji:"🇩", option:"🇩 Change District", handler: setDistrict },
+	{ emoji:"🇦", option:"🇦 Change Age", handler: setAge },
 	{ emoji:"ℹ️", option:"ℹ️ Just show my details", handler: showInfo },
 	{ emoji:"❌", option:"❌ Delete Account", handler: deleteUser },
 	{ emoji:"🤷", option:"🤷 Do Nothing", handler: undefined}
