@@ -23,6 +23,7 @@ import Discord from "discord.js";
 import register from "./register.js";
 import help from "./help.js";
 import slots from "./slots.js";
+import info from "./info.js";
  
 // Create an instance of Client 
 const client = new Discord.Client();
@@ -34,6 +35,7 @@ const commands =
  	{ name: "register", handler: register }, 
  	{ name: "help",     handler: help     },
  	{ name: "slots",    handler: slots    },
+ 	{ name: "info",     handler: info     },
  ];
  
 /**
