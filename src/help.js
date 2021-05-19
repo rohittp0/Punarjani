@@ -28,7 +28,10 @@ const BOT_AVATAR = "https://raw.githubusercontent.com/rohittp0/Punarjani/main/bo
 const COMMAND_LIST = 
 {
 	register: { format: "!register age", example: "!register 25", action: "what happens when user use this?" },
-	slots: { format: "!slots date", example: "!slots may 19", action: "what happens when user use this?" }
+	slots: { format: "!slots date", example: "!slots may 19", action: "what happens when user use this?" },
+	edits: { format: "!edits", example: "!edits", action: "what happens when user use this?" },
+	info: { format: "!info", example: "!info", action: "what happens when user use this?" }
+
 };
 
 /**
