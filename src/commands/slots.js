@@ -19,10 +19,7 @@
 
 // eslint-disable-next-line no-unused-vars
 import Discord from "discord.js";
-import {APIS, sendRequest, TEXTS} from "../common.js";
-
-const BOT_AVATAR = "https://raw.githubusercontent.com/rohittp0/Punarjani/main/bot-avatar.png";
-//add user's age from the database here......
+import {APIS, getSlotEmbed, sendRequest, TEXTS} from "../common.js";
 
 /**
  * Converts date from human readable format to the format required by cowin API.
@@ -48,34 +45,6 @@ function getDate(dateString)
 		date.setFullYear(today.getFullYear() + 1);	
 		
 	return `${date.getDate()}-${date.getMonth()+1}-${date.getFullYear()}`;
-}
-
-/**
- *this function generate an embed containing the vaccination center and available slots 
- * @author Sunith V S
- * @param {string} center The string containing name of the vaccination center 
- * @param {number}	slots the number of available slots
- * @param {string} address The address of the center
- * @param {string} date Date on which slot is available.
- * @returns {Discord.MessageEmbed} Embed including number of slots ,vaccination center and redirecting link to cowin website 
- */
-function getEmbed(center, slots, address, date)
-{
-	const embedObject = new Discord.MessageEmbed()
-		.setDescription("Click the ☝️ to go to CoWin site.")
-		.setURL("https://www.cowin.gov.in/home")  //url for redirecting user  to cowin website
-		.setColor("#f9cf03")
-		.setTitle(center)
-		.setThumbnail(BOT_AVATAR)
-		.addFields(
-			{ name: "Vaccination center", value: center },
-			{ name: "Available Dose", value: slots  },
-			{ name: "Address", value: address }
-			
-		)
-		.setFooter(`Slots available on ${date}`);
-
-	return embedObject;
 }
 
 
@@ -110,10 +79,9 @@ export default async function slots(message, args, app)
 	// @ts-ignore
 	response.sessions.forEach(({min_age_limit, available_capacity, name, address, date}) => 
 	{
-		console.log(min_age_limit);
 		if(user.get("age") >= Number(min_age_limit) && Number(available_capacity) > 0)
 			promises.push(new Promise((resolve)=>
-				resolve(message.channel.send(getEmbed(name, available_capacity, address, date)))));
+				resolve(message.channel.send(getSlotEmbed(name, available_capacity, address, date)))));
 	});
 	
 	if(promises.length!==0)

@@ -18,8 +18,7 @@
  */
 
 import Discord from "discord.js";
-
-const BOT_AVATAR = "https://raw.githubusercontent.com/rohittp0/Punarjani/main/bot-avatar.png";
+import { BOT_AVATAR } from "../common.js";
 
 /**
   * This function handle the !info command and send corresponding embed

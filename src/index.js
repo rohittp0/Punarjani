@@ -18,7 +18,7 @@
  */
 
 import Discord from "discord.js";
-import { getApp, TEXTS } from "./common.js";
+import {APIS, getApp, getSlotEmbed, sendRequest, TEXTS } from "./common.js";
 // Importing command handlers.
 import register from "./commands/register.js";
 import help from "./commands/help.js";
@@ -44,9 +44,74 @@ const commands =
 	{ name: "info",     handler: info     }
 ];
 
+console.log("All globals set.");
+
 active.onDisconnect().remove();
 
- 
+/**
+ * @param {FirebaseFirestore.Firestore} firestore
+ * @param {Discord.Client} dsClient
+ */
+async function sendHourlyUpdates(firestore, dsClient)
+{
+	// TODO remove
+	console.log("Hourly updates");
+	const districts = await firestore.collection("/locations/states/districts")
+		.where("users", ">", 0).get();
+	
+	// TODO remove
+	console.log("dist size ", districts.size, 63);	
+
+	/** @type {Promise<any>[]} The promises got when sending embeds. */
+	const promises = [];	
+	
+	districts.forEach(async (dist) => 
+	{
+		// TODO remove
+		console.log(dist.get("name"), 71);
+
+		const today = new Date();
+		const date = `${today.getDate()}-${today.getMonth()+1}-${today.getFullYear()}`;
+		const response = sendRequest(`${APIS.byDistrict}${dist.get("id")}&date=${date}`).catch(()=>({sessions: []}));
+	
+		// TODO remove
+		console.log(date, 78);
+
+		const users = await firestore.collection("users")
+			.where("district.id", "==", dist.get("id"))
+			.where("hourlyUpdate", "==", true)
+			.get();
+
+		// TODO remove
+		console.log("Users", users.size, 86);
+
+		// @ts-ignore
+		(await response).sessions.forEach(({min_age_limit, available_capacity, name, address, date}) => 
+		{
+			// TODO remove
+			console.log("Min age", min_age_limit);
+
+			const embed = getSlotEmbed(name, available_capacity, address, date);
+
+			users.forEach(async (user) => 
+			{
+				// TODO remove
+				console.log(user.get("userName"));
+
+				const dm = await dsClient.users.fetch(user.get("id")).catch(console.error);
+
+				if(dm && user.get("age") >= Number(min_age_limit) && Number(available_capacity) > 0)
+					promises.push(
+						new Promise((resolve)=> resolve(dm.send(embed)))
+					);
+			});
+		});
+	});
+	// TODO remove
+	return await Promise.all(promises).then(console.log).catch(console.error);
+}
+
+
 /**
   * Add an on message handler to the discord bot. This handler will be 
   * the starting point for most of the functions handled by the bot.
@@ -86,7 +151,12 @@ client.on("message", async (message) =>
 	console.log(`${command} execution ${result}`); 
 });
 
-client.on("ready", () => console.log("Bot ready"));
+client.on("ready", () => 
+{
+	console.log("Bot ready");									// One hour
+	setInterval(() => sendHourlyUpdates(app.firestore(), client), 60*60*60*1000);
+	sendHourlyUpdates(app.firestore(), client); // TODO remove
+});
  
 //Login to discord using TOKEN
 if(process.env.BOT_TOKEN)

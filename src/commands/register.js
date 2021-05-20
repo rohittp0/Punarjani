@@ -19,7 +19,8 @@
 
 // eslint-disable-next-line no-unused-vars
 import Discord from "discord.js";
-import {sendRequest, getEmbeds, TEXTS, APIS} from "../common.js";
+import {FieldValue} from "@google-cloud/firestore";
+import {askPolar, getLocationEmbeds, TEXTS} from "../common.js";
 
 /**
  * Helper function to sanitize required parameters.
@@ -55,21 +56,20 @@ async function checkArgs(args, uid, firestore)
  * 
  * @param {Discord.User} user The author of message.
  * @param {Discord.TextChannel | Discord.DMChannel | Discord.NewsChannel} channel The message channel.
+ * @param {FirebaseFirestore.Firestore} firestore
  * 
  * @returns {Promise<{name: string, id: number}>} The selected state
  */
-async function getState(user, channel) 
+async function getState(user, channel, firestore) 
 {
-	// Get the list of state name and id from cowin API.
-	const response = await sendRequest(APIS.states)
-		.catch(() => ({states: []}));
-
-	const states = response.states // Format the response we got from the API to an object array.
-		.map((/** @type {any} */ state) => ({id: state.state_id, name: state.state_name}));	
+	// Get the list of state name and id from database.
+	const states = (await firestore.doc("/locations/states").get()).get("list");
 	
+	/** @type {Discord.Message[]} */
+	const sent = [];
 	// Create embeds with the state list and user's avatar and send it.	
-	const embeds = getEmbeds(TEXTS.stateQuery[0], TEXTS.stateQuery[1], user.displayAvatarURL(), states);	
-	embeds.forEach(async (embed) =>await channel.send(embed));
+	const embeds = getLocationEmbeds(TEXTS.stateQuery[0], TEXTS.stateQuery[1], user.displayAvatarURL(), states);	
+	embeds.forEach(async (embed) =>sent.push(await channel.send(embed)));
 
 	// Define a function to filter the replies from the user.
 	const numberFilter = (/** @type {Discord.Message} */ response) => 
@@ -79,6 +79,9 @@ async function getState(user, channel)
 	// Wait for the user to reply with the code of state they want to select.	
 	const choice = await channel.awaitMessages(numberFilter, {max: 1, errors: ["time"]})
 		.then((collected) => Number(collected.first()?.content));
+	
+	// Delete unwanted messages	
+	sent.forEach((msg) => msg.delete().catch(console.error));	
 
 	// Search the states array for the state specified by the state code user sent. 	
 	const state = states.find((/** @type {{ id: number; }} */ state) => state.id === choice);	
@@ -93,19 +96,28 @@ async function getState(user, channel)
  * @param {Discord.User} user
  * @param {Discord.TextChannel | Discord.DMChannel | Discord.NewsChannel} channel
  * @param {{ name: any; id?: number; }} state
+ * @param {FirebaseFirestore.Firestore} firestore
+ * 
+ * @returns {Promise<{name: any; id: any; ref: FirebaseFirestore.QueryDocumentSnapshot<FirebaseFirestore.DocumentData>}|undefined>} The selected district.
  */
-async function getDistrict(user, channel, state) 
+async function getDistrict(user, channel, state, firestore) 
 {
-	// Get the list of district name and id from cowin API.
-	const response = await sendRequest(`https://cdn-api.co-vin.in/api/v2/admin/location/districts/${state.id}`)
-		.catch(() => ({districts: []}));
+	// Get the list of district name and id from database.
+	const response = await firestore.collection("/locations/states/districts")
+		.where("state_id", "==", Number(state.id))
+		.orderBy("name").get();
+			
+	/** @type {{ name: any; id: any; ref: FirebaseFirestore.QueryDocumentSnapshot<FirebaseFirestore.DocumentData>; }[]} */
+	const districts = [];	
+	// Format the response we got from the API to an object array.
+	response.forEach((dist) => 
+		districts.push({name: dist.get("name"), id: dist.get("id"), ref: dist}));	
 
-	const districts = response.districts // Format the response we got from the API to an object array.
-		.map((/** @type {any} */ dist) => ({id: dist.district_id, name: dist.district_name}));	
-	
+	/** @type {Discord.Message[]} */
+	const sent = [];
 	// Create embeds with the district list and user's avatar and send it.	
-	const embeds = getEmbeds(TEXTS.districtQuery[0], TEXTS.districtQuery[1], user.displayAvatarURL(), districts);	
-	embeds.forEach(async (embed) =>await channel.send(embed));
+	const embeds = getLocationEmbeds(TEXTS.districtQuery[0], TEXTS.districtQuery[1], user.displayAvatarURL(), districts);	
+	embeds.forEach(async (embed) =>sent.push(await channel.send(embed)));
 
 	// Define a function to filter the replies from the user.
 	const numberFilter = (/** @type {Discord.Message} */ response) => 
@@ -115,6 +127,9 @@ async function getDistrict(user, channel, state)
 	// Wait for the user to reply with the code of district they want to select.	
 	const choice = await channel.awaitMessages(numberFilter, {max: 1, errors: ["time"]})
 		.then((collected) => Number(collected.first()?.content));
+
+	// Delete unwanted messages	
+	sent.forEach((msg) => msg.delete().catch(console.error));	
 
 	// Search the districts array for the code user sent. 	
 	const district = districts.find((/** @type {{ id: number; }} */ state) => state.id === choice);	
@@ -147,12 +162,12 @@ export default async function register(message, args, app)
 		return message.reply(`<@${message.author.id}> ${errorMessage}`), false;
 
 	// Get the state name and ID of the user.	
-	const state = await getState(message.author, message.channel);
+	const state = await getState(message.author, message.channel, firestore);
 
 	if(!state) // Check if the user selected a valid state.
 		return message.reply(`${TEXTS.stateError}\n${TEXTS.tryAgain}`), false;	
 	
-	const district = await getDistrict(message.author, message.channel, state);	
+	const district = await getDistrict(message.author, message.channel, state, firestore);	
 
 	if(!district) // Check if the user selected a valid state.
 		return message.reply(`${TEXTS.districtError}\n${TEXTS.tryAgain}`), false;
@@ -161,15 +176,22 @@ export default async function register(message, args, app)
 	message.reply(`<@${message.author.id}> ${TEXTS.infoCollected}`);
 
 	// Write the collected user data to cloud firestore.
-	const done =  await firestore.collection("users").add(
-		{
-			userID: message.author.id,
-			userName: message.author.username,
-			age: Number(args[0]),
-			district,
-			state,
-			avatar: message.author.displayAvatarURL()
-		})
+	const batch = firestore.batch();
+
+	batch.create(firestore.collection("users").doc(message.author.id), {
+		userID: message.author.id,
+		userName: message.author.username,
+		age: Number(args[0]),
+		district: {id: district.id, name: district.name},
+		distRef: district.ref.ref,
+		state,
+		avatar: message.author.displayAvatarURL(),
+		hourlyUpdate: await askPolar(TEXTS.hourlyUpdate, message.channel, message.author.id)
+	});
+
+	batch.update(district.ref.ref, {users: FieldValue.increment(1)});
+
+	const done =  await batch.commit()
 		.then(()=>true)
 		.catch((error) => (console.error(error), false));
 	
@@ -178,7 +200,6 @@ export default async function register(message, args, app)
 			( done ?  TEXTS.regSuccess : `${TEXTS.regFailed}\n${TEXTS.tryAgain}`);
 	
 	// Send the generated status message to the message channel and as dm to user.		
-	message.author.dmChannel?.send(status);
 	await message.reply(status);	
 
 	// Return weather everything went well or not.
