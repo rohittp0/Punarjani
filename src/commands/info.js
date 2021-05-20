@@ -34,7 +34,8 @@ export default async function info (message)
 		.setColor("#f9cf03")
 		.setTitle("Hello awesome human 👋\nI am Punarjani 😇")
 		.setDescription(`I am here to help you get CoWin slot ASAP 🤩 !!!\n
-❎ My services:\n
+
+🛎️ My services:\n
 👉 I can give you hourly updates on slots available in COWIN site.
 👉 You will be able to register early so that you never miss a chance to take vaccine
 👉 You can even manually check the slots in any districts
