@@ -86,7 +86,7 @@ async function sendHourlyUpdates(firestore, dsClient)
 		console.log("Users", users.size, 86);
 
 		// @ts-ignore
-		(await response).sessions.forEach(({min_age_limit, available_capacity, name, address, date}) => 
+		((await response).sessions || []).forEach(({min_age_limit, available_capacity, name, address, date}) => 
 		{
 			// TODO remove
 			console.log("Min age", min_age_limit);
@@ -98,7 +98,7 @@ async function sendHourlyUpdates(firestore, dsClient)
 				// TODO remove
 				console.log(user.get("userName"));
 
-				const dm = await dsClient.users.fetch(user.get("id")).catch(console.error);
+				const dm = await dsClient.users.fetch(user.get("userID")).catch(console.error);
 
 				if(dm && user.get("age") >= Number(min_age_limit) && Number(available_capacity) > 0)
 					promises.push(

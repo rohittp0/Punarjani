@@ -67,7 +67,7 @@ export const TEXTS =
 
 export const APIS = 
 {
-	byDistrict: "https://cdn-api.co-vin.in/api/v2/appointment/sessions/public/findByDistrict?district_id="
+	byDistrict: "https://cowin.rabeeh.me/api/v2/appointment/sessions/public/findByDistrict?district_id="
 };
 
 export const BOT_AVATAR = "https://raw.githubusercontent.com/rohittp0/Punarjani/main/bot-avatar.png";
@@ -101,8 +101,8 @@ export async function sendRequest(url)
 			headers: {
 				accept: "application/json",
 				"Accept-Language": "hi_IN",
-				Host: "cdn-api.co-vin.in",
-				"User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/90.0.4430.93 Safari/537.36"
+				//Host: "cdn-api.co-vin.in",
+				//"User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/90.0.4430.93 Safari/537.36"
 			}
 		}
 	);
