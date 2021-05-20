@@ -18,6 +18,7 @@
  */
 
 import Discord from "discord.js";
+import NodeCache from "node-cache";
 import {APIS, getApp, getSlotEmbed, sendRequest, TEXTS } from "./common.js";
 // Importing command handlers.
 import register from "./commands/register.js";
@@ -25,7 +26,10 @@ import help from "./commands/help.js";
 import slots from "./commands/slots.js";
 import edit from "./commands/edit.js";
 import info from "./commands/info.js";
- 
+import profile from "./commands/profile.js";
+
+// Opens a cache.
+const cache = new NodeCache();
 // Create an instance of Client 
 const client = new Discord.Client();
 // Create an instance of firebase app
@@ -41,7 +45,8 @@ const commands =
 	{ name: "help",     handler: help     },
 	{ name: "slots",    handler: slots    },
 	{ name: "edit",     handler: edit     }, 
-	{ name: "info",     handler: info     }
+	{ name: "info",     handler: info     },
+	{ name: "profile",  handler: profile  }
 ];
 
 console.log("All globals set.");
@@ -51,8 +56,9 @@ active.onDisconnect().remove();
 /**
  * @param {FirebaseFirestore.Firestore} firestore
  * @param {Discord.Client} dsClient
+ * @param {NodeCache} cache
  */
-async function sendHourlyUpdates(firestore, dsClient)
+async function sendHourlyUpdates(firestore, dsClient, cache)
 {
 	// TODO remove
 	console.log("Hourly updates");
@@ -72,7 +78,7 @@ async function sendHourlyUpdates(firestore, dsClient)
 
 		const today = new Date();
 		const date = `${today.getDate()}-${today.getMonth()+1}-${today.getFullYear()}`;
-		const response = sendRequest(`${APIS.byDistrict}${dist.get("id")}&date=${date}`).catch(()=>({sessions: []}));
+		const response = sendRequest(`${APIS.byDistrict}${dist.get("id")}&date=${date}`, cache).catch(()=>({sessions: []}));
 	
 		// TODO remove
 		console.log(date, 78);
@@ -107,8 +113,8 @@ async function sendHourlyUpdates(firestore, dsClient)
 			});
 		});
 	});
-	// TODO remove
-	return await Promise.all(promises).then(console.log).catch(console.error);
+
+	return Promise.all(promises).catch(console.error);
 }
 
 
@@ -121,7 +127,7 @@ client.on("message", async (message) =>
 	// Check if the message starts with prefix and is not send by bot it's self.
 	if (!message.content.startsWith(prefix) || message.author.bot || message.content.length < 2) 
 		return;
-
+	
 	const userRef = active.child(message.author.id); 	
 	// Check if the user is doing something else
 	const running = new Promise((resolve) => userRef.once("value", snapshot => resolve(snapshot.exists())));	
@@ -133,18 +139,21 @@ client.on("message", async (message) =>
 
 	if(message.channel.type !== "dm" && command !== "help" && command !== "info")
 		return message.reply(TEXTS.cantTalk+TEXTS.goToDM);	
-
+	
 	// Don't run if user has some other commands running for him/her/they
-	if(command !== "help" && await running)
+	if(command !== "help" && (cache.get(message.author.id+"running") || await running))
 		return message.reply(TEXTS.runningError).catch(console.error);
 
 	// Set the ser as trying to do something.
 	const setRunning =  userRef.set(true).catch(console.error);	
+	cache.set(message.author.id+"running", true);
 
+	console.log(new Date().toTimeString());
 	// Execute the command.
 	const result = await commands.find(cmd => cmd.name === command)
-		?.handler(message, args, app).catch(console.error);
+		?.handler(message, args, app, cache).catch(console.error);
 	
+	cache.set(message.author.id+"running", false);	
 	await setRunning;	
 	await userRef.remove().catch(console.error);	
 
@@ -154,8 +163,8 @@ client.on("message", async (message) =>
 client.on("ready", () => 
 {
 	console.log("Bot ready");									// One hour
-	setInterval(() => sendHourlyUpdates(app.firestore(), client), 60*60*60*1000);
-	sendHourlyUpdates(app.firestore(), client); // TODO remove
+	setInterval(() => sendHourlyUpdates(app.firestore(), client, cache), 60*60*60*1000);
+	sendHourlyUpdates(app.firestore(), client, cache); // TODO remove
 });
  
 //Login to discord using TOKEN

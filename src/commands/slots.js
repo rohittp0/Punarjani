@@ -19,6 +19,8 @@
 
 // eslint-disable-next-line no-unused-vars
 import Discord from "discord.js";
+// eslint-disable-next-line no-unused-vars
+import NodeCache from "node-cache";
 import {APIS, getSlotEmbed, sendRequest, TEXTS} from "../common.js";
 
 /**
@@ -55,29 +57,30 @@ function getDate(dateString)
  * @param {Discord.Message} message The message that initiated this command.
  * @param {Array<string>} args The arguments passed.
  * @param {{firestore: () => FirebaseFirestore.Firestore}} app The firebase app
+ * @param {NodeCache} cache
  * @returns {Promise<Boolean>} Indicates operation success or failure.
  */
 // eslint-disable-next-line no-unused-vars
-export default async function slots(message, args, app) 
+export default async function slots(message, args, app, cache) 
 {
 	// Get an instance of firestore to access the database.
 	const firestore = app.firestore();
  
 	// Check if user has already registered.
-	const user = (await firestore.collection("users").where("userID", "==", message.author.id).get()).docs[0];
+	const user = await firestore.collection("users").doc(message.author.id).get();
 		
 	// If there is some error send it to user and exit.
 	if(!user || !user.exists)
 		return message.reply(TEXTS.notRegistered), false;	
 
 	const date = getDate(args.join(" "));	
-	const response = await sendRequest(`${APIS.byDistrict}${user.get("district").id}&date=${date}`);
+	const response = await sendRequest(`${APIS.byDistrict}${user.get("district").id}&date=${date}`, cache);
 	
 	/** @type {Promise<any>[]} The promises got when sending embeds. */
 	const promises = [];
 
 	// @ts-ignore
-	response.sessions.forEach(({min_age_limit, available_capacity, name, address, date}) => 
+	(response.sessions || []).forEach(({min_age_limit, available_capacity, name, address, date}) => 
 	{
 		if(user.get("age") >= Number(min_age_limit) && Number(available_capacity) > 0)
 			promises.push(new Promise((resolve)=>

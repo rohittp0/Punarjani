@@ -17,6 +17,8 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>. 
  */
 
+// eslint-disable-next-line no-unused-vars
+import NodeCache from "node-cache";
 import Discord from "discord.js";
 import {FieldValue} from "@google-cloud/firestore";
 import {getLocationEmbeds, TEXTS, askPolar} from "../common.js";
@@ -34,7 +36,7 @@ const emojiTable =
 /**
  * A helper function to show a list of states and let the user pick one.
  * 
- * @param {FirebaseFirestore.QueryDocumentSnapshot<FirebaseFirestore.DocumentData>} doc The author of message.
+ * @param {FirebaseFirestore.DocumentSnapshot<FirebaseFirestore.DocumentData>} doc
  * @param {Discord.TextChannel | Discord.DMChannel | Discord.NewsChannel} channel The message channel.
  * @param {FirebaseFirestore.Firestore} firestore
  * 
@@ -83,7 +85,7 @@ async function setState(doc, channel, firestore)
 /**
  * A helper function to show a list of states and let the user pick one.
  * 
- * @param {FirebaseFirestore.QueryDocumentSnapshot<FirebaseFirestore.DocumentData>} doc The author of message.
+ * @param {FirebaseFirestore.DocumentSnapshot<FirebaseFirestore.DocumentData>} doc
  * @param {Discord.TextChannel | Discord.DMChannel | Discord.NewsChannel} channel The message channel.
  * @param {FirebaseFirestore.Firestore} firestore
  * 
@@ -148,7 +150,7 @@ async function setDistrict(doc, channel, firestore)
 }
 
 /**
- * @param {FirebaseFirestore.QueryDocumentSnapshot<FirebaseFirestore.DocumentData>} doc
+ * @param {FirebaseFirestore.DocumentSnapshot<FirebaseFirestore.DocumentData>} doc
  * @param {Discord.TextChannel | Discord.DMChannel | Discord.NewsChannel} channel
  * @returns {Promise<boolean>} True if everything went well
  */
@@ -183,7 +185,7 @@ async function setAge(doc, channel)
 }
 
 /**
- * @param {FirebaseFirestore.QueryDocumentSnapshot<FirebaseFirestore.DocumentData>} doc
+ * @param {FirebaseFirestore.DocumentSnapshot<FirebaseFirestore.DocumentData>} doc
  * @param {Discord.TextChannel | Discord.DMChannel | Discord.NewsChannel} channel
  * @returns {Promise<boolean>} True if everything went well
  */
@@ -210,13 +212,13 @@ function showInfo(doc, channel)
 }
 
 /**
- * @param {FirebaseFirestore.QueryDocumentSnapshot<FirebaseFirestore.DocumentData>} doc
+ * @param {FirebaseFirestore.DocumentSnapshot<FirebaseFirestore.DocumentData>} doc
  * @param {Discord.TextChannel | Discord.DMChannel | Discord.NewsChannel} channel
  * @param {FirebaseFirestore.Firestore} firestore
- * 
+ * @param {NodeCache} cache
  * @returns {Promise<boolean>} True if everything went well
  */
-async function deleteUser(doc, channel, firestore) 
+async function deleteUser(doc, channel, firestore, cache) 
 {
 	if(!(await askPolar(TEXTS.confirmDele, channel, doc.get("userID"))))
 		return await channel.send(`<@${doc.get("userID")}>${TEXTS.noDelete}`).catch(console.error), false;
@@ -228,11 +230,13 @@ async function deleteUser(doc, channel, firestore)
 	if(doc.get("hourlyUpdate") === true)
 		batch.update(doc.get("distRef"), {users: FieldValue.increment(-1)});
 	
-	const status = await batch.commit();
+	const status = await batch.commit().catch(console.error);
 
 	if(!status)
 		return await channel.send(`<@${doc.get("userID")}> ${TEXTS.generalError} ${TEXTS.tryAgain}`), false; 
 	
+	cache.set(doc.get("userID")+"exists", !status);
+		
 	await channel.send(`<@${doc.get("userID")}> Good bye friend.`).catch(console.error);	
 
 	return true;	
@@ -245,9 +249,10 @@ async function deleteUser(doc, channel, firestore)
  * @param {Discord.Message} message The message that initiated this command.
  * @param {string[]} args The arguments.
  * @param {{firestore: () => FirebaseFirestore.Firestore}} app The firebase app
+ * @param {NodeCache} cache
  * @returns {Promise<Boolean>} Indicates operation success or failure.
  */
-export default async function edit(message, args, app) 
+export default async function edit(message, args, app, cache) 
 {
 	// Start creating an embed in background.
 	const menuEmbed = new Promise((resolve) => resolve(new Discord.MessageEmbed()
@@ -262,7 +267,7 @@ export default async function edit(message, args, app)
 	const firestore = app.firestore();
  
 	// Check if user has already registered.
-	const user = (await firestore.collection("users").where("userID", "==", message.author.id).get()).docs[0];
+	const user = await firestore.collection("users").doc(message.author.id).get();
 	
 	// If there is some error send it to user and exit.
 	if(!user || !user.exists)
@@ -283,7 +288,7 @@ export default async function edit(message, args, app)
 
 	let done = false;
 	if(handler) 
-		done = await handler(user, message.channel, firestore).catch(() => false);
+		done = await handler(user, message.channel, firestore, cache).catch(() => false);
 	
 	if(!done) await message.reply("Edit Canceled");
 	

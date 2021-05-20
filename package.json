@@ -36,6 +36,7 @@
   "dependencies": {
     "axios": "^0.21.1",
     "discord.js": "^12.5.3",
-    "firebase-admin": "^9.8.0"
+    "firebase-admin": "^9.8.0",
+    "node-cache": "^5.1.2"
   }
 }

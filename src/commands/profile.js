@@ -1,7 +1,7 @@
 /**
  * Punarjani is a discord bot that notifies you about slot availability at
  * CoWin vaccination centers.
- * Copyright (C) 2021  SANU MUHAMMED C
+ * Copyright (C) 2021  Rohit T P
  * 
  *  This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU Affero General Public License as published
@@ -21,14 +21,20 @@ import Discord from "discord.js";
 import {TEXTS} from "../common.js";
 
 /**
- * @author SANU MUHAMMED C
- * @param {FirebaseFirestore.QueryDocumentSnapshot<FirebaseFirestore.DocumentData>} doc
- * @param {Discord.TextChannel | Discord.DMChannel | Discord.NewsChannel} channel
+ * @author Rohit T P
+ * @param {Discord.Message} message The message that initiated this command.
+ * @param {Array<string>} _args The arguments passed.
+ * @param {{firestore: () => FirebaseFirestore.Firestore}} app The firebase app
  * @returns {Promise<boolean>} True if everything went well
  */
-export default async function profile(doc, channel) 
+export default async function profile(message, _args, app) 
 {
-	return channel.send(
+	const doc = await app.firestore().collection("users").doc(message.author.id).get();
+
+	if(!doc || !doc.exists)
+		return message.reply(TEXTS.notRegistered), false;
+		
+	return message.channel.send(
 		new Discord.MessageEmbed()
 			.setThumbnail(doc.get("avatar"))
 			.setColor("#0099ff")

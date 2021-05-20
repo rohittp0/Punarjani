@@ -19,6 +19,8 @@
 
 // eslint-disable-next-line no-unused-vars
 import Discord from "discord.js";
+// eslint-disable-next-line no-unused-vars
+import NodeCache from "node-cache";
 import {FieldValue} from "@google-cloud/firestore";
 import {askPolar, getLocationEmbeds, TEXTS} from "../common.js";
 
@@ -29,25 +31,20 @@ import {askPolar, getLocationEmbeds, TEXTS} from "../common.js";
  * @param {any[]} args The arguments to be checked.
  * @param {string} uid The user id of the message author.
  * @param {FirebaseFirestore.Firestore} firestore An instance of firestore 
+ * @param {NodeCache} cache
  * @returns {Promise<string|boolean>} Error message if any or false.
  */
-async function checkArgs(args, uid, firestore) 
+async function checkArgs(args, uid, firestore, cache) 
 {
 	// This check would accept 18.123 but I think it is feature not a bug.
 	if(!(Number(args[0]) >= 18)) // Check if the arguments passed contains a valid age.
 		return `${TEXTS.ageError}\n${TEXTS.helpInfo}`;	
 	
 	// Check if user has already registered.
-	const docs = await firestore.collection("users").where("userID", "==", uid).get();
-	if(!docs.empty)
-	{   // If the user already has a registration get details related to it.
-		const dist = docs.docs[0].get("district")?.name;
-		const age = docs.docs[0].get("age");
-		
-		// Return the error message.
-		return `${TEXTS.existingUser[0]}${dist}${TEXTS.existingUser[1]}${age}${TEXTS.existingUser[2]}`;
-	}
-
+	const docs = firestore.collection("users").doc(uid).get();
+	if(cache.get(uid+"exists") || !(await docs)?.exists)
+		return cache.set(uid+"exists", true), TEXTS.existingUser; // If exists return the error message.	
+	
 	return false;
 }
 
@@ -147,15 +144,16 @@ async function getDistrict(user, channel, state, firestore)
  * @param {Discord.Message} message The message that initiated this command.
  * @param {Array<string>} args Array containing age.
  * @param {{firestore: () => FirebaseFirestore.Firestore}} app The firebase app
+ * @param {NodeCache} cache
  * @returns {Promise<Boolean>} Indicates operation success or failure.
  */
-export default async function register(message, args, app) 
+export default async function register(message, args, app, cache) 
 {
 	// Get an instance of firestore to access the database.
 	const firestore = app.firestore();
 
 	// Checks the arguments to see if everything is ok.
-	const errorMessage = await checkArgs(args, message.author.id, firestore)
+	const errorMessage = await checkArgs(args, message.author.id, firestore, cache)
 		.catch(() => TEXTS.generalError);
 	// If there is some error send it to user and exit.
 	if(errorMessage)
@@ -195,6 +193,8 @@ export default async function register(message, args, app)
 		.then(()=>true)
 		.catch((error) => (console.error(error), false));
 	
+	cache.set(message.author.id+"exists", done);	
+
 	// Generate a status message 	
 	const status = `<@${message.author.id}>` + 
 			( done ?  TEXTS.regSuccess : `${TEXTS.regFailed}\n${TEXTS.tryAgain}`);

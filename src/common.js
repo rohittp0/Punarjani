@@ -20,6 +20,8 @@
 import admin from "firebase-admin";
 import Discord from "discord.js";
 import axios from "axios";
+// eslint-disable-next-line no-unused-vars
+import NodeCache from "node-cache";
 
 export const TEXTS = 
 {
@@ -36,6 +38,7 @@ export const TEXTS =
 	cantTalk: "Some one told my developers that I am too noisy 😡 now I am banned from talking here 😭 ",
 	goToDM: "We can still chat in DM 😉,But you have to swear you won't complain on me 🤫",
 	hourlyUpdate: "Do you want to get hourly update for CoWin slots ?",
+	existingUser: "Hmm you look familiar... Aah I know you have registered a while back, no need to do it again.",
 	stateQuery: 
 	[ 
 		"Select The Sate", 
@@ -45,12 +48,6 @@ export const TEXTS =
 	[
 		"Select The District",
 		"Select your preferred district. Only showing districts from the state you selected."
-	],
-	existingUser:
-	[
-		"You have already registered at ",
-		" with age as ",
-		"\nIf you want to edit this use !edit"
 	],
 	embedFields: 
 	{
@@ -92,9 +89,11 @@ export const getApp = () => admin.initializeApp(
  * 
  * @author Rohit T P
  * @param {string} url The url to get.
+ * @param {NodeCache} cache A per opened cache.
  * @returns {Promise<{[key: string]: any}>} Response JSON converted to JS object.  
+ * @throws If request failed and cache was also not found.
  */
-export async function sendRequest(url) 
+export async function sendRequest(url, cache) 
 {
 	const result = await axios.get(url, 
 		{
@@ -105,9 +104,18 @@ export async function sendRequest(url)
 				//"User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/90.0.4430.93 Safari/537.36"
 			}
 		}
-	);
+	).catch(() =>undefined);
 
-	return result.data;
+	let data = result?.data;
+
+	if(!data)
+		data = cache.get(url);
+	else 
+		cache.set(url, data, 5*60*60*1000);	
+
+	if(!data) throw "Request failed and cache also didn't hit.";
+
+	return data;
 }
 
 /**
