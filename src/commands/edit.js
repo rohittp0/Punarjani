@@ -18,7 +18,8 @@
  */
 
 import Discord from "discord.js";
-import {APIS, getEmbeds, sendRequest, TEXTS, askPolar} from "../common.js";
+import {FieldValue} from "@google-cloud/firestore";
+import {getLocationEmbeds, TEXTS, askPolar} from "../common.js";
 
 const emojiTable = 
 [
@@ -35,20 +36,20 @@ const emojiTable =
  * 
  * @param {FirebaseFirestore.QueryDocumentSnapshot<FirebaseFirestore.DocumentData>} doc The author of message.
  * @param {Discord.TextChannel | Discord.DMChannel | Discord.NewsChannel} channel The message channel.
+ * @param {FirebaseFirestore.Firestore} firestore
  * 
  * @returns {Promise<boolean>} True if everything went well
  */
-async function setState(doc, channel) 
+async function setState(doc, channel, firestore) 
 {
-	// Get the list of state name and id from cowin API.
-	const response = await sendRequest(APIS.states).catch(() => ({states: []}));
-
-	const states = response.states // Format the response we got from the API to an object array.
-		.map((/** @type {any} */ state) => ({id: state.state_id, name: state.state_name}));	
+	// Get the list of state name and id from database.
+	const states = (await firestore.doc("/locations/states").get()).get("list");
 	
+	/** @type {Discord.Message[]} */
+	const sent = [];
 	// Create embeds with the state list and user's avatar and send it.	
-	const embeds = getEmbeds(TEXTS.stateQuery[0], TEXTS.stateQuery[1], doc.get("avatar"), states);	
-	embeds.forEach(async (embed) =>await channel.send(embed));
+	const embeds = getLocationEmbeds(TEXTS.stateQuery[0], TEXTS.stateQuery[1], doc.get("avatar"), states);	
+	embeds.forEach(async (embed) =>sent.push(await channel.send(embed)));
 
 	// Define a function to filter the replies from the user.
 	const numberFilter = (/** @type {Discord.Message} */ response) => 
@@ -58,6 +59,9 @@ async function setState(doc, channel)
 	// Wait for the user to reply with the code of state they want to select.	
 	const choice = await channel.awaitMessages(numberFilter, {max: 1, errors: ["time"]})
 		.then((collected) => Number(collected.first()?.content));
+
+	// Delete unwanted messages	
+	sent.forEach((msg) => msg.delete().catch(console.error));	
 
 	// Search the states array for the state specified by the state code user sent. 	
 	const state = states.find((/** @type {{ id: number; }} */ state) => state.id === choice);	
@@ -81,21 +85,28 @@ async function setState(doc, channel)
  * 
  * @param {FirebaseFirestore.QueryDocumentSnapshot<FirebaseFirestore.DocumentData>} doc The author of message.
  * @param {Discord.TextChannel | Discord.DMChannel | Discord.NewsChannel} channel The message channel.
+ * @param {FirebaseFirestore.Firestore} firestore
  * 
  * @returns {Promise<boolean>} True if everything went well
  */
-async function setDistrict(doc, channel) 
+async function setDistrict(doc, channel, firestore) 
 {
-	// Get the list of district name and id from cowin API.
-	const response = await sendRequest(`${APIS.districts}${doc.get("state").id}`)
-		.catch(() => ({districts: []}));
-
-	const districts = response.districts // Format the response we got from the API to an object array.
-		.map((/** @type {any} */ dist) => ({id: dist.district_id, name: dist.district_name}));	
+	// Get the list of district name and id from database.
+	const response = await firestore.collection("/locations/states/districts")
+		.where("state_id", "==", doc.get("state").id)
+		.orderBy("name").get();
+			
+	/** @type {{ name: any; id: any; ref: FirebaseFirestore.DocumentReference<FirebaseFirestore.DocumentData>; }[]} */
+	const districts = [];	
+	// Format the response we got from the API to an object array.
+	response.forEach((dist) => 
+		districts.push({name: dist.get("name"), id: dist.get("id"), ref: dist.ref}));	
 	
+	/** @type {Discord.Message[]} */
+	const sent = [];	
 	// Create embeds with the district list and user's avatar and send it.	
-	const embeds = getEmbeds(TEXTS.districtQuery[0], TEXTS.districtQuery[1], doc.get("avatar"), districts);	
-	embeds.forEach(async (embed) =>await channel.send(embed));
+	const embeds = getLocationEmbeds(TEXTS.districtQuery[0], TEXTS.districtQuery[1], doc.get("avatar"), districts);	
+	embeds.forEach(async (embed) =>sent.push(await channel.send(embed)));
 
 	// Define a function to filter the replies from the user.
 	const numberFilter = (/** @type {Discord.Message} */ response) => 
@@ -105,6 +116,9 @@ async function setDistrict(doc, channel)
 	// Wait for the user to reply with the code of district they want to select.	
 	const choice = await channel.awaitMessages(numberFilter, {max: 1, errors: ["time"]})
 		.then((collected) => Number(collected.first()?.content));
+	
+	// Delete unwanted messages	
+	sent.forEach((msg) => msg.delete().catch(console.error));	
 
 	// Search the districts array for the code user sent. 	
 	const district = districts.find((/** @type {{ id: number; }} */ state) => state.id === choice);	
@@ -112,7 +126,17 @@ async function setDistrict(doc, channel)
 	if(!district)
 		return await channel.send(`<@${doc.get("userID")}> You selected an invalid district`), false;
 
-	const status = await doc.ref.update({district});
+	const batch = firestore.batch();
+
+	batch.update(doc.ref, {district, distRef: district.ref});
+
+	if(doc.get("hourlyUpdate") === true)
+	{
+		batch.update(district.ref, {users: FieldValue.increment(1)});
+		batch.update(doc.get("distRef"), {users: FieldValue.increment(-1)})	;
+	}
+	
+	const status = await batch.commit();
 
 	if(!status)
 		return await channel.send(`<@${doc.get("userID")}> ${TEXTS.generalError} ${TEXTS.tryAgain}`), false; 
@@ -136,11 +160,14 @@ async function setAge(doc, channel)
 		response.author.id === doc.get("userID") && !isNaN(Number(response.content));
 
 	// Ask the user form age.	
-	channel.send(`<@${doc.get("userID")}> ${TEXTS.ageQuestion}`);
+	const msg = channel.send(`<@${doc.get("userID")}> ${TEXTS.ageQuestion}`);
 	const age = await channel.awaitMessages(numberFilter, {max: 1})
 		.then((got) => Number(got.first()?.content))
 		.catch(() => 0);
 
+	// Delete useless message.	
+	(await msg).delete().catch(console.error);
+	
 	// This check would accept 18.123 but I think it is feature not a bug.
 	if(age < 18) // Check if the arguments passed contains a valid age.
 		return await channel.send(`<@${doc.get("userID")}> ${TEXTS.ageError}\n${TEXTS.helpInfo}`), false;
@@ -162,6 +189,8 @@ async function setAge(doc, channel)
  */
 function showInfo(doc, channel) 
 {
+	const hourlyUpdate = doc.get("hourlyUpdate") ? "enabled" : "disabled";
+
 	return channel.send(
 		new Discord.MessageEmbed()
 			.setThumbnail(doc.get("avatar"))
@@ -173,6 +202,7 @@ function showInfo(doc, channel)
 				{ name: "Age", value: doc.get("age") },
 				{ name: "State", value: doc.get("state").name },
 				{ name: "District", value: doc.get("district").name },
+				{ name: "\0", value: `You have hourly update ${hourlyUpdate}`}
 			)
 			.setTimestamp())
 		.then(() => true)	
@@ -182,14 +212,23 @@ function showInfo(doc, channel)
 /**
  * @param {FirebaseFirestore.QueryDocumentSnapshot<FirebaseFirestore.DocumentData>} doc
  * @param {Discord.TextChannel | Discord.DMChannel | Discord.NewsChannel} channel
+ * @param {FirebaseFirestore.Firestore} firestore
+ * 
  * @returns {Promise<boolean>} True if everything went well
  */
-async function deleteUser(doc, channel) 
+async function deleteUser(doc, channel, firestore) 
 {
 	if(!(await askPolar(TEXTS.confirmDele, channel, doc.get("userID"))))
 		return await channel.send(`<@${doc.get("userID")}>${TEXTS.noDelete}`).catch(console.error), false;
 	
-	const status = await doc.ref.delete().catch(() => false);	
+	const batch = firestore.batch();
+
+	batch.delete(doc.ref);
+
+	if(doc.get("hourlyUpdate") === true)
+		batch.update(doc.get("distRef"), {users: FieldValue.increment(-1)});
+	
+	const status = await batch.commit();
 
 	if(!status)
 		return await channel.send(`<@${doc.get("userID")}> ${TEXTS.generalError} ${TEXTS.tryAgain}`), false; 
@@ -238,11 +277,13 @@ export default async function edit(message, args, app)
 	const choice = await menu.awaitReactions(filter, { max: 1 }).then((got) => got.first()?.emoji.name )
 		.catch(console.error);	
 
+	if(menu.deletable) menu.delete();	
+
 	const handler = emojiTable.find(({emoji})=> emoji === choice)?.handler;
 
 	let done = false;
 	if(handler) 
-		done = await handler(user, message.channel).catch(() => false);
+		done = await handler(user, message.channel, firestore).catch(() => false);
 	
 	if(!done) await message.reply("Edit Canceled");
 	

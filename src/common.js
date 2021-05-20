@@ -35,6 +35,7 @@ export const TEXTS =
 	noDelete: "Oof that was close 😌, I was really scared.",
 	cantTalk: "Some one told my developers that I am too noisy 😡 now I am banned from talking here 😭 ",
 	goToDM: "We can still chat in DM 😉,But you have to swear you won't complain on me 🤫",
+	hourlyUpdate: "Do you want to get hourly update for CoWin slots ?",
 	stateQuery: 
 	[ 
 		"Select The Sate", 
@@ -66,10 +67,10 @@ export const TEXTS =
 
 export const APIS = 
 {
-	states: "https://cdn-api.co-vin.in/api/v2/admin/location/states",
-	districts: "https://cdn-api.co-vin.in/api/v2/admin/location/districts/",
 	byDistrict: "https://cdn-api.co-vin.in/api/v2/appointment/sessions/public/findByDistrict?district_id="
 };
+
+export const BOT_AVATAR = "https://raw.githubusercontent.com/rohittp0/Punarjani/main/bot-avatar.png";
 
 // Login to firebase server then exports the logging instance so we can use it in other files. 
 export const getApp = () => admin.initializeApp(
@@ -102,12 +103,7 @@ export async function sendRequest(url)
 				"Accept-Language": "hi_IN",
 				Host: "cdn-api.co-vin.in",
 				"User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/90.0.4430.93 Safari/537.36"
-			},
-			// proxy: {
-			// 	host: "104.211.201.68",
-			// 	port: 3128
-			// }
-			
+			}
 		}
 	);
 
@@ -115,7 +111,7 @@ export async function sendRequest(url)
 }
 
 /**
- * Helper function to create embed from passed data.
+ * Helper function to create embed for selecting state or district.
  * 
  * @author Rohit T P
  * @param {string} title The title of the embed.
@@ -124,7 +120,7 @@ export async function sendRequest(url)
  * @param {{name: string, id: number}[]} options An object containing options to list.
  * @returns {Discord.MessageEmbed[]} The embed created using given data.
  */
-export function getEmbeds(title, description, avatar, options) 
+export function getLocationEmbeds(title, description, avatar, options) 
 {
 	const embeds = [];
 	const fields = options.map((option) => 
@@ -146,6 +142,35 @@ export function getEmbeds(title, description, avatar, options)
 }
 
 /**
+ * This function generate an embed containing the vaccination center and available slots 
+ * 
+ * @author Sunith V S
+ * @param {string} center The name of the vaccination center 
+ * @param {number}	slots the number of available slots
+ * @param {string} address The address of the center
+ * @param {string} date Date on which slot is available.
+ * @returns {Discord.MessageEmbed} The created embed 
+ */
+export function getSlotEmbed(center, slots, address, date)
+{
+	const embedObject = new Discord.MessageEmbed()
+		.setDescription("Click the ☝️ to go to CoWin site.")
+		.setURL("https://www.cowin.gov.in/home")  //url for redirecting user  to cowin website
+		.setColor("#f9cf03")
+		.setTitle(center)
+		.setThumbnail(BOT_AVATAR)
+		.addFields(
+			{ name: "Vaccination center", value: center },
+			{ name: "Available Dose", value: slots  },
+			{ name: "Address", value: address }
+			
+		)
+		.setFooter(`Slots available on ${date}`);
+
+	return embedObject;
+}
+
+/**
  * Helper function ask a yes or no question and return what user decided.
  * 
  * @author Rohit T P
@@ -164,7 +189,8 @@ export async function askPolar(question, channel, uid)
 	const message = await channel.send(question);
 	const result = message.awaitReactions(filter, { max: 1 })
 		.then(collected => collected.first()?.emoji.name === "👍")
-		.catch(() => false);
+		.catch(() => false)
+		.finally(() => message.delete().catch(console.log));
 
 	// Pre set the reactions that the user can use.	
 	await Promise.all([

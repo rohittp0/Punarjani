@@ -18,7 +18,7 @@
  */
 
 import Discord from "discord.js";
-import { getApp, TEXTS } from "./common.js";
+import {getApp, TEXTS } from "./common.js";
 // Importing command handlers.
 import register from "./commands/register.js";
 import help from "./commands/help.js";
@@ -44,9 +44,10 @@ const commands =
 	{ name: "info",     handler: info     }
 ];
 
+console.log("All globals set.");
+
 active.onDisconnect().remove();
 
- 
 /**
   * Add an on message handler to the discord bot. This handler will be 
   * the starting point for most of the functions handled by the bot.
