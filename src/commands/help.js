@@ -31,6 +31,34 @@ const COMMAND_LIST =
 		info: "A new user can use !register command to register in Punarjani.", 
 		format: "!register <your-age>",
 		details: "For example !register 19 starts registration for a person 19 years old."
+	},
+
+	{
+		name: "edit", 
+		info: "A registered user can use !edit command to edit the entry.", 
+		format: "!edit",
+		details: ""
+	},
+
+	{
+		name: "slots", 
+		info: "A registered user can use !slots to view the slots available.", 
+		format: "!slots",
+		details: ""
+	},
+
+	{
+		name: "profile", 
+		info: "A registered user can use !profile to view his/her own profile.", 
+		format: "!profile",
+		details: ""
+	},
+
+	{
+		name: "info", 
+		info: "If you want to know about me, use !info command", 
+		format: "!info",
+		details: ""
 	}
 ];
 
