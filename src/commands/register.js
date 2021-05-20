@@ -186,7 +186,7 @@ export default async function register(message, args, app)
 		distRef: district.ref.ref,
 		state,
 		avatar: message.author.displayAvatarURL(),
-		hourlyUpdate: askPolar(TEXTS.hourlyUpdate, message.channel, message.author.id)
+		hourlyUpdate: await askPolar(TEXTS.hourlyUpdate, message.channel, message.author.id)
 	});
 
 	batch.update(district.ref.ref, {users: FieldValue.increment(1)});

@@ -79,7 +79,6 @@ export default async function slots(message, args, app)
 	// @ts-ignore
 	response.sessions.forEach(({min_age_limit, available_capacity, name, address, date}) => 
 	{
-		console.log(min_age_limit);
 		if(user.get("age") >= Number(min_age_limit) && Number(available_capacity) > 0)
 			promises.push(new Promise((resolve)=>
 				resolve(message.channel.send(getSlotEmbed(name, available_capacity, address, date)))));
