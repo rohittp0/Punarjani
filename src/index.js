@@ -164,7 +164,7 @@ client.on("ready", () =>
 {
 	console.log("Bot ready");									// One hour
 	setInterval(() => sendHourlyUpdates(app.firestore(), client, cache), 60*60*60*1000);
-	sendHourlyUpdates(app.firestore(), client, cache); // TODO remove
+	//sendHourlyUpdates(app.firestore(), client, cache); // TODO remove
 });
  
 //Login to discord using TOKEN
