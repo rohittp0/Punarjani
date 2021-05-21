@@ -15,7 +15,6 @@
     "lint": "node ./node_modules/eslint/bin/eslint.js --color ./src",
     "fix": "node ./node_modules/eslint/bin/eslint.js --color --fix ./src",
     "watch": "node ./node_modules/nodemon/bin/nodemon -r dotenv/config src/index.js",
-    "postinstall": "node build",
     "test": "echo \"No tests specified\""
   },
   "keywords": [
