@@ -19,7 +19,9 @@
 			"jsconfig.json": true,
 			".env": true,
 			"LICENSE": true,
-			"bot-avatar.png": true
+			"bot-avatar.png": true,
+			".firebaserc": true,
+			"firebase.json": true
 		},
 		"beautify.ignore": ["**/*.js"],
 		"eslint.format.enable": true,
@@ -40,6 +42,7 @@
 			"Sunith",
 			"cowin",
 			"dbaeumer",
+			"firebaserc",
 			"firestore",
 			"jsbeautifyrc",
 			"pincode"

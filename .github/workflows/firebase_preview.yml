@@ -16,3 +16,4 @@ jobs:
           repoToken: '${{ secrets.GITHUB_TOKEN }}'
           firebaseServiceAccount: '${{ secrets.FIREBASE_SERVICE_ACCOUNT_PUNARJANI_COWIN }}'
           projectId: punarjani-cowin
+          channelId: test
