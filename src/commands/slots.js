@@ -74,22 +74,29 @@ export default async function slots(message, args, app, cache)
 		return message.reply(TEXTS.notRegistered), false;	
 
 	const date = getDate(args.join(" "));	
-	const response = await sendRequest(`${APIS.byDistrict}${user.get("district").id}&date=${date}`, cache);
+	const response = await sendRequest(`${APIS.byDistrict}${user.get("district").id}&date=${date}`, cache)
+		.catch(()=>({sessions: [], time: "never"}));
 	
-	/** @type {Promise<any>[]} The promises got when sending embeds. */
-	const promises = [];
+	const available = {time: response.time, centers: []};
 
-	// @ts-ignore
-	(response.sessions || []).forEach(({min_age_limit, available_capacity, name, address, date}) => 
-	{
-		if(user.get("age") >= Number(min_age_limit) && Number(available_capacity) > 0)
-			promises.push(new Promise((resolve)=>
-				resolve(message.channel.send(getSlotEmbed(name, available_capacity, address, date)))));
-	});
+	available.centers = (response.sessions || [])
+		// @ts-ignore
+		.map(({min_age_limit, name, available_capacity_dose1, available_capacity_dose2, pincode}) =>
+			(
+				{ 
+					age: (Number(min_age_limit) <= user.get("age")), 
+					slots: user.get("gotFirst") ? available_capacity_dose2 : available_capacity_dose1,
+					name, 
+					pincode 
+				}
+			))
+		// @ts-ignore
+		.filter(({age, slots})=> age && Number(slots) > 0);
 	
-	if(promises.length!==0)
-		Promise.all(promises);
-	else
+	for(const embed of getSlotEmbed(available))
+		await message.channel.send(embed).catch(console.error);			
+	
+	if(available.centers.length === 0)
 		message.reply(`No slots available in ${user.get("district").name} for ${date}`);	
 		
 	return true;

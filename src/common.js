@@ -95,18 +95,9 @@ export const getApp = () => admin.initializeApp(
  */
 export async function sendRequest(url, cache) 
 {
-	const result = await axios.get(url, 
-		{
-			headers: {
-				accept: "application/json",
-				"Accept-Language": "hi_IN",
-				//Host: "cdn-api.co-vin.in",
-				//"User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/90.0.4430.93 Safari/537.36"
-			}
-		}
-	).catch(() =>undefined);
+	const result = await axios.get(url).then(({data}) => data).catch(() =>undefined);
 
-	let data = result?.data;
+	let data = result.data;
 
 	if(!data)
 		data = cache.get(url);
@@ -114,6 +105,13 @@ export async function sendRequest(url, cache)
 		cache.set(url, data, 5*60*60*1000);	
 
 	if(!data) throw "Request failed and cache also didn't hit.";
+	if(!data.time) 
+	{
+		const currentTime = new Date();
+		const offset = currentTime.getTimezoneOffset() + 330;   // IST offset UTC +5:30 
+		data.time = new Date(currentTime.getTime() + offset*60000)
+			.toLocaleString("en-US", { hour: "numeric", minute: "numeric", hour12: true });
+	}
 
 	return data;
 }
@@ -144,38 +142,38 @@ export function getLocationEmbeds(title, description, avatar, options)
 		.setDescription(description);
 	
 	embeds[embeds.length-1].setTimestamp()
-		.setFooter("Reply within 1 minute", avatar); 	
+		.setFooter("Reply with the appropriate number", avatar); 	
 
 	return embeds;	
 }
 
-/**
- * This function generate an embed containing the vaccination center and available slots 
- * 
- * @author Sunith V S
- * @param {string} center The name of the vaccination center 
- * @param {number}	slots the number of available slots
- * @param {string} address The address of the center
- * @param {string} date Date on which slot is available.
- * @returns {Discord.MessageEmbed} The created embed 
- */
-export function getSlotEmbed(center, slots, address, date)
-{
-	const embedObject = new Discord.MessageEmbed()
-		.setDescription("Click the ☝️ to go to CoWin site.")
-		.setURL("https://www.cowin.gov.in/home")  //url for redirecting user  to cowin website
-		.setColor("#f9cf03")
-		.setTitle(center)
-		.setThumbnail(BOT_AVATAR)
-		.addFields(
-			{ name: "Vaccination center", value: center },
-			{ name: "Available Dose", value: slots  },
-			{ name: "Address", value: address }
-			
-		)
-		.setFooter(`Slots available on ${date}`);
 
-	return embedObject;
+/**
+ * @author Rohit T P
+ * @param {{centers: { slots: number; name: string; pincode: number; }[], time: any}} sessions The available sessions for the user.
+ * @returns {Discord.MessageEmbed[]}
+ */
+export function getSlotEmbed(sessions)
+{
+	const embeds = [];
+	const fields = sessions.centers.map(({slots, name, pincode}) => 
+		({ name: `_\n${name}`, value: `Slots ${slots}\nPIN ${pincode}`}));
+	
+	while(fields.length)
+		embeds.push(new Discord.MessageEmbed()
+			.setColor("#f9cf03")
+			.addFields(fields.splice(0, 25))
+			.setThumbnail(BOT_AVATAR));
+
+	
+	embeds[0].setTitle("Available Slots")
+		.setURL("https://www.cowin.gov.in/home") //url for redirecting user  to cowin website
+		.setDescription("Click ☝️ to go to CoWin site. Only slots for your age and dose type.");
+	
+	embeds[embeds.length-1]
+		.setFooter(`Last checked at ${sessions.time}`); 	
+
+	return embeds;	
 }
 
 /**

@@ -19,6 +19,7 @@
 
 import Discord from "discord.js";
 import NodeCache from "node-cache";
+import cron from "node-cron";
 import {APIS, getApp, getSlotEmbed, sendRequest, TEXTS } from "./common.js";
 // Importing command handlers.
 import register from "./commands/register.js";
@@ -78,7 +79,8 @@ async function sendHourlyUpdates(firestore, dsClient, cache)
 
 		const today = new Date();
 		const date = `${today.getDate()}-${today.getMonth()+1}-${today.getFullYear()}`;
-		const response = sendRequest(`${APIS.byDistrict}${dist.get("id")}&date=${date}`, cache).catch(()=>({sessions: []}));
+		const response = sendRequest(`${APIS.byDistrict}${dist.get("id")}&date=${date}`, cache)
+			.catch(()=>({sessions: [], time: "never"}));
 	
 		// TODO remove
 		console.log(date, 78);
@@ -88,29 +90,32 @@ async function sendHourlyUpdates(firestore, dsClient, cache)
 			.where("hourlyUpdate", "==", true)
 			.get();
 
-		// TODO remove
-		console.log("Users", users.size, 86);
-
-		// @ts-ignore
-		((await response).sessions || []).forEach(({min_age_limit, available_capacity, name, address, date}) => 
+		users.forEach(async (user) => 
 		{
+			const available = {time: (await response).time, centers: []};
+
+			available.centers = ((await response).sessions || [])
+			// @ts-ignore
+				.map(({min_age_limit, name, available_capacity_dose1, available_capacity_dose2, pincode}) =>
+					(
+						{ 
+							age: (Number(min_age_limit) <= user.get("age")), 
+							slots: user.get("gotFirst") ? available_capacity_dose2 : available_capacity_dose1,
+							name, 
+							pincode 
+						}
+					))
+			// @ts-ignore
+				.filter(({age, slots})=> age && Number(slots) > 0);
+
 			// TODO remove
-			console.log("Min age", min_age_limit);
+			console.log(user.get("userName"));
 
-			const embed = getSlotEmbed(name, available_capacity, address, date);
+			const dm = await dsClient.users.fetch(user.get("userID")).catch(console.error);
 
-			users.forEach(async (user) => 
-			{
-				// TODO remove
-				console.log(user.get("userName"));
-
-				const dm = await dsClient.users.fetch(user.get("userID")).catch(console.error);
-
-				if(dm && user.get("age") >= Number(min_age_limit) && Number(available_capacity) > 0)
-					promises.push(
-						new Promise((resolve)=> resolve(dm.send(embed)))
-					);
-			});
+			for(const embed of getSlotEmbed(available))
+				if(dm)
+					promises.push(dm.send(embed));	
 		});
 	});
 
@@ -162,9 +167,9 @@ client.on("message", async (message) =>
 
 client.on("ready", () => 
 {
-	console.log("Bot ready");									// One hour
-	setInterval(() => sendHourlyUpdates(app.firestore(), client, cache), 60*60*60*1000);
-	//sendHourlyUpdates(app.firestore(), client, cache); // TODO remove
+	console.log("Bot ready");
+	cron.schedule("0 5-12 * * *", () => sendHourlyUpdates(app.firestore(), client, cache));									// One hour
+	sendHourlyUpdates(app.firestore(), client, cache); // TODO remove
 });
  
 //Login to discord using TOKEN
