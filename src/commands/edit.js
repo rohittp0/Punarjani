@@ -28,7 +28,8 @@ const emojiTable =
 	{ emoji:"🇸", option:"🇸 Change State", handler: setState },
 	{ emoji:"🇩", option:"🇩 Change District", handler: setDistrict },
 	{ emoji:"🇦", option:"🇦 Change Age", handler: setAge },
-	{ emoji:"ℹ️", option:"ℹ️ Just show my details", handler: showInfo },
+	{ emoji:"🕒", option:"🕒 Toggle Hourly Update", handler: toggleUpdate },
+	{ emoji:"💉", option:"💉 Set First Vaccination Status", handler: changeShot },
 	{ emoji:"❌", option:"❌ Delete Account", handler: deleteUser },
 	{ emoji:"🤷", option:"🤷 Do Nothing", handler: undefined}
 ];
@@ -189,26 +190,37 @@ async function setAge(doc, channel)
  * @param {Discord.TextChannel | Discord.DMChannel | Discord.NewsChannel} channel
  * @returns {Promise<boolean>} True if everything went well
  */
-function showInfo(doc, channel) 
+async function toggleUpdate(doc, channel) 
 {
-	const hourlyUpdate = doc.get("hourlyUpdate") ? "enabled" : "disabled";
+	const update = await askPolar(TEXTS.hourlyUpdate, channel, doc.get("userID"));
 
-	return channel.send(
-		new Discord.MessageEmbed()
-			.setThumbnail(doc.get("avatar"))
-			.setColor("#0099ff")
-			.setTitle("Your Profile")
-			.setDescription(TEXTS.profileDesc)
-			.addFields(
-				{ name: "User Name", value: doc.get("userName") },
-				{ name: "Age", value: doc.get("age") },
-				{ name: "State", value: doc.get("state").name },
-				{ name: "District", value: doc.get("district").name },
-				{ name: "\0", value: `You have hourly update ${hourlyUpdate}`}
-			)
-			.setTimestamp())
-		.then(() => true)	
-		.catch(() => false);
+	let status = true;
+	if(doc.get("hourlyUpdate") !== update)
+		status = await doc.ref.update({hourlyUpdate: update}).then(() => true).catch(() => false);
+
+	if(status)	
+		channel.send(`Hourly update turned ${update ? "ON" : "OFF"}`);	
+
+	return status;	
+}
+
+/**
+ * @param {FirebaseFirestore.DocumentSnapshot<FirebaseFirestore.DocumentData>} doc
+ * @param {Discord.TextChannel | Discord.DMChannel | Discord.NewsChannel} channel
+ * @returns {Promise<boolean>} True if everything went well
+ */
+async function changeShot(doc, channel) 
+{
+	const update = await askPolar(TEXTS.gotShot, channel, doc.get("userID"));
+ 
+	let status = true;
+	if(doc.get("gotFirst") !== update)
+		status = await doc.ref.update({hourlyUpdate: update}).then(() => true).catch(() => false);
+ 
+	if(status)	
+		channel.send("Your vaccination status changed.");	
+ 
+	return status;	
 }
 
 /**

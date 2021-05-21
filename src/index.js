@@ -168,8 +168,7 @@ client.on("message", async (message) =>
 client.on("ready", () => 
 {
 	console.log("Bot ready");
-	cron.schedule("0 5-12 * * *", () => sendHourlyUpdates(app.firestore(), client, cache));									// One hour
-	sendHourlyUpdates(app.firestore(), client, cache); // TODO remove
+	cron.schedule("0 5-12 * * *", () => sendHourlyUpdates(app.firestore(), client, cache));
 });
  
 //Login to discord using TOKEN

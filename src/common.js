@@ -39,6 +39,7 @@ export const TEXTS =
 	goToDM: "We can still chat in DM 😉,But you have to swear you won't complain on me 🤫",
 	hourlyUpdate: "Do you want to get hourly update for CoWin slots ?",
 	existingUser: "Hmm you look familiar... Aah I know you have registered a while back, no need to do it again.",
+	gotShot: "Did you get your first vaccine shot?",
 	stateQuery: 
 	[ 
 		"Select The Sate", 
@@ -53,7 +54,7 @@ export const TEXTS =
 	{
 		title: "Edit Info",
 		description: "Hmm so you have decided to edit your personal details. You can do the following:",
-		footer: "React with appropriate emoji"
+		footer: "To see currently saved details use !profile"
 	},
 	ageError: "Did you really forget your age, or are you trolling me 🤔",
 	stateError: "Registration has been canceled due to invalid state selection 😭",
