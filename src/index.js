@@ -19,6 +19,7 @@
 
 import Discord from "discord.js";
 import NodeCache from "node-cache";
+import cron from "node-cron";
 import {APIS, getApp, getSlotEmbed, sendRequest, TEXTS } from "./common.js";
 // Importing command handlers.
 import register from "./commands/register.js";
@@ -38,6 +39,7 @@ const app = getApp();
 const active = app.database().ref("/active");
 // Define a prefix to use when sending commands to bot.
 const prefix = process.env.PREFIX || "!";
+
 // An array of commands and functions to handle them.
 const commands = 
 [
@@ -60,57 +62,49 @@ active.onDisconnect().remove();
  */
 async function sendHourlyUpdates(firestore, dsClient, cache)
 {
-	// TODO remove
-	console.log("Hourly updates");
+	console.log("Hourly updates ", new Date());
+
 	const districts = await firestore.collection("/locations/states/districts")
-		.where("users", ">", 0).get();
-	
-	// TODO remove
-	console.log("dist size ", districts.size, 63);	
+		.where("users", ">", 0).get();	
 
 	/** @type {Promise<any>[]} The promises got when sending embeds. */
 	const promises = [];	
 	
 	districts.forEach(async (dist) => 
 	{
-		// TODO remove
-		console.log(dist.get("name"), 71);
-
 		const today = new Date();
 		const date = `${today.getDate()}-${today.getMonth()+1}-${today.getFullYear()}`;
-		const response = sendRequest(`${APIS.byDistrict}${dist.get("id")}&date=${date}`, cache).catch(()=>({sessions: []}));
-	
-		// TODO remove
-		console.log(date, 78);
+		const response = sendRequest(`${APIS.byDistrict}${dist.get("id")}&date=${date}`, cache)
+			.catch(()=>({sessions: [], time: "never"}));
 
 		const users = await firestore.collection("users")
 			.where("district.id", "==", dist.get("id"))
 			.where("hourlyUpdate", "==", true)
 			.get();
 
-		// TODO remove
-		console.log("Users", users.size, 86);
-
-		// @ts-ignore
-		((await response).sessions || []).forEach(({min_age_limit, available_capacity, name, address, date}) => 
+		users.forEach(async (user) => 
 		{
-			// TODO remove
-			console.log("Min age", min_age_limit);
+			const available = {time: (await response).time, centers: []};
 
-			const embed = getSlotEmbed(name, available_capacity, address, date);
+			available.centers = ((await response).sessions || [])
+			// @ts-ignore
+				.map(({min_age_limit, name, available_capacity_dose1, available_capacity_dose2, pincode}) =>
+					(
+						{ 
+							age: (Number(min_age_limit) <= user.get("age")), 
+							slots: user.get("gotFirst") ? available_capacity_dose2 : available_capacity_dose1,
+							name, 
+							pincode 
+						}
+					))
+			// @ts-ignore
+				.filter(({age, slots})=> age && Number(slots) > 0);
 
-			users.forEach(async (user) => 
-			{
-				// TODO remove
-				console.log(user.get("userName"));
+			const dm = await dsClient.users.fetch(user.get("userID")).catch(console.error);
 
-				const dm = await dsClient.users.fetch(user.get("userID")).catch(console.error);
-
-				if(dm && user.get("age") >= Number(min_age_limit) && Number(available_capacity) > 0)
-					promises.push(
-						new Promise((resolve)=> resolve(dm.send(embed)))
-					);
-			});
+			for(const embed of getSlotEmbed(available))
+				if(dm)
+					promises.push(dm.send(embed));	
 		});
 	});
 
@@ -148,7 +142,6 @@ client.on("message", async (message) =>
 	const setRunning =  userRef.set(true).catch(console.error);	
 	cache.set(message.author.id+"running", true);
 
-	console.log(new Date().toTimeString());
 	// Execute the command.
 	const result = await commands.find(cmd => cmd.name === command)
 		?.handler(message, args, app, cache).catch(console.error);
@@ -162,9 +155,8 @@ client.on("message", async (message) =>
 
 client.on("ready", () => 
 {
-	console.log("Bot ready");									// One hour
-	setInterval(() => sendHourlyUpdates(app.firestore(), client, cache), 60*60*60*1000);
-	//sendHourlyUpdates(app.firestore(), client, cache); // TODO remove
+	console.log("Bot ready");
+	cron.schedule("0 5-12 * * *", () => sendHourlyUpdates(app.firestore(), client, cache));
 });
  
 //Login to discord using TOKEN

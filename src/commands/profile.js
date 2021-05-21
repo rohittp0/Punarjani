@@ -45,8 +45,9 @@ export default async function profile(message, _args, app)
 				{ name: "Age", value: doc.get("age") },
 				{ name: "State", value: doc.get("state").name },
 				{ name: "District", value: doc.get("district").name },
+				{ name: "Got First Dose", value: doc.get("gotFirst") ? "Yes" : "No" }
 			)
-			.setTimestamp())
+			.setFooter(`You have hourly updates ${doc.get("hourlyUpdate") ? "enabled" : "disabled"}`))
 		.then(() => true);	
 	
 }

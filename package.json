@@ -15,7 +15,6 @@
     "lint": "node ./node_modules/eslint/bin/eslint.js --color ./src",
     "fix": "node ./node_modules/eslint/bin/eslint.js --color --fix ./src",
     "watch": "node ./node_modules/nodemon/bin/nodemon -r dotenv/config src/index.js",
-    "postinstall": "node build",
     "test": "echo \"No tests specified\""
   },
   "keywords": [
@@ -37,6 +36,7 @@
     "axios": "^0.21.1",
     "discord.js": "^12.5.3",
     "firebase-admin": "^9.8.0",
-    "node-cache": "^5.1.2"
+    "node-cache": "^5.1.2",
+    "node-cron": "^3.0.0"
   }
 }
