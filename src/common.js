@@ -197,7 +197,7 @@ export async function askPolar(question, channel, uid)
 	const result = message.awaitReactions(filter, { max: 1 })
 		.then(collected => collected.first()?.emoji.name === "👍")
 		.catch(() => false)
-		.finally(() => message.delete().catch(console.log));
+		.finally(() => message.delete().catch(console.error));
 
 	// Pre set the reactions that the user can use.	
 	await Promise.all([

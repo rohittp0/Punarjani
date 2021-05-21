@@ -39,6 +39,7 @@ const app = getApp();
 const active = app.database().ref("/active");
 // Define a prefix to use when sending commands to bot.
 const prefix = process.env.PREFIX || "!";
+
 // An array of commands and functions to handle them.
 const commands = 
 [
@@ -61,29 +62,20 @@ active.onDisconnect().remove();
  */
 async function sendHourlyUpdates(firestore, dsClient, cache)
 {
-	// TODO remove
-	console.log("Hourly updates");
+	console.log("Hourly updates ", new Date());
+
 	const districts = await firestore.collection("/locations/states/districts")
-		.where("users", ">", 0).get();
-	
-	// TODO remove
-	console.log("dist size ", districts.size, 63);	
+		.where("users", ">", 0).get();	
 
 	/** @type {Promise<any>[]} The promises got when sending embeds. */
 	const promises = [];	
 	
 	districts.forEach(async (dist) => 
 	{
-		// TODO remove
-		console.log(dist.get("name"), 71);
-
 		const today = new Date();
 		const date = `${today.getDate()}-${today.getMonth()+1}-${today.getFullYear()}`;
 		const response = sendRequest(`${APIS.byDistrict}${dist.get("id")}&date=${date}`, cache)
 			.catch(()=>({sessions: [], time: "never"}));
-	
-		// TODO remove
-		console.log(date, 78);
 
 		const users = await firestore.collection("users")
 			.where("district.id", "==", dist.get("id"))
@@ -107,9 +99,6 @@ async function sendHourlyUpdates(firestore, dsClient, cache)
 					))
 			// @ts-ignore
 				.filter(({age, slots})=> age && Number(slots) > 0);
-
-			// TODO remove
-			console.log(user.get("userName"));
 
 			const dm = await dsClient.users.fetch(user.get("userID")).catch(console.error);
 
@@ -153,7 +142,6 @@ client.on("message", async (message) =>
 	const setRunning =  userRef.set(true).catch(console.error);	
 	cache.set(message.author.id+"running", true);
 
-	console.log(new Date().toTimeString());
 	// Execute the command.
 	const result = await commands.find(cmd => cmd.name === command)
 		?.handler(message, args, app, cache).catch(console.error);
