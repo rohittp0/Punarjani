@@ -113,7 +113,25 @@ h1, h2, h3, h4, h5, h6 {
   [data-aos-delay] {
     transition-delay: 0 !important;
   }
+#header.header-scrolled,#header.fixed-top{
+  position:absolute !important ;
+
 }
+
+.nav-mob{
+  border-radius: 14% 0% 14% 5%;
+    height: 40vh;
+    width: 55vw;
+    transform: translate(51%,-7%);
+    text-align: center;
+}
+.nav-li-mob{
+    margin: auto;
+    width: 50%;
+}
+
+}
+
 
 /*--------------------------------------------------------------
 # Header
@@ -123,6 +141,8 @@ h1, h2, h3, h4, h5, h6 {
   z-index: 997;
   padding: 20px 0;
 }
+
+
 
 #header.header-scrolled, #header.header-inner-pages {
   background: rgb(24, 6, 185);
@@ -1623,3 +1643,5 @@ section {
   color: #fff;
   text-decoration: none;
 }
+
+
