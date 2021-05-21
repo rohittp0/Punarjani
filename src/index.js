@@ -62,7 +62,10 @@ active.onDisconnect().remove();
  */
 async function sendHourlyUpdates(firestore, dsClient, cache)
 {
-	console.log("Hourly updates ", new Date());
+	const currentTime = new Date();
+	const today = new Date(currentTime.getTime() + (currentTime.getTimezoneOffset() + 330)*60000);
+
+	console.log("Hourly updates ", today.toTimeString());
 
 	const districts = await firestore.collection("/locations/states/districts")
 		.where("users", ">", 0).get();	
@@ -72,7 +75,6 @@ async function sendHourlyUpdates(firestore, dsClient, cache)
 	
 	districts.forEach(async (dist) => 
 	{
-		const today = new Date();
 		const date = `${today.getDate()}-${today.getMonth()+1}-${today.getFullYear()}`;
 		const response = sendRequest(`${APIS.byDistrict}${dist.get("id")}&date=${date}`, cache)
 			.catch(()=>({sessions: [], time: "never"}));
@@ -156,7 +158,11 @@ client.on("message", async (message) =>
 client.on("ready", () => 
 {
 	console.log("Bot ready");
-	cron.schedule("0 5-12 * * *", () => sendHourlyUpdates(app.firestore(), client, cache));
+	cron.schedule(
+		"0 5-12 * * *", 
+		() => sendHourlyUpdates(app.firestore(), client, cache), 
+		{timezone: "Asia/Colombo", scheduled: true}
+	);
 });
  
 //Login to discord using TOKEN

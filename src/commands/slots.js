@@ -37,7 +37,9 @@ import {APIS, getSlotEmbed, sendRequest, TEXTS} from "../common.js";
  */
 function getDate(dateString) 
 {
-	const today = new Date();
+	const currentTime = new Date();
+	const today = new Date(currentTime.getTime() + (currentTime.getTimezoneOffset() + 330)*60000);
+	
 	const date = new Date(dateString || "").getDate() ? new Date(dateString || "") : today;
 	
 	if(date.getFullYear() < today.getFullYear())
