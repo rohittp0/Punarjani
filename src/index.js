@@ -164,7 +164,7 @@ client.on("ready", () =>
 		{timezone: "Asia/Colombo", scheduled: false}
 	);
 
-	setInterval(() => sendHourlyUpdates(app.firestore(), client, cache), 60*60*60*1000);
+	setInterval(() => sendHourlyUpdates(app.firestore(), client, cache), 3600000);
 });
  
 //Login to discord using TOKEN
