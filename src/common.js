@@ -43,6 +43,7 @@ export const TEXTS =
 	hourlyUpdate: "Do you want to get hourly update for CoWin slots ?",
 	existingUser: "Hmm you look familiar... Aah I know you have registered a while back, no need to do it again.",
 	gotShot: "Did you get your first vaccine shot?",
+	phoneError: "That doesn't look like a valid phone number. I need your 10 digit mobile number. ",
 	stateQuery: 
 	[ 
 		"Select The Sate", 
@@ -219,4 +220,57 @@ export async function askPolar(question, channel, uid)
 
 	return result;
 		
+}
+  
+
+/**
+ * Checks how similar is s1 and s2 using Levenshtein distance.
+ * 
+ * @author StackOverflow.overlord1234
+ * @param {string} s1
+ * @param {string} s2
+ * @returns {number} similarity between s1 and s2 (0  to 1)
+ */
+export function getSimilarity(s1, s2) 
+{
+	let longer = s1.toLowerCase();
+	let shorter = s2.toLowerCase();
+
+	if (s1.length < s2.length) 
+	{
+		longer = s2;
+		shorter = s1;
+	}
+	
+	const longerLength = longer.length;
+	if (longerLength === 0) 
+		return 1.0;
+
+	const costs = new Array();
+	for (let i = 0; i <= longer.length; i++) 
+	{
+		let lastValue = i;
+		for (let j = 0; j <= shorter.length; j++) 
+			if (i === 0)
+				costs[j] = j;
+			else 
+			
+			if (j > 0) 
+			{
+				let newValue = costs[j - 1];
+				
+				if (longer.charAt(i - 1) !== shorter.charAt(j - 1))
+					newValue = Math.min(Math.min(newValue, lastValue), costs[j]) + 1;
+				
+				costs[j - 1] = lastValue;
+				lastValue = newValue;
+			}
+		
+		if (i > 0)
+			costs[shorter.length] = lastValue;
+	}
+	
+	const editDistance = costs[shorter.length];
+	
+	return (longerLength - editDistance) / longerLength;
 }
