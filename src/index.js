@@ -19,8 +19,7 @@
 
 import Discord from "discord.js";
 import NodeCache from "node-cache";
-import cron from "node-cron";
-import {APIS, getApp, getSlotEmbed, sendRequest, TEXTS } from "./common.js";
+import {APIS, getApp, getIndianTime, getSlotEmbed, sendRequest, TEXTS, UPDATE_FREQUENCY } from "./common.js";
 // Importing command handlers.
 import register from "./commands/register.js";
 import help from "./commands/help.js";
@@ -62,8 +61,7 @@ active.onDisconnect().remove();
  */
 async function sendHourlyUpdates(firestore, dsClient, cache)
 {
-	const currentTime = new Date();
-	const today = new Date(currentTime.getTime() + (currentTime.getTimezoneOffset() + 330)*60000);
+	const today = getIndianTime(undefined);
 
 	console.log("Hourly updates ", today.toTimeString());
 
@@ -76,8 +74,12 @@ async function sendHourlyUpdates(firestore, dsClient, cache)
 	districts.forEach(async (dist) => 
 	{
 		const date = `${today.getDate()}-${today.getMonth()+1}-${today.getFullYear()}`;
-		const response = sendRequest(`${APIS.byDistrict}${dist.get("id")}&date=${date}`, cache)
-			.catch(()=>({sessions: [], time: "never"}));
+		const response = await sendRequest(`${APIS.byDistrict}${dist.get("id")}&date=${date}`, cache)
+			.catch(()=>({sessions: [], time: new Date(0)}));
+
+		// Check if the difference between last checked and current time is less than half the update frequency
+		if(response.time.getTime() - today.getTime() < Math.ceil(UPDATE_FREQUENCY/2))
+			return; // If so exit without sending.
 
 		const users = await firestore.collection("users")
 			.where("district.id", "==", dist.get("id"))
@@ -86,9 +88,9 @@ async function sendHourlyUpdates(firestore, dsClient, cache)
 
 		users.forEach(async (user) => 
 		{
-			const available = {time: (await response).time, centers: []};
+			const available = {time: response.time, centers: []};
 
-			available.centers = ((await response).sessions || [])
+			available.centers = (response.sessions || [])
 			// @ts-ignore
 				.map(({min_age_limit, name, available_capacity_dose1, available_capacity_dose2, pincode}) =>
 					(
@@ -101,6 +103,9 @@ async function sendHourlyUpdates(firestore, dsClient, cache)
 					))
 			// @ts-ignore
 				.filter(({age, slots})=> age && Number(slots) > 0);
+
+			// If no centers have slots left return early.	
+			if(available.centers.length === 0) return;	
 
 			const dm = await dsClient.users.fetch(user.get("userID")).catch(console.error);
 
@@ -158,13 +163,18 @@ client.on("message", async (message) =>
 client.on("ready", () => 
 {
 	console.log("Bot ready");
-	cron.schedule(
-		"0 5-12 * * *", 
-		() => sendHourlyUpdates(app.firestore(), client, cache), 
-		{timezone: "Asia/Colombo", scheduled: false}
-	);
+	setInterval(() => sendHourlyUpdates(app.firestore(), client, cache), UPDATE_FREQUENCY);
+});
 
-	setInterval(() => sendHourlyUpdates(app.firestore(), client, cache), 3600000);
+client.on("guildCreate", async (guild) => 
+{
+	// Check if we can send message in system channel.
+	if(!guild.systemChannel?.send) return;
+	// Create a message object to send message.
+	const message = {channel: guild.systemChannel};
+	// Send the info message.
+	await info(message).catch(console.error);
+
 });
  
 //Login to discord using TOKEN

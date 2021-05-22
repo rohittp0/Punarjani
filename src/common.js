@@ -23,6 +23,9 @@ import axios from "axios";
 // eslint-disable-next-line no-unused-vars
 import NodeCache from "node-cache";
 
+// Time in milliseconds after which to send slots update.
+export const UPDATE_FREQUENCY = 3600000; // One hour
+
 export const TEXTS = 
 {
 	helpInfo: "Don't worry you can always ask for !help 😉",
@@ -70,13 +73,6 @@ export const APIS =
 
 export const BOT_AVATAR = "https://raw.githubusercontent.com/rohittp0/Punarjani/main/bot-avatar.png";
 
-// Login to firebase server then exports the logging instance so we can use it in other files. 
-export const getApp = () => admin.initializeApp(
-	{
-		credential: admin.credential.cert(JSON.parse(process.env.FIREBASE_KEY || "")),
-		databaseURL: "https://punarjani-cowin-default-rtdb.firebaseio.com"
-	});
-
 /**
  * Returns an instance of firebase admin after initalizing it using
  * credentials stored in serviceAccountKey.json
@@ -84,6 +80,26 @@ export const getApp = () => admin.initializeApp(
  * @author Rohit T P
  * @returns {admin.app.App} Initialized Firebase App
  */
+export const getApp = () => admin.initializeApp(
+	{
+		credential: admin.credential.cert(JSON.parse(process.env.FIREBASE_KEY || "")),
+		databaseURL: "https://punarjani-cowin-default-rtdb.firebaseio.com"
+	});
+
+/**
+ * Gets indian time from the date string passed or returns current time in IST.
+ * 
+ * @author Rohit T P
+ * @param {string | undefined} dateString The date string to use
+ * @returns {Date} IST Date
+ */
+export function getIndianTime(dateString) 
+{
+	const date = new Date(dateString || "").getDate() ? new Date(dateString || "") : new Date();
+	const offset = date.getTimezoneOffset() + 330;   // IST offset UTC +5:30
+ 
+	return new Date(date.getTime() + offset*60000);
+}	
 
 /**
  * Sends get request to cowin rest api specified by the url passed.
@@ -107,12 +123,7 @@ export async function sendRequest(url, cache)
 
 	if(!data) throw "Request failed and cache also didn't hit.";
 	if(!data.time) 
-	{
-		const currentTime = new Date();
-		const offset = currentTime.getTimezoneOffset() + 330;   // IST offset UTC +5:30 
-		data.time = new Date(currentTime.getTime() + offset*60000)
-			.toLocaleString("en-US", { hour: "numeric", minute: "numeric", hour12: true });
-	}
+		data.time = getIndianTime(undefined);
 
 	return data;
 }
@@ -172,7 +183,7 @@ export function getSlotEmbed(sessions)
 		.setDescription("Click ☝️ to go to CoWin site. Only slots for your age and dose type.");
 	
 	embeds[embeds.length-1]
-		.setFooter(`Last checked at ${sessions.time}`); 	
+		.setFooter(`Last checked at ${sessions.time.toLocaleString("en-US", { hour: "numeric", minute: "numeric", hour12: true })}`); 	
 
 	return embeds;	
 }
