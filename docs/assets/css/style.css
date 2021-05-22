@@ -1668,8 +1668,14 @@ section {
   text-decoration: none;
 }
 
-#footer .footer-list{
-  float: left !important;
 
+.link{
+  color: #ffffff;
+  text-decoration: none;
+}
+
+.link:hover {
+  color: #887ee2;
+  
 }
 
