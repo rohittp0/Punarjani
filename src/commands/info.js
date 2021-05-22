@@ -24,13 +24,13 @@ import { BOT_AVATAR } from "../common.js";
   * This function handle the !info command and send corresponding embed
   * 
   * @author SANU MUHAMMED C
-  * @param {Discord.Message} message The message that initiated this command.
+  * @param {{channel: Discord.TextChannel | Discord.DMChannel | Discord.NewsChannel}} message The message that initiated this command.
   * @returns {Promise<Boolean>} Indicates operation success or failure.
   */
-export default async function info (message) 
+export default async function info ({channel}) 
 {
 	
-	return message.channel.send(new Discord.MessageEmbed()
+	return channel.send(new Discord.MessageEmbed()
 		.setColor("#f9cf03")
 		.setTitle("Hello awesome human 👋\nI am Punarjani 😇")
 		.setDescription(`I am here to help you get CoWin slot ASAP 🤩 !!!\n

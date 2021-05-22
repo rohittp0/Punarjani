@@ -21,7 +21,7 @@
 import Discord from "discord.js";
 // eslint-disable-next-line no-unused-vars
 import NodeCache from "node-cache";
-import {APIS, getSlotEmbed, sendRequest, TEXTS} from "../common.js";
+import {APIS, getIndianTime, getSlotEmbed, sendRequest, TEXTS} from "../common.js";
 
 /**
  * Converts date from human readable format to the format required by cowin API.
@@ -37,10 +37,8 @@ import {APIS, getSlotEmbed, sendRequest, TEXTS} from "../common.js";
  */
 function getDate(dateString) 
 {
-	const currentTime = new Date();
-	const today = new Date(currentTime.getTime() + (currentTime.getTimezoneOffset() + 330)*60000);
-	
-	const date = new Date(dateString || "").getDate() ? new Date(dateString || "") : today;
+	const today = getIndianTime(undefined);	
+	const date = getIndianTime(dateString);
 	
 	if(date.getFullYear() < today.getFullYear())
 		date.setFullYear(today.getFullYear());
