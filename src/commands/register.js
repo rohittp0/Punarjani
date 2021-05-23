@@ -22,7 +22,8 @@ import Discord from "discord.js";
 // eslint-disable-next-line no-unused-vars
 import NodeCache from "node-cache";
 import {FieldValue} from "@google-cloud/firestore";
-import {askPolar, getLocationEmbeds, TEXTS} from "../common.js";
+import {askPolar, getLocationEmbeds} from "../common.js";
+import { TEXTS } from "../consts.js";
 
 /**
  * Helper function to sanitize required parameters.

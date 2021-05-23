@@ -18,7 +18,7 @@
  */
 
 import Discord from "discord.js";
-import {TEXTS} from "../common.js";
+import { TEXTS } from "../consts";
 
 /**
  * @author Rohit T P

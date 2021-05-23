@@ -21,7 +21,8 @@
 import NodeCache from "node-cache";
 import Discord from "discord.js";
 import {FieldValue} from "@google-cloud/firestore";
-import {getLocationEmbeds, TEXTS, askPolar} from "../common.js";
+import {getLocationEmbeds, askPolar} from "../common.js";
+import { TEXTS } from "../consts.js";
 
 const emojiTable = 
 [

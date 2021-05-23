@@ -20,59 +20,7 @@
 import admin from "firebase-admin";
 import Discord from "discord.js";
 import axios from "axios";
-// eslint-disable-next-line no-unused-vars
-import NodeCache from "node-cache";
-
-// Time in milliseconds after which to send slots update.
-export const UPDATE_FREQUENCY = 3600000; // One hour
-
-export const TEXTS = 
-{
-	helpInfo: "Don't worry you can always ask for !help 😉",
-	tryAgain: "Don't worry you can try again later 🤘",
-	generalError: "Oops something went wrong 😵‍💫",
-	infoCollected: "That's all I need to know 👍 I will write it in my 📖 and let you know.",
-	regSuccess: "Your registration has been completed 🎊 Welcome to Punarjani 🙋",
-	regFailed: "Sorry your registration failed 😞 Looks like I forgot how to write 😵",
-	profileDesc: "I found this written in my 📖 about you.",
-	ageQuestion: "Hmm you look soo young, tell me your real age?",
-	confirmDele: "Are you sure you want to delete your account? 😨",
-	noDelete: "Oof that was close 😌, I was really scared.",
-	cantTalk: "Some one told my developers that I am too noisy 😡 now I am banned from talking here 😭 ",
-	goToDM: "We can still chat in DM 😉,But you have to swear you won't complain on me 🤫",
-	hourlyUpdate: "Do you want to get hourly update for CoWin slots ?",
-	existingUser: "Hmm you look familiar... Aah I know you have registered a while back, no need to do it again.",
-	gotShot: "Did you get your first vaccine shot?",
-	phoneError: "That doesn't look like a valid phone number. I need your 10 digit mobile number. ",
-	stateQuery: 
-	[ 
-		"Select The Sate", 
-		"Select the state from where you want to get vaccinated. Don't worry you can change it latter." 
-	],
-	districtQuery:
-	[
-		"Select The District",
-		"Select your preferred district. Only showing districts from the state you selected."
-	],
-	embedFields: 
-	{
-		title: "Edit Info",
-		description: "Hmm so you have decided to edit your personal details. You can do the following:",
-		footer: "To see currently saved details use !profile"
-	},
-	ageError: "Did you really forget your age, or are you trolling me 🤔",
-	stateError: "Registration has been canceled due to invalid state selection 😭",
-	districtError: "Registration has been canceled due to invalid district selection 😭",
-	notRegistered: "Looks like you haven't registered yet. Use !register to get yourself registered.",
-	runningError: "You asked me to do something else complete it first."
-};
-
-export const APIS = 
-{
-	byDistrict: "https://cowin.rabeeh.me/api/v2/appointment/sessions/public/findByDistrict?district_id="
-};
-
-export const BOT_AVATAR = "https://raw.githubusercontent.com/rohittp0/Punarjani/main/bot-avatar.png";
+import { BOT_AVATAR } from "./consts.js";
 
 /**
  * Returns an instance of firebase admin after initalizing it using
@@ -112,7 +60,7 @@ export function getIndianTime(dateString)
  * 
  * @param {string | number} id The district ID
  * @param {string} date The date for which sessions are needed in the dd-mm-yyyy format 
- * @param {NodeCache} cache A per opened cache.
+ * @param {{set: any, get:any}} cache A per opened cache.
  * 
  * 
  * @returns {Promise<{sessions: any[], time: Date}>} The available sessions and time of fetching.  

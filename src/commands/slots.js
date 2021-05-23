@@ -21,7 +21,8 @@
 import Discord from "discord.js";
 // eslint-disable-next-line no-unused-vars
 import NodeCache from "node-cache";
-import {getIndianTime, getSlotEmbed, getSessions, TEXTS} from "../common.js";
+import {getIndianTime, getSlotEmbed, getSessions} from "../common.js";
+import { TEXTS } from "../consts.js";
 
 /**
  * Converts date from human readable format to the format required by cowin API.

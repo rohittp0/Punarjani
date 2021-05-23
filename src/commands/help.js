@@ -18,7 +18,7 @@
  */
 
 import Discord from "discord.js";
-import { BOT_AVATAR } from "../common.js";
+import { BOT_AVATAR } from "../consts";
 
 /**
  * The list of commands, their format and an example.

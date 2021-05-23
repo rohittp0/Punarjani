@@ -18,7 +18,7 @@
  */
 
 import Discord from "discord.js";
-import { BOT_AVATAR } from "../common.js";
+import { BOT_AVATAR } from "../consts";
 
 /**
   * This function handle the !info command and send corresponding embed

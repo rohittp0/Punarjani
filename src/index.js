@@ -19,7 +19,7 @@
 
 import Discord from "discord.js";
 import NodeCache from "node-cache";
-import {askPolar, getApp, getIndianTime, getSimilarity, getSlotEmbed, getSessions, TEXTS, UPDATE_FREQUENCY } from "./common.js";
+import {askPolar, getApp, getIndianTime, getSimilarity, getSlotEmbed, getSessions } from "./common.js";
 // Importing command handlers.
 import register from "./commands/register.js";
 import help from "./commands/help.js";
@@ -27,6 +27,7 @@ import slots from "./commands/slots.js";
 import edit from "./commands/edit.js";
 import info from "./commands/info.js";
 import profile from "./commands/profile.js";
+import { TEXTS, UPDATE_FREQUENCY } from "./consts.js";
 
 // Opens a cache.
 const cache = new NodeCache();
