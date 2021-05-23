@@ -45,6 +45,7 @@ export const TEXTS =
 	existingUser: "Hmm you look familiar... Aah I know you have registered a while back, no need to do it again.",
 	gotShot: "Did you get your first vaccine shot?",
 	phoneError: "That doesn't look like a valid phone number. I need your 10 digit mobile number. ",
+	slotsDescription: "Click ☝️ to go to CoWin site. Only showing slots for your age and dose type available on",
 	stateQuery: 
 	[ 
 		"Select The Sate", 

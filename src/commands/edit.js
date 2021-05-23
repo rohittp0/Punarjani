@@ -45,13 +45,10 @@ const emojiTable =
 async function setState(doc, channel, firestore) 
 {
 	// Get the list of state name and id from database.
-	const states = (await firestore.doc("/locations/states").get()).get("list");
+	const states = firestore.doc("/locations/states").get();
 	
-	/** @type {Discord.Message[]} */
-	const sent = [];
-	// Create embeds with the state list and user's avatar and send it.	
-	const embeds = getLocationEmbeds(TEXTS.stateQuery[0], TEXTS.stateQuery[1], doc.get("avatar"), states);	
-	embeds.forEach(async (embed) =>sent.push(await channel.send(embed)));
+	// Send an image with the list of states.
+	const sent = await channel.send({files: ["images/states.png"]});
 
 	// Define a function to filter the replies from the user.
 	const numberFilter = (/** @type {Discord.Message} */ response) => 
@@ -63,10 +60,10 @@ async function setState(doc, channel, firestore)
 		.then((collected) => Number(collected.first()?.content));
 
 	// Delete unwanted messages	
-	sent.forEach((msg) => msg.delete().catch(console.error));	
+	sent.delete().catch(console.error);	
 
 	// Search the states array for the state specified by the state code user sent. 	
-	const state = states.find((/** @type {{ id: number; }} */ state) => state.id === choice);	
+	const state = (await states).get("list").find((/** @type {{ id: number; }} */ state) => state.id === choice);	
 
 	if(!state)
 		return await channel.send(`<@${doc.get("userID")}> You selected an invalid state`), false; 
@@ -171,7 +168,7 @@ async function setAge(doc, channel)
 	(await msg).delete().catch(console.error);
 	
 	// This check would accept 18.123 but I think it is feature not a bug.
-	if(age < 18) // Check if the arguments passed contains a valid age.
+	if(age < 18 || !(age < 120) ) // Check if the arguments passed contains a valid age.
 		return await channel.send(`<@${doc.get("userID")}> ${TEXTS.ageError}\n${TEXTS.helpInfo}`), false;
 	
 	const status = await doc.ref.update({age});	
@@ -214,7 +211,7 @@ async function changeShot(doc, channel)
  
 	let status = true;
 	if(doc.get("gotFirst") !== update)
-		status = await doc.ref.update({hourlyUpdate: update}).then(() => true).catch(() => false);
+		status = await doc.ref.update({gotFirst: update}).then(() => true).catch(() => false);
  
 	if(status)	
 		channel.send("Your vaccination status changed.");	
@@ -241,7 +238,7 @@ async function deleteUser(doc, channel, firestore, cache)
 	if(doc.get("hourlyUpdate") === true)
 		batch.update(doc.get("distRef"), {users: FieldValue.increment(-1)});
 	
-	const status = await batch.commit().catch(console.error);
+	const status = await batch.commit().then(() => true).catch(() => false);
 
 	if(!status)
 		return await channel.send(`<@${doc.get("userID")}> ${TEXTS.generalError} ${TEXTS.tryAgain}`), false; 

@@ -105,7 +105,7 @@ async function sendHourlyUpdates(firestore, dsClient, cache)
 
 			const dm = await dsClient.users.fetch(user.get("userID")).catch(console.error);
 
-			for(const embed of getSlotEmbed({time: response.time, centers}))
+			for(const embed of getSlotEmbed({time: response.time, centers}, date))
 				if(dm)
 					promises.push(dm.send(embed));	
 		});
@@ -193,7 +193,7 @@ client.on("message", async (message) =>
 client.on("ready", () => 
 {
 	console.log("Bot ready");
-	setInterval(() => sendHourlyUpdates(app.firestore(), client, cache), UPDATE_FREQUENCY);
+	setInterval(sendHourlyUpdates, UPDATE_FREQUENCY, app.firestore(), client, cache);
 });
 
 client.on("guildCreate", async (guild) => 
