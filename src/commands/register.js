@@ -59,13 +59,10 @@ async function checkArgs(args, uid, firestore, cache)
 async function getState(user, channel, firestore) 
 {
 	// Get the list of state name and id from database.
-	const states = (await firestore.doc("/locations/states").get()).get("list");
+	const states = firestore.doc("/locations/states").get();
 	
-	/** @type {Message[]} */
-	const sent = [];
-	// Create embeds with the state list and user's avatar and send it.	
-	const embeds = getLocationEmbeds(TEXTS.stateQuery[0], TEXTS.stateQuery[1], user.displayAvatarURL(), states);	
-	embeds.forEach(async (embed) =>sent.push(await channel.send(embed)));
+	// Send an image with the list of states.
+	const sent = await channel.send({files: ["images/states.png"]});
 
 	// Define a function to filter the replies from the user.
 	const numberFilter = (/** @type {Message} */ response) => 
@@ -77,10 +74,10 @@ async function getState(user, channel, firestore)
 		.then((collected) => Number(collected.first()?.content));
 	
 	// Delete unwanted messages	
-	sent.forEach((msg) => msg.delete().catch(console.error));	
+	sent.delete().catch(console.error);	
 
 	// Search the states array for the state specified by the state code user sent. 	
-	const state = states.find((/** @type {{ id: number; }} */ state) => state.id === choice);	
+	const state = (await states).get("list").find((/** @type {{ id: number; }} */ state) => state.id === choice);	
 
 	// Send an appropriate reply to the user.
 	channel.send(`<@${user.id}> You selected ${state ? state.name : "an invalid state"}`);
