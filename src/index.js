@@ -193,7 +193,7 @@ client.on("message", async (message) =>
 client.on("ready", () => 
 {
 	console.log("Bot ready");
-	setInterval(() => sendHourlyUpdates(app.firestore(), client, cache), UPDATE_FREQUENCY);
+	setInterval(sendHourlyUpdates, UPDATE_FREQUENCY, app.firestore(), client, cache);
 });
 
 client.on("guildCreate", async (guild) => 

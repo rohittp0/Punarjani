@@ -21,7 +21,7 @@
  * @author Rohit T P
  * The time intervale in milliseconds after which to send updates to users
  */
-export const UPDATE_FREQUENCY = 3600000; // One hour
+export const UPDATE_FREQUENCY = 36000;//00; // One hour
 
 /**
  * @author Rohit T P

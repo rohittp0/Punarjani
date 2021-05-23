@@ -70,7 +70,9 @@ export async function getSessions(id, date, cache)
 	const url = `https://cowin.rabeeh.me/api/v2/appointment/sessions/public/findByDistrict?district_id=${id}&date=${date}`;
 	const result = await axios.get(url).then(({data}) => data).catch(() =>undefined);
 
-	let data = result.data;
+	console.log(url, result);
+
+	let data = result?.data;
 
 	if(!data || !data.sessions)
 		data = cache.get(url);
