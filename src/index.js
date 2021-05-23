@@ -69,6 +69,9 @@ async function sendHourlyUpdates(firestore, dsClient, cache)
 	const districts = await firestore.collection("/locations/states/districts")
 		.where("users", ">", 0).get();	
 
+	if(districts.empty)
+		return console.log("No districts where user needs hourly update.");	
+
 	/** @type {Promise<any>[]} The promises got when sending embeds. */
 	const promises = [];	
 	
@@ -78,13 +81,16 @@ async function sendHourlyUpdates(firestore, dsClient, cache)
 		const response = await getSessions(dist.get("id"), date, cache);
 
 		// Check if the difference between last checked and current time is less than half the update frequency
-		if(response.time.getTime() - today.getTime() < Math.ceil(UPDATE_FREQUENCY/2))
-			return; // If so exit without sending.
+		if(Math.abs(response.time.getTime() - today.getTime()) < Math.ceil(UPDATE_FREQUENCY/2))
+			return console.log("Stale Data not sending update");
 
 		const users = await firestore.collection("users")
 			.where("district.id", "==", dist.get("id"))
 			.where("hourlyUpdate", "==", true)
 			.get();
+
+		if(users.empty)
+			return console.error("No users for this district ", dist.get("Name"));	
 
 		users.forEach(async (user) => 
 		{
@@ -101,7 +107,8 @@ async function sendHourlyUpdates(firestore, dsClient, cache)
 				.filter(({age, slots})=> age && Number(slots) > 0);
 
 			// If no centers have slots left return early.	
-			if(centers.length === 0) return;	
+			if(centers.length === 0) 
+				return console.log("No centers with slots available for", user.get("userID"));	
 
 			const dm = await dsClient.users.fetch(user.get("userID")).catch(console.error);
 
