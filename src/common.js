@@ -20,7 +20,7 @@
 import admin from "firebase-admin";
 import Discord from "discord.js";
 import axios from "axios";
-import { BOT_AVATAR } from "./consts.js";
+import { BOT_AVATAR, TEXTS } from "./consts.js";
 
 /**
  * Returns an instance of firebase admin after initalizing it using
@@ -70,8 +70,6 @@ export async function getSessions(id, date, cache)
 	const url = `https://cowin.rabeeh.me/api/v2/appointment/sessions/public/findByDistrict?district_id=${id}&date=${date}`;
 	const result = await axios.get(url).then(({data}) => data).catch(() =>undefined);
 
-	console.log(url, result);
-
 	let data = result?.data;
 
 	if(!data || !data.sessions)
@@ -120,7 +118,7 @@ export function getLocationEmbeds(title, description, avatar, options)
 
 /**
  * @author Rohit T P
- * @param {{centers: { slots: number; name: string; pincode: number; }[], time: any}} sessions The available sessions for the user.
+ * @param {{centers: { slots: number; name: string; pincode: number; }[], time: Date}} sessions The available sessions for the user.
  * @returns {Discord.MessageEmbed[]}
  */
 export function getSlotEmbed(sessions)
@@ -138,7 +136,7 @@ export function getSlotEmbed(sessions)
 	
 	embeds[0].setTitle("Available Slots")
 		.setURL("https://www.cowin.gov.in/home") //url for redirecting user  to cowin website
-		.setDescription("Click ☝️ to go to CoWin site. Only slots for your age and dose type.");
+		.setDescription(`${TEXTS.slotsDescription}${sessions.time.toDateString()}`);
 	
 	embeds[embeds.length-1]
 		.setFooter(`Last checked at ${sessions.time.toLocaleString("en-US", { hour: "numeric", minute: "numeric", hour12: true })}`); 	

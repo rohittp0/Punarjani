@@ -21,7 +21,7 @@
  * @author Rohit T P
  * The time intervale in milliseconds after which to send updates to users
  */
-export const UPDATE_FREQUENCY = 36000;//00; // One hour
+export const UPDATE_FREQUENCY = 3600000; // One hour
 
 /**
  * @author Rohit T P
@@ -45,6 +45,7 @@ export const TEXTS =
 	existingUser: "Hmm you look familiar... Aah I know you have registered a while back, no need to do it again.",
 	gotShot: "Did you get your first vaccine shot?",
 	phoneError: "That doesn't look like a valid phone number. I need your 10 digit mobile number. ",
+	slotsDescription: "Click ☝️ to go to CoWin site. Only showing slots for your age and dose type available on",
 	stateQuery: 
 	[ 
 		"Select The Sate", 

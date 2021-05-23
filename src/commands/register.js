@@ -36,12 +36,12 @@ import { TEXTS } from "../consts.js";
 async function checkArgs(args, uid, firestore, cache) 
 {
 	// This check would accept 18.123 but I think it is feature not a bug.
-	if(!(Number(args[0]) >= 18)) // Check if the arguments passed contains a valid age.
+	if(Number(args[0]) < 18 || !(Number(args[0]) < 120) ) // Check if the arguments passed contains a valid age.
 		return `${TEXTS.ageError}\n${TEXTS.helpInfo}`;	
 	
 	// Check if user has already registered.
 	const docs = firestore.collection("users").doc(uid).get();
-	if(cache.get(uid+"exists") || !(await docs)?.exists)
+	if(cache.get(uid+"exists") === true  || (await docs)?.exists)
 		return cache.set(uid+"exists", true), TEXTS.existingUser; // If exists return the error message.	
 	
 	return false;
@@ -166,9 +166,6 @@ export default async function register(message, args, app, cache)
 	if(!district) // Check if the user selected a valid state.
 		return message.reply(`${TEXTS.districtError}\n${TEXTS.tryAgain}`), false;
 
-	// Send a message to the user that data collection has been completed.	
-	message.reply(`<@${message.author.id}> ${TEXTS.infoCollected}`);
-
 	// Write the collected user data to cloud firestore.
 	const batch = firestore.batch();
 
@@ -183,6 +180,9 @@ export default async function register(message, args, app, cache)
 		hourlyUpdate: await askPolar(TEXTS.hourlyUpdate, message.channel, message.author.id),
 		gotFirst: await askPolar(TEXTS.gotShot, message.channel, message.author.id)
 	});
+
+	// Send a message to the user that data collection has been completed.	
+	message.reply(`<@${message.author.id}> ${TEXTS.infoCollected}`);
 
 	batch.update(district.ref.ref, {users: FieldValue.increment(1)});
 
