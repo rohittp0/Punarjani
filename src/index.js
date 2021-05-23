@@ -58,67 +58,72 @@ active.onDisconnect().remove();
 /**
  * @param {FirebaseFirestore.Firestore} firestore
  * @param {Discord.Client} dsClient
- * @param {NodeCache} cache
+ * @param {NodeCache} hrCache
  */
-async function sendHourlyUpdates(firestore, dsClient, cache)
+async function sendHourlyUpdates(firestore, dsClient, hrCache)
 {
+	// Get current IST time.
 	const today = getIndianTime(undefined);
+	const todayString = `${today.getDate()}-${today.getMonth()+1}-${today.getFullYear()}`;
 
-	console.log("Hourly updates ", today.toTimeString());
+	console.log("Hourly update at", today.toTimeString());
 
-	const districts = await firestore.collection("/locations/states/districts")
-		.where("users", ">", 0).get();	
+	// Get the list of districts from firestore in which more than 0 users have opted for hourly update.
+	const districts = await firestore.collection("/locations/states/districts").where("users", ">", 0).get();
 
-	if(districts.empty)
-		return console.log("No districts where user needs hourly update.");	
-
-	/** @type {Promise<any>[]} The promises got when sending embeds. */
-	const promises = [];	
-	
-	districts.forEach(async (dist) => 
+	districts.forEach(async (district) => 
 	{
-		const date = `${today.getDate()}-${today.getMonth()+1}-${today.getFullYear()}`;
-		const response = await getSessions(dist.get("id"), date, cache);
+		const distId = district.get("id");
 
-		// Check if the difference between last checked and current time is less than half the update frequency
-		if(Math.abs(response.time.getTime() - today.getTime()) < Math.ceil(UPDATE_FREQUENCY/2))
-			return console.log("Stale Data not sending update");
+		// Use cowin API to get available sessions for this district.
+		const sessionsResponse = await getSessions(distId, todayString, hrCache);
+		const sessions = sessionsResponse.sessions;
+		const responseTime = sessionsResponse.time;
 
-		const users = await firestore.collection("users")
-			.where("district.id", "==", dist.get("id"))
+		// Get the user of this districts who have hourly updates enabled.
+		const usersOfDist = await firestore.collection("/users")
 			.where("hourlyUpdate", "==", true)
+			.where("district.id", "==", distId)
 			.get();
 
-		if(users.empty)
-			return console.error("No users for this district ", dist.get("Name"));	
+		if(sessions.length === 0)
+			return console.log("No slots in the district", district.get("name"), distId);	
 
-		users.forEach(async (user) => 
+		usersOfDist.forEach(async (user) => 
 		{
-			const centers = response.sessions
+			const userAge = user.get("age");
+			const gotFirstDose = user.get("gotFirst");
+
+			const availableCenters = sessions // Filter the sessions to get sessions that are applicable to the user.
 				.map(({min_age_limit, name, available_capacity_dose1, available_capacity_dose2, pincode}) =>
 					(
 						{ 
-							age: (Number(min_age_limit) <= user.get("age")), 
-							slots: user.get("gotFirst") ? available_capacity_dose2 : available_capacity_dose1,
+							age: (Number(min_age_limit) <= userAge), 
+							slots: gotFirstDose ? available_capacity_dose2 : available_capacity_dose1,
 							name, 
 							pincode 
 						}
 					))
 				.filter(({age, slots})=> age && Number(slots) > 0);
 
-			// If no centers have slots left return early.	
-			if(centers.length === 0) 
-				return console.log("No centers with slots available for", user.get("userID"));	
+			console.log(sessions.length, availableCenters.length, user.get("userName"));
+			if(availableCenters.length === 0)
+				return console.log("No thing to send to", user.get("userName"));
 
-			const dm = await dsClient.users.fetch(user.get("userID")).catch(console.error);
+			// Fetch user's DM channel using his Discord user ID.
+			const dmChannel = await dsClient.users.fetch(user.get("userID")).catch(console.error);	
 
-			for(const embed of getSlotEmbed({time: response.time, centers}, date))
-				if(dm)
-					promises.push(dm.send(embed));	
-		});
+			if(!dmChannel) return console.log("User can't be DMd");
+
+			// Create embeds using data we have.
+			const slotEmbeds = getSlotEmbed({centers: availableCenters, time: responseTime}, todayString);
+
+			for(const embed of slotEmbeds)
+				await dmChannel.send(embed).catch(() => console.error("Cant DM", user.get("userName")));						
+			
+		});	
 	});
 
-	return Promise.all(promises).catch(console.error);
 }
 
 
@@ -201,6 +206,7 @@ client.on("ready", () =>
 {
 	console.log("Bot ready");
 	setInterval(sendHourlyUpdates, UPDATE_FREQUENCY, app.firestore(), client, cache);
+	sendHourlyUpdates(app.firestore(), client, cache);
 });
 
 client.on("guildCreate", async (guild) => 
