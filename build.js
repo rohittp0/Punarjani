@@ -5,7 +5,9 @@ import path from "path";
 const TEMPLATES_DIR = path.join(process.cwd(), "html-templates/");
 const IMAGES_DIR = path.join(process.cwd(), "images/");
 
-const htmlFiles = fs.readdirSync(TEMPLATES_DIR);
+const htmlFiles = fs.readdirSync(TEMPLATES_DIR).filter((file) => file.endsWith(".html"));
+
+console.log(htmlFiles);
 
 if (!fs.existsSync(IMAGES_DIR))
 	fs.mkdirSync(IMAGES_DIR);
