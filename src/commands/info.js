@@ -1,7 +1,7 @@
 /**
  * Punarjani is a discord bot that notifies you about slot availability at
  * CoWin vaccination centers.
- * Copyright (C) 2021  SANU MUHAMMED C
+ * Copyright (C) 2021 Rohit TP, Sunith VS, Sanu Muhammed C
  * 
  *  This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU Affero General Public License as published
