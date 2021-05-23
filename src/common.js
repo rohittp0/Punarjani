@@ -103,26 +103,33 @@ export function getIndianTime(dateString)
 }	
 
 /**
- * Sends get request to cowin rest api specified by the url passed.
+ * Gets the sessions available by district id for the specified date.
+ * If for some reason API request fails return an object with empty sessions array
+ * and time of fetching Date(0)
+ * 
  * 
  * @author Rohit T P
- * @param {string} url The url to get.
+ * 
+ * @param {string | number} id The district ID
+ * @param {string} date The date for which sessions are needed in the dd-mm-yyyy format 
  * @param {NodeCache} cache A per opened cache.
- * @returns {Promise<{[key: string]: any}>} Response JSON converted to JS object.  
- * @throws If request failed and cache was also not found.
+ * 
+ * 
+ * @returns {Promise<{sessions: any[], time: Date}>} The available sessions and time of fetching.  
  */
-export async function sendRequest(url, cache) 
+export async function getSessions(id, date, cache) 
 {
+	const url = `https://cowin.rabeeh.me/api/v2/appointment/sessions/public/findByDistrict?district_id=${id}&date=${date}`;
 	const result = await axios.get(url).then(({data}) => data).catch(() =>undefined);
 
 	let data = result.data;
 
-	if(!data)
+	if(!data || !data.sessions)
 		data = cache.get(url);
 	else 
-		cache.set(url, data, 5*60*60*1000);	
+		cache.set("slots"+id+date, data, 5*60*60*1000);	
 
-	if(!data) throw "Request failed and cache also didn't hit.";
+	if(!data || !data.sessions) return { sessions: [], time: new Date(0) };
 	if(!data.time) 
 		data.time = getIndianTime(undefined);
 
@@ -225,11 +232,12 @@ export async function askPolar(question, channel, uid)
 
 /**
  * Checks how similar is s1 and s2 using Levenshtein distance.
+ * Returns 1 if s1===s2 or a number between 0 (inclusive) and 1 (exclusive) 
  * 
  * @author StackOverflow.overlord1234
- * @param {string} s1
- * @param {string} s2
- * @returns {number} similarity between s1 and s2 (0  to 1)
+ * @param {string} s1 First string
+ * @param {string} s2 Second string
+ * @returns {number} similarity between s1 and s2 (0 to 1)
  */
 export function getSimilarity(s1, s2) 
 {

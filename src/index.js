@@ -19,7 +19,7 @@
 
 import Discord from "discord.js";
 import NodeCache from "node-cache";
-import {APIS, askPolar, getApp, getIndianTime, getSimilarity, getSlotEmbed, sendRequest, TEXTS, UPDATE_FREQUENCY } from "./common.js";
+import {askPolar, getApp, getIndianTime, getSimilarity, getSlotEmbed, getSessions, TEXTS, UPDATE_FREQUENCY } from "./common.js";
 // Importing command handlers.
 import register from "./commands/register.js";
 import help from "./commands/help.js";
@@ -74,8 +74,7 @@ async function sendHourlyUpdates(firestore, dsClient, cache)
 	districts.forEach(async (dist) => 
 	{
 		const date = `${today.getDate()}-${today.getMonth()+1}-${today.getFullYear()}`;
-		const response = await sendRequest(`${APIS.byDistrict}${dist.get("id")}&date=${date}`, cache)
-			.catch(()=>({sessions: [], time: new Date(0)}));
+		const response = await getSessions(dist.get("id"), date, cache);
 
 		// Check if the difference between last checked and current time is less than half the update frequency
 		if(response.time.getTime() - today.getTime() < Math.ceil(UPDATE_FREQUENCY/2))
@@ -88,10 +87,7 @@ async function sendHourlyUpdates(firestore, dsClient, cache)
 
 		users.forEach(async (user) => 
 		{
-			const available = {time: response.time, centers: []};
-
-			available.centers = (response.sessions || [])
-			// @ts-ignore
+			const centers = response.sessions
 				.map(({min_age_limit, name, available_capacity_dose1, available_capacity_dose2, pincode}) =>
 					(
 						{ 
@@ -101,15 +97,14 @@ async function sendHourlyUpdates(firestore, dsClient, cache)
 							pincode 
 						}
 					))
-			// @ts-ignore
 				.filter(({age, slots})=> age && Number(slots) > 0);
 
 			// If no centers have slots left return early.	
-			if(available.centers.length === 0) return;	
+			if(centers.length === 0) return;	
 
 			const dm = await dsClient.users.fetch(user.get("userID")).catch(console.error);
 
-			for(const embed of getSlotEmbed(available))
+			for(const embed of getSlotEmbed({time: response.time, centers}))
 				if(dm)
 					promises.push(dm.send(embed));	
 		});

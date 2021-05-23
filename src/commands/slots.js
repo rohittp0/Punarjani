@@ -21,7 +21,7 @@
 import Discord from "discord.js";
 // eslint-disable-next-line no-unused-vars
 import NodeCache from "node-cache";
-import {APIS, getIndianTime, getSlotEmbed, sendRequest, TEXTS} from "../common.js";
+import {getIndianTime, getSlotEmbed, getSessions, TEXTS} from "../common.js";
 
 /**
  * Converts date from human readable format to the format required by cowin API.
@@ -74,13 +74,9 @@ export default async function slots(message, args, app, cache)
 		return message.reply(TEXTS.notRegistered), false;	
 
 	const date = getDate(args.join(" "));	
-	const response = await sendRequest(`${APIS.byDistrict}${user.get("district").id}&date=${date}`, cache)
-		.catch(()=>({sessions: [], time: "never"}));
+	const response = await getSessions(user.get("district").id, date, cache);
 	
-	const available = {time: response.time, centers: []};
-
-	available.centers = (response.sessions || [])
-		// @ts-ignore
+	const centers = response.sessions
 		.map(({min_age_limit, name, available_capacity_dose1, available_capacity_dose2, pincode}) =>
 			(
 				{ 
@@ -90,13 +86,12 @@ export default async function slots(message, args, app, cache)
 					pincode 
 				}
 			))
-		// @ts-ignore
 		.filter(({age, slots})=> age && Number(slots) > 0);
 	
-	for(const embed of getSlotEmbed(available))
+	for(const embed of getSlotEmbed({centers, time: response.time}))
 		await message.channel.send(embed).catch(console.error);			
 	
-	if(available.centers.length === 0)
+	if(centers.length === 0)
 		message.reply(`No slots available in ${user.get("district").name} for ${date}`);	
 		
 	return true;
