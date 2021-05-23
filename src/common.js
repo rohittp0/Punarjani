@@ -119,9 +119,10 @@ export function getLocationEmbeds(title, description, avatar, options)
 /**
  * @author Rohit T P
  * @param {{centers: { slots: number; name: string; pincode: number; }[], time: Date}} sessions The available sessions for the user.
+ * @param {string} displayDate
  * @returns {Discord.MessageEmbed[]}
  */
-export function getSlotEmbed(sessions)
+export function getSlotEmbed(sessions, displayDate)
 {
 	const embeds = [];
 	const fields = sessions.centers.map(({slots, name, pincode}) => 
@@ -136,7 +137,7 @@ export function getSlotEmbed(sessions)
 	
 	embeds[0].setTitle("Available Slots")
 		.setURL("https://www.cowin.gov.in/home") //url for redirecting user  to cowin website
-		.setDescription(`${TEXTS.slotsDescription}${sessions.time.toDateString()}`);
+		.setDescription(`${TEXTS.slotsDescription} ${displayDate}`);
 	
 	embeds[embeds.length-1]
 		.setFooter(`Last checked at ${sessions.time.toLocaleString("en-US", { hour: "numeric", minute: "numeric", hour12: true })}`); 	

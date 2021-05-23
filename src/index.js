@@ -105,7 +105,7 @@ async function sendHourlyUpdates(firestore, dsClient, cache)
 
 			const dm = await dsClient.users.fetch(user.get("userID")).catch(console.error);
 
-			for(const embed of getSlotEmbed({time: response.time, centers}))
+			for(const embed of getSlotEmbed({time: response.time, centers}, date))
 				if(dm)
 					promises.push(dm.send(embed));	
 		});

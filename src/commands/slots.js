@@ -89,7 +89,7 @@ export default async function slots(message, args, app, cache)
 	if(centers.length === 0)
 		return message.reply(`No slots available in ${user.get("district").name} for ${date}`), true;	
 
-	for(const embed of getSlotEmbed({centers, time: response.time}))
+	for(const embed of getSlotEmbed({centers, time: response.time}, date))
 		await message.channel.send(embed).catch(console.error);				
 		
 	return true;
