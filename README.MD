@@ -15,6 +15,8 @@ We made a Discord bot, our dear Mr. PJ. Mr. PJ integrates Cowin public API direc
 	 - Now you don't even have to check, you will be updated every hour automatically.
  - [x] **Manual  Slot Checking**
 	 - Just send *!slot  "some date"* and  Mr. PJ got you covered.
+ - [x] **Command Prediction**
+	 - With Mr. PJ typos or half spelled commands are not a problem. Mr. PJ will suggest you the most similar command automagically!
  - [x]  **Free Fore Ever**
 	 - Yes forever! That is not until a certain period or with a specific cap to the how much you can use. It is truly unlimited.
  - [x] **Fully Opensource**
