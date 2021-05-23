@@ -17,8 +17,6 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>. 
  */
 
-// eslint-disable-next-line no-unused-vars
-import NodeCache from "node-cache";
 import Discord from "discord.js";
 import {FieldValue} from "@google-cloud/firestore";
 import {getLocationEmbeds, askPolar} from "../common.js";
@@ -228,7 +226,7 @@ async function changeShot(doc, channel)
  * @param {FirebaseFirestore.DocumentSnapshot<FirebaseFirestore.DocumentData>} doc
  * @param {Discord.TextChannel | Discord.DMChannel | Discord.NewsChannel} channel
  * @param {FirebaseFirestore.Firestore} firestore
- * @param {NodeCache} cache
+ * @param {{get: any, set:any}} cache
  * @returns {Promise<boolean>} True if everything went well
  */
 async function deleteUser(doc, channel, firestore, cache) 
@@ -262,7 +260,7 @@ async function deleteUser(doc, channel, firestore, cache)
  * @param {Discord.Message} message The message that initiated this command.
  * @param {string[]} args The arguments.
  * @param {{firestore: () => FirebaseFirestore.Firestore}} app The firebase app
- * @param {NodeCache} cache
+ * @param {{get: any, set:any}} cache
  * @returns {Promise<Boolean>} Indicates operation success or failure.
  */
 export default async function edit(message, args, app, cache) 

@@ -18,9 +18,7 @@
  */
 
 // eslint-disable-next-line no-unused-vars
-import Discord from "discord.js";
-// eslint-disable-next-line no-unused-vars
-import NodeCache from "node-cache";
+import { Message, User, DMChannel, NewsChannel, TextChannel } from "discord.js";
 import {FieldValue} from "@google-cloud/firestore";
 import {askPolar, getLocationEmbeds} from "../common.js";
 import { TEXTS } from "../consts.js";
@@ -32,7 +30,7 @@ import { TEXTS } from "../consts.js";
  * @param {any[]} args The arguments to be checked.
  * @param {string} uid The user id of the message author.
  * @param {FirebaseFirestore.Firestore} firestore An instance of firestore 
- * @param {NodeCache} cache
+ * @param {{get: any, set:any}} cache
  * @returns {Promise<string|boolean>} Error message if any or false.
  */
 async function checkArgs(args, uid, firestore, cache) 
@@ -52,8 +50,8 @@ async function checkArgs(args, uid, firestore, cache)
 /**
  * A helper function to show a list of states and let the user pick one.
  * 
- * @param {Discord.User} user The author of message.
- * @param {Discord.TextChannel | Discord.DMChannel | Discord.NewsChannel} channel The message channel.
+ * @param {User} user The author of message.
+ * @param {TextChannel | DMChannel | NewsChannel} channel The message channel.
  * @param {FirebaseFirestore.Firestore} firestore
  * 
  * @returns {Promise<{name: string, id: number}>} The selected state
@@ -63,14 +61,14 @@ async function getState(user, channel, firestore)
 	// Get the list of state name and id from database.
 	const states = (await firestore.doc("/locations/states").get()).get("list");
 	
-	/** @type {Discord.Message[]} */
+	/** @type {Message[]} */
 	const sent = [];
 	// Create embeds with the state list and user's avatar and send it.	
 	const embeds = getLocationEmbeds(TEXTS.stateQuery[0], TEXTS.stateQuery[1], user.displayAvatarURL(), states);	
 	embeds.forEach(async (embed) =>sent.push(await channel.send(embed)));
 
 	// Define a function to filter the replies from the user.
-	const numberFilter = (/** @type {Discord.Message} */ response) => 
+	const numberFilter = (/** @type {Message} */ response) => 
 	// Check if the reply is from the correct user and also a valid option. 
 		response.author.id === user.id && !isNaN(Number(response.content));
 
@@ -91,8 +89,8 @@ async function getState(user, channel, firestore)
 }
 
 /**
- * @param {Discord.User} user
- * @param {Discord.TextChannel | Discord.DMChannel | Discord.NewsChannel} channel
+ * @param {User} user
+ * @param {TextChannel | DMChannel | NewsChannel} channel
  * @param {{ name: any; id?: number; }} state
  * @param {FirebaseFirestore.Firestore} firestore
  * 
@@ -111,14 +109,14 @@ async function getDistrict(user, channel, state, firestore)
 	response.forEach((dist) => 
 		districts.push({name: dist.get("name"), id: dist.get("id"), ref: dist}));	
 
-	/** @type {Discord.Message[]} */
+	/** @type {Message[]} */
 	const sent = [];
 	// Create embeds with the district list and user's avatar and send it.	
 	const embeds = getLocationEmbeds(TEXTS.districtQuery[0], TEXTS.districtQuery[1], user.displayAvatarURL(), districts);	
 	embeds.forEach(async (embed) =>sent.push(await channel.send(embed)));
 
 	// Define a function to filter the replies from the user.
-	const numberFilter = (/** @type {Discord.Message} */ response) => 
+	const numberFilter = (/** @type {Message} */ response) => 
 	// Check if the reply is from the correct user and also a valid option. 
 		response.author.id === user.id && !isNaN(Number(response.content));
 
@@ -142,10 +140,10 @@ async function getDistrict(user, channel, state, firestore)
  * This function handles the user registration for Punarjani.
  * 
  * @author Rohit T P
- * @param {Discord.Message} message The message that initiated this command.
+ * @param {Message} message The message that initiated this command.
  * @param {Array<string>} args Array containing age.
  * @param {{firestore: () => FirebaseFirestore.Firestore}} app The firebase app
- * @param {NodeCache} cache
+ * @param {{get: any, set:any}} cache
  * @returns {Promise<Boolean>} Indicates operation success or failure.
  */
 export default async function register(message, args, app, cache) 

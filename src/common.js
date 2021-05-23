@@ -156,7 +156,7 @@ export function getSlotEmbed(sessions)
  */
 export async function askPolar(question, channel, uid) 
 {
-	// @ts-ignore A filter to only allow select emoji and user to react.
+	// @ts-ignore
 	const filter = (reaction, user) => ["👍", "👎"].includes(reaction.emoji.name) && user.id === uid;
 
 	// Send the message and wait for reactions.

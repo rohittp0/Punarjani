@@ -6,6 +6,6 @@
 		"moduleResolution": "node",
 		"strict": true
 	},
-	"include": ["src/*.js", "src/commands/*.js"],
+	"include": ["src/*.js", "src/commands/*.js", "./build.js"],
 	"exclude": ["node_modules", "**/node_modules/*"]
 }

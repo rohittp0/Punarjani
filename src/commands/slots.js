@@ -18,9 +18,7 @@
  */
 
 // eslint-disable-next-line no-unused-vars
-import Discord from "discord.js";
-// eslint-disable-next-line no-unused-vars
-import NodeCache from "node-cache";
+import { Message } from "discord.js";
 import {getIndianTime, getSlotEmbed, getSessions} from "../common.js";
 import { TEXTS } from "../consts.js";
 
@@ -55,13 +53,12 @@ function getDate(dateString)
  * This function handles manual checking of COWIN slots available  for users district in Punarjani.
  * 
  * @author Sanu Muhammed C
- * @param {Discord.Message} message The message that initiated this command.
+ * @param {Message} message The message that initiated this command.
  * @param {Array<string>} args The arguments passed.
  * @param {{firestore: () => FirebaseFirestore.Firestore}} app The firebase app
- * @param {NodeCache} cache
+ * @param {{get: any, set:any}} cache
  * @returns {Promise<Boolean>} Indicates operation success or failure.
  */
-// eslint-disable-next-line no-unused-vars
 export default async function slots(message, args, app, cache) 
 {
 	// Get an instance of firestore to access the database.
