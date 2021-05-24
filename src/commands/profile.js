@@ -21,21 +21,27 @@ import Discord from "discord.js";
 import { TEXTS } from "../consts.js";
 
 /**
+ * This function handles the !profile command and displays the details of the user
+ * save in the database.
+ * 
  * @author Rohit T P
+ * 
  * @param {Discord.Message} message The message that initiated this command.
- * @param {Array<string>} _args The arguments passed.
+ * @param {Array<string>} _args The arguments passed (Not used).
  * @param {{firestore: () => FirebaseFirestore.Firestore}} app The firebase app
+ * 
  * @returns {Promise<boolean>} True if everything went well
  */
 export default async function profile(message, _args, app) 
 {
+	// Gets the user data
 	const doc = await app.firestore().collection("users").doc(message.author.id).get();
 
-	if(!doc || !doc.exists)
+	if(!doc || !doc.exists) // Return error message if user doesn't exist.
 		return message.reply(TEXTS.notRegistered), false;
 		
 	return message.channel.send(
-		new Discord.MessageEmbed()
+		new Discord.MessageEmbed() // Create an embed with user data and send it.
 			.setThumbnail(doc.get("avatar"))
 			.setColor("#0099ff")
 			.setTitle("Your Profile")
