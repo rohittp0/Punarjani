@@ -36,9 +36,11 @@ const emojiTable =
 /**
  * A helper function to show a list of states and let the user pick one.
  * 
- * @param {FirebaseFirestore.DocumentSnapshot<FirebaseFirestore.DocumentData>} doc
- * @param {Discord.TextChannel | Discord.DMChannel | Discord.NewsChannel} channel The message channel.
- * @param {FirebaseFirestore.Firestore} firestore
+ * @author Rohit T P
+ * 
+ * @param {FirebaseFirestore.DocumentSnapshot<FirebaseFirestore.DocumentData>} doc Firestore document containing users data.
+ * @param {Discord.TextChannel | Discord.DMChannel | Discord.NewsChannel} channel A channel to send and receive message
+ * @param {FirebaseFirestore.Firestore} firestore An instance of the database.
  * 
  * @returns {Promise<boolean>} True if everything went well
  */
@@ -82,9 +84,11 @@ async function setState(doc, channel, firestore)
 /**
  * A helper function to show a list of states and let the user pick one.
  * 
- * @param {FirebaseFirestore.DocumentSnapshot<FirebaseFirestore.DocumentData>} doc
- * @param {Discord.TextChannel | Discord.DMChannel | Discord.NewsChannel} channel The message channel.
- * @param {FirebaseFirestore.Firestore} firestore
+ * @author Rohit T P
+ * 
+ * @param {FirebaseFirestore.DocumentSnapshot<FirebaseFirestore.DocumentData>} doc Firestore document containing users data.
+ * @param {Discord.TextChannel | Discord.DMChannel | Discord.NewsChannel} channel A channel to send and receive message
+ * @param {FirebaseFirestore.Firestore} firestore An instance of the database.
  * 
  * @returns {Promise<boolean>} True if everything went well
  */
@@ -147,8 +151,13 @@ async function setDistrict(doc, channel, firestore)
 }
 
 /**
- * @param {FirebaseFirestore.DocumentSnapshot<FirebaseFirestore.DocumentData>} doc
- * @param {Discord.TextChannel | Discord.DMChannel | Discord.NewsChannel} channel
+ * A helper function to ask user his/her age and save it to database.
+ * 
+ * @author Rohit T P
+ * 
+ * @param {FirebaseFirestore.DocumentSnapshot<FirebaseFirestore.DocumentData>} doc Firestore document containing users data.
+ * @param {Discord.TextChannel | Discord.DMChannel | Discord.NewsChannel} channel A channel to send and receive message
+ * 
  * @returns {Promise<boolean>} True if everything went well
  */
 async function setAge(doc, channel) 
@@ -182,8 +191,13 @@ async function setAge(doc, channel)
 }
 
 /**
- * @param {FirebaseFirestore.DocumentSnapshot<FirebaseFirestore.DocumentData>} doc
- * @param {Discord.TextChannel | Discord.DMChannel | Discord.NewsChannel} channel
+ * A helper function to ask user if he/she wants hourly update and save it to database.
+ * 
+ * @author Rohit T P
+ * 
+ * @param {FirebaseFirestore.DocumentSnapshot<FirebaseFirestore.DocumentData>} doc Firestore document containing users data.
+ * @param {Discord.TextChannel | Discord.DMChannel | Discord.NewsChannel} channel A channel to send and receive message
+ * 
  * @returns {Promise<boolean>} True if everything went well
  */
 async function toggleUpdate(doc, channel) 
@@ -201,8 +215,13 @@ async function toggleUpdate(doc, channel)
 }
 
 /**
- * @param {FirebaseFirestore.DocumentSnapshot<FirebaseFirestore.DocumentData>} doc
- * @param {Discord.TextChannel | Discord.DMChannel | Discord.NewsChannel} channel
+ * A helper function to ask user if he/she got the first dose and save it to database.
+ * 
+ * @author Rohit T P
+ * 
+ * @param {FirebaseFirestore.DocumentSnapshot<FirebaseFirestore.DocumentData>} doc Firestore document containing users data.
+ * @param {Discord.TextChannel | Discord.DMChannel | Discord.NewsChannel} channel A channel to send and receive message
+ * 
  * @returns {Promise<boolean>} True if everything went well
  */
 async function changeShot(doc, channel) 
@@ -220,10 +239,16 @@ async function changeShot(doc, channel)
 }
 
 /**
- * @param {FirebaseFirestore.DocumentSnapshot<FirebaseFirestore.DocumentData>} doc
- * @param {Discord.TextChannel | Discord.DMChannel | Discord.NewsChannel} channel
- * @param {FirebaseFirestore.Firestore} firestore
- * @param {{get: any, set:any}} cache
+ * This function deletes the user referenced by the doc object after asking
+ * the user for confirmation.
+ * 
+ * @author Rohit T P
+ * 
+ * @param {FirebaseFirestore.DocumentSnapshot<FirebaseFirestore.DocumentData>} doc Firestore document containing users data.
+ * @param {Discord.TextChannel | Discord.DMChannel | Discord.NewsChannel} channel A channel to send and receive message
+ * @param {FirebaseFirestore.Firestore} firestore An instance of the database.
+ * @param {{get: any, set:any}} cache A pre opened cache
+ * 
  * @returns {Promise<boolean>} True if everything went well
  */
 async function deleteUser(doc, channel, firestore, cache) 
@@ -251,13 +276,15 @@ async function deleteUser(doc, channel, firestore, cache)
 }
 
 /**
- * This function handles the user registration for Punarjani.
+ * This function handles the !edit command.
  * 
  * @author Rohit T P
+ * 
  * @param {Discord.Message} message The message that initiated this command.
  * @param {string[]} args The arguments.
  * @param {{firestore: () => FirebaseFirestore.Firestore}} app The firebase app
- * @param {{get: any, set:any}} cache
+ * @param {{get: any, set:any}} cache A pre opened cache
+ * 
  * @returns {Promise<Boolean>} Indicates operation success or failure.
  */
 export default async function edit(message, args, app, cache) 
