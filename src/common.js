@@ -72,20 +72,21 @@ export async function getSessions(id, date, cache)
 
 	let data = result?.data;
 
-	if(!data || !data.sessions)
+	if(!data || !data.sessions) // If no data was got try getting the data from cache
 		data = cache.get(url);
 	else 
-		cache.set("slots"+id+date, data, 5*60*60*1000);	
+		cache.set("slots"+id+date, data, 5*60*60*1000);	// If valid data is got save it in cache
 
-	if(!data || !data.sessions) return { sessions: [], time: new Date(0) };
+	if(!data || !data.sessions) 
+		return { sessions: [], time: new Date(0) }; // If data was not found in cache also then return a place holder.
 	if(!data.time) 
-		data.time = getIndianTime(undefined);
+		data.time = getIndianTime(undefined); // If data dose not have time set set it to current time. 
 
 	return data;
 }
 
 /**
- * Helper function to create embed for selecting state or district.
+ * Helper function to create embed for selecting district.
  * 
  * @author Rohit T P
  * @param {string} title The title of the embed.
@@ -117,6 +118,8 @@ export function getLocationEmbeds(title, description, avatar, options)
 
 
 /**
+ * Helper function to create embed for available slots.
+ * 
  * @author Rohit T P
  * @param {{centers: { slots: number; name: string; pincode: number; }[], time: Date}} sessions The available sessions for the user.
  * @param {string} displayDate
