@@ -29,16 +29,12 @@ import info from "./commands/info.js";
 import profile from "./commands/profile.js";
 import { TEXTS, UPDATE_FREQUENCY } from "./consts.js";
 
-// Opens a cache.
-const cache = new NodeCache();
-// Create an instance of Client 
-const client = new Discord.Client();
-// Create an instance of firebase app
-const app = getApp();
-// Get a ref to active node
-const active = app.database().ref("/active");
-// Define a prefix to use when sending commands to bot.
-const prefix = process.env.PREFIX || "!";
+const cache = new NodeCache(); // Opens a cache.
+const client = new Discord.Client(); // Create an instance of Client 
+const app = getApp(); // Create an instance of firebase app
+
+const active = app.database().ref("/active"); // Get a ref to active node
+const prefix = process.env.PREFIX || "!"; // Define a prefix to use when sending commands to bot.
 
 // An array of commands and functions to handle them.
 const commands = 
@@ -53,14 +49,17 @@ const commands =
 
 console.log("All globals set.");
 
+// set firebase realtime database to delete active users collection if server turns off.
 active.onDisconnect().remove();
 
 /**
- * @param {FirebaseFirestore.Firestore} firestore
- * @param {Discord.Client} dsClient
- * @param {NodeCache} hrCache
+ * This function sends slot updates to all subscribed users. 
+ * @author Rohit T P
+ * @param {FirebaseFirestore.Firestore} firestore An instance of firestore database
+ * @param {Discord.Client} dsClient The discord client using which to send update
+ * @param {NodeCache} hrCache A pre opened cache to store requests.
  */
-async function sendHourlyUpdates(firestore, dsClient, hrCache)
+async function sendUpdates(firestore, dsClient, hrCache)
 {
 	// Get current IST time.
 	const today = getIndianTime(undefined);
@@ -128,6 +127,10 @@ async function sendHourlyUpdates(firestore, dsClient, hrCache)
 
 
 /**
+ * A helper function that gets the appropriate handler for the command passed.
+ * If command is invalid suggests the user the correct command and returns it's handler.
+ * 
+ * @author Rohit T P
  * @param {string} input
  * @param {Discord.TextChannel | Discord.DMChannel | Discord.NewsChannel} channel
  * @param {string} id
@@ -139,7 +142,7 @@ async function getCommand(input, channel, id)
 	/** @type {{handler: ((message: Discord.Message, args: string[], app: any, cache: NodeCache) => Promise<any>) | undefined, name: string | undefined}}	 */
 	const command = {handler: undefined, name: ""};
 
-	for(const cmd of commands)
+	for(const cmd of commands) // Searches the commands array to find the most similar command
 	{
 		const sim = getSimilarity(cmd.name, input);
 		if(sim > similarity)
@@ -149,13 +152,14 @@ async function getCommand(input, channel, id)
 			similarity = sim;
 		}
 
-		if(sim === 1) break;
+		if(sim === 1) break; // If there is an exact match break immediately
 	}
 
 	// Set the user to doing something in cache.
 	cache.set(id+"running", true);
+
 	if(similarity < 1 && !(await askPolar(`!${input} is not a valid command, did you mean !${command.name} ?`, channel, id))) 
-		return undefined;
+		return undefined; // If there is no exact match and the user rejects the suggestion return undefined.
 	
 	return command.handler;	
 }
@@ -163,6 +167,8 @@ async function getCommand(input, channel, id)
 /**
   * Add an on message handler to the discord bot. This handler will be 
   * the starting point for most of the functions handled by the bot.
+  * 
+  * @param {Discord.Message} message The message that triggered this listener.
   */
 client.on("message", async (message) =>
 {
@@ -178,7 +184,7 @@ client.on("message", async (message) =>
 	const command = args.shift()?.toLowerCase(); 	// Gets the command to command variable.
 
 	if(message.channel.type !== "dm" && command !== "help" && command !== "info")
-		return message.reply(TEXTS.cantTalk+TEXTS.goToDM);	
+		return message.reply(TEXTS.cantTalk+TEXTS.goToDM); // If the message was sent not in a DM channel return.	
 	
 	// Don't run if user has some other commands running for him/her/they
 	if(command !== "help" && (cache.get(message.author.id+"running") || await running))
@@ -195,6 +201,7 @@ client.on("message", async (message) =>
 	// Execute the command.
 		result = await handler(message, args, app, cache).catch(console.error);	
 	
+	// Reset the users running status to false.
 	cache.set(message.author.id+"running", false);	
 	await setRunning;	
 	await userRef.remove().catch(console.error);	
@@ -202,13 +209,20 @@ client.on("message", async (message) =>
 	console.log(`${command} execution ${result}`); 
 });
 
+/**
+ * Runs once the bot is ready.
+ */
 client.on("ready", () => 
 {
 	console.log("Bot ready");
-	setInterval(sendHourlyUpdates, UPDATE_FREQUENCY, app.firestore(), client, cache);
-	sendHourlyUpdates(app.firestore(), client, cache);
+	setInterval(sendUpdates, UPDATE_FREQUENCY, app.firestore(), client, cache);
+	sendUpdates(app.firestore(), client, cache); // Call the function to send an update as soon as the server starts.
 });
 
+/**
+ * Runs when the bot is added to a new server (guild).
+ * @param {Discord.Guild} guild
+ */
 client.on("guildCreate", async (guild) => 
 {
 	// Check if we can send message in system channel.
@@ -224,4 +238,4 @@ client.on("guildCreate", async (guild) =>
 if(process.env.BOT_TOKEN)
 	client.login(process.env.BOT_TOKEN);
 else 
-	console.error("Discord-Bot Token missing."); // Print error message if token is missing.		
+	throw new Error("Discord-Bot Token missing."); // Throws error if token is missing.		
