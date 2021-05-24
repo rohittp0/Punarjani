@@ -30,7 +30,7 @@ import { TEXTS } from "../consts.js";
  * @param {any[]} args The arguments to be checked.
  * @param {string} uid The user id of the message author.
  * @param {FirebaseFirestore.Firestore} firestore An instance of firestore 
- * @param {{get: any, set:any}} cache
+ * @param {{get: any, set:any}} cache A pre opened cache.
  * @returns {Promise<string|boolean>} Error message if any or false.
  */
 async function checkArgs(args, uid, firestore, cache) 
@@ -50,9 +50,11 @@ async function checkArgs(args, uid, firestore, cache)
 /**
  * A helper function to show a list of states and let the user pick one.
  * 
- * @param {User} user The author of message.
- * @param {TextChannel | DMChannel | NewsChannel} channel The message channel.
- * @param {FirebaseFirestore.Firestore} firestore
+ * @author Rohit T P
+ * 
+ * @param {User} user The user who initiated the command
+ * @param {TextChannel | DMChannel | NewsChannel} channel A channel to send and receive message
+ * @param {FirebaseFirestore.Firestore} firestore An instance of the database.
  * 
  * @returns {Promise<{name: string, id: number}>} The selected state
  */
@@ -86,10 +88,14 @@ async function getState(user, channel, firestore)
 }
 
 /**
- * @param {User} user
- * @param {TextChannel | DMChannel | NewsChannel} channel
- * @param {{ name: any; id?: number; }} state
- * @param {FirebaseFirestore.Firestore} firestore
+ * A helper function to show a list of districts and let the user pick one.
+ * 
+ * @author Rohit T P
+ * 
+ * @param {User} user The user who initiated the command
+ * @param {TextChannel | DMChannel | NewsChannel} channel A channel to send and receive message
+ * @param {{ name: any; id?: number; }} state The current state of the user
+ * @param {FirebaseFirestore.Firestore} firestore An instance of the database.
  * 
  * @returns {Promise<{name: any; id: any; ref: FirebaseFirestore.QueryDocumentSnapshot<FirebaseFirestore.DocumentData>}|undefined>} The selected district.
  */
@@ -166,6 +172,10 @@ export default async function register(message, args, app, cache)
 	if(!district) // Check if the user selected a valid state.
 		return message.reply(`${TEXTS.districtError}\n${TEXTS.tryAgain}`), false;
 
+	// Asks weather the user want hourly update and did he get first dose.	
+	const hourlyUpdate = await askPolar(TEXTS.hourlyUpdate, message.channel, message.author.id);	
+	const gotFirst = await askPolar(TEXTS.gotShot, message.channel, message.author.id);
+
 	// Write the collected user data to cloud firestore.
 	const batch = firestore.batch();
 
@@ -177,8 +187,8 @@ export default async function register(message, args, app, cache)
 		distRef: district.ref.ref,
 		state,
 		avatar: message.author.displayAvatarURL(),
-		hourlyUpdate: await askPolar(TEXTS.hourlyUpdate, message.channel, message.author.id),
-		gotFirst: await askPolar(TEXTS.gotShot, message.channel, message.author.id)
+		hourlyUpdate,
+		gotFirst
 	});
 
 	// Send a message to the user that data collection has been completed.	
