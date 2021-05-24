@@ -19,7 +19,7 @@
 
 import Discord from "discord.js";
 import {FieldValue} from "@google-cloud/firestore";
-import {getLocationEmbeds, askPolar} from "../common.js";
+import {askPolar} from "../common.js";
 import { TEXTS } from "../consts.js";
 
 const emojiTable = 
@@ -94,22 +94,8 @@ async function setState(doc, channel, firestore)
  */
 async function setDistrict(doc, channel, firestore) 
 {
-	// Get the list of district name and id from database.
-	const response = await firestore.collection("/locations/states/districts")
-		.where("state_id", "==", doc.get("state").id)
-		.orderBy("name").get();
-			
-	/** @type {{ name: any; id: any; ref: FirebaseFirestore.DocumentReference<FirebaseFirestore.DocumentData>; }[]} */
-	const districts = [];	
-	// Format the response we got from the API to an object array.
-	response.forEach((dist) => 
-		districts.push({name: dist.get("name"), id: dist.get("id"), ref: dist.ref}));	
-	
-	/** @type {Discord.Message[]} */
-	const sent = [];	
-	// Create embeds with the district list and user's avatar and send it.	
-	const embeds = getLocationEmbeds(TEXTS.districtQuery[0], TEXTS.districtQuery[1], doc.get("avatar"), districts);	
-	embeds.forEach(async (embed) =>sent.push(await channel.send(embed)));
+	// Send an image with the list of states.
+	const sent = await channel.send({files: [`images/Districts/${Number(doc.get("state").id)}.png`]});
 
 	// Define a function to filter the replies from the user.
 	const numberFilter = (/** @type {Discord.Message} */ response) => 
@@ -120,13 +106,24 @@ async function setDistrict(doc, channel, firestore)
 	const choice = await channel.awaitMessages(numberFilter, {max: 1, errors: ["time"]})
 		.then((collected) => Number(collected.first()?.content));
 	
-	// Delete unwanted messages	
-	sent.forEach((msg) => msg.delete().catch(console.error));	
+	// Get the district from database.
+	const districts = await firestore.collection("/locations/states/districts")
+		.where("state_id", "==", Number(doc.get("state").id))
+		.where("id", "==", Number(choice)).get();	
 
-	// Search the districts array for the code user sent. 	
-	const district = districts.find((/** @type {{ id: number; }} */ state) => state.id === choice);	
+	// Delete unwanted message	
+	if(sent.deletable) sent.delete().catch(console.error);		
+	
+	let district;	// Create the district object.
+	if(!districts.empty)
+		district = 
+		{ 
+			name: districts.docs[0].get("name"), 
+			id: districts.docs[0].get("id"), 
+			ref: districts.docs[0].ref
+		};	
 
-	if(!district)
+	if(!district || !district.ref || !district.id)
 		return await channel.send(`<@${doc.get("userID")}> You selected an invalid district`), false;
 
 	const batch = firestore.batch();

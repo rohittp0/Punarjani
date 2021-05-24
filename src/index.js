@@ -105,9 +105,8 @@ async function sendUpdates(firestore, dsClient, hrCache)
 					))
 				.filter(({age, slots})=> age && Number(slots) > 0);
 
-			console.log(sessions.length, availableCenters.length, user.get("userName"));
 			if(availableCenters.length === 0)
-				return console.log("No thing to send to", user.get("userName"));
+				return console.log("No thing to send to", user.get("userName"), sessions.length, availableCenters.length);
 
 			// Fetch user's DM channel using his Discord user ID.
 			const dmChannel = await dsClient.users.fetch(user.get("userID")).catch(console.error);	

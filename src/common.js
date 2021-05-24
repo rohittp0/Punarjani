@@ -86,38 +86,6 @@ export async function getSessions(id, date, cache)
 }
 
 /**
- * Helper function to create embed for selecting district.
- * 
- * @author Rohit T P
- * @param {string} title The title of the embed.
- * @param {string} description The description of the embed.
- * @param {string} avatar The url to an image to use as avatar.
- * @param {{name: string, id: number}[]} options An object containing options to list.
- * @returns {Discord.MessageEmbed[]} The embed created using given data.
- */
-export function getLocationEmbeds(title, description, avatar, options) 
-{
-	const embeds = [];
-	const fields = options.map((option) => 
-		({ name: `${option.name} - ${option.id}`, value: "‾", inline: true }));
-	
-	while(fields.length)
-		embeds.push(new Discord.MessageEmbed()
-			.setThumbnail(avatar)
-			.setColor("#0099ff")
-			.addFields(fields.splice(0, 25)));
-	
-	embeds[0].setTitle(title)
-		.setDescription(description);
-	
-	embeds[embeds.length-1].setTimestamp()
-		.setFooter("Reply with the appropriate number", avatar); 	
-
-	return embeds;	
-}
-
-
-/**
  * Helper function to create embed for available slots.
  * 
  * @author Rohit T P
