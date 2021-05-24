@@ -42,6 +42,7 @@ Our bot Mr. PJ follows a chatbot-like scheme. You can tell him to do what you wa
 
 ## Want To Know More?
 Check out our [website](https://punarjani-cowin.web.app/) for a detailed walk-through, or see this video for a glance.
+[<img src = "https://cdn.educba.com/academy/wp-content/uploads/2021/02/Code-Walkthrough-2.jpg.webp" />](https://www.loom.com/share/468077844b564d218a0eef0394322e16)
 
 ## Team members
 1. [Rohit T P](https://github.com/rohittp0)
