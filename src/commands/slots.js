@@ -71,8 +71,8 @@ export default async function slots(message, args, app, cache)
 	if(!user || !user.exists)
 		return message.reply(TEXTS.notRegistered), false;	
 
-	const date = getDate(args.join(" "));	
-	const response = await getSessions(user.get("district").id, date, cache);
+	const date = getDate(args.join(" ")); // Create date string to send with the request.	
+	const response = await getSessions(user.get("district").id, date, cache); // Send API request
 	
 	const centers = response.sessions
 		.map(({min_age_limit, name, available_capacity_dose1, available_capacity_dose2, pincode}) =>
