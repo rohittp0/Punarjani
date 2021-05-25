@@ -1,0 +1,28 @@
+{
+    "short_name": "Punarjani",
+    "name": "Punarjani Discord Bot",
+    "icons": [
+        {
+            "src": "/assets/img/logos/logo-48.png",
+            "type": "image/png",
+            "sizes": "48x48"
+        },
+        {
+            "src": "/assets/img/logos/logo-192.png",
+            "type": "image/png",
+            "sizes": "192x192",
+            "purpose": "any maskable"
+        },
+        {
+            "src": "/assets/img/logos/logo-512.png",
+            "type": "image/png",
+            "sizes": "512x512"
+        }
+    ],
+    "start_url": "/?source=pwa",
+    "background_color": "#007aff",
+    "display": "standalone",
+    "scope": "/",
+    "theme_color": "#007aff",
+    "description": "Get vaccinated ASAP !!"
+}

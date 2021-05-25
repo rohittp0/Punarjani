@@ -600,6 +600,15 @@ section {
   color: #2c4964;
 }
 
+.about-title h2 {
+  font-size: 32px;
+  font-weight: bold;
+  text-transform: uppercase;
+  margin-bottom: 20px;
+  padding-bottom: 20px;
+  position: relative;
+}
+
 .about .content ul {
   list-style: none;
   padding: 0;
@@ -617,6 +626,17 @@ section {
 
 .about .content p:last-child {
   margin-bottom: 0;
+}
+
+.about-title h2::after {
+  content: '';
+  position: absolute;
+  display: block;
+  width: 50px;
+  height: 3px;
+  background: #5846f9;
+  bottom: 0;
+  left: calc(50% - 25px);
 }
 
 .about .content .read-more {
@@ -1648,4 +1668,14 @@ section {
   text-decoration: none;
 }
 
+
+.link{
+  color: #ffffff;
+  text-decoration: none;
+}
+
+.link:hover {
+  color: #887ee2;
+  
+}
 
