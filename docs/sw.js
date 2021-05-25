@@ -1,10 +1,12 @@
 const CACHE_NAME = "my-site-cache-v1";
 const urlsToCache = [
 	"/",
-	"docs/assets/css/style.css",
-	"docs/assets/js/main.js",
-	"docs/assets/img/about.gif",
-	"docs/assets/img/logo.png",
+	"/assets/css/style.css",
+	"/assets/js/main.js",
+	"/assets/img/about.gif",
+	"/assets/img/logo.png",
+	"/assets/vendor/bootstrap/css/bootstrap.min.css",
+	"assets/vendor/bootstrap/js/bootstrap.bundle.min.js"
 ];
 
 self.addEventListener("install", (event) => 
