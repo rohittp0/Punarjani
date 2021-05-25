@@ -6,13 +6,13 @@
   <meta content="width=device-width, initial-scale=1.0" name="viewport">
 
   <title>Punarjani</title>
-  
+
   <link rel="manifest" href="manifest.json">
 
   <script>
     if ('serviceWorker' in navigator)
       window.addEventListener('load', () =>
-        navigator.serviceWorker.register('/sw.js')
+        navigator.serviceWorker.register('sw.js')
         .then((registration) => console.log('ServiceWorker registered with scope: ', registration.scope))
         .catch((err) => console.log('ServiceWorker registration failed: ', err)));
   </script>
@@ -52,8 +52,8 @@
           <li class='nav-li-mob'><a class="nav-link scrollto " href="#features">Features</a></li>
           <li class='nav-li-mob'><a class="nav-link scrollto" href="#pricing">Set-up</a></li>
           <li class='nav-li-mob'><a class="nav-link scrollto" href="#portfolio">Working</a></li>
-          <li class='nav-li-mob'><a class="nav-link scrollto" href="#cowin">Cowin </a></li>
           <li class='nav-li-mob'><a class="nav-link scrollto" href="#testimonials">Developers</a></li>
+          <li class='nav-li-mob'><a class="nav-link scrollto" href="#cowin">Cowin </a></li>
 
           <li class='nav-li-mob'><a class="getstarted scrollto"
               href="https://github.com/rohittp0/Punarjani.git">Contribute</a></li>
@@ -433,43 +433,8 @@
     </section>
     <!--Working -->
 
-
-
-    <!-- ======= cowin section ======= -->
-    <section id="cowin" class="about section-bg">
-      <div class="container">
-
-        <div class="row">
-          <div class="section-title">
-            <h2>Cowin</h2>
-
-          </div>
-
-          <div class="col-lg-6 order-1 order-lg-2" data-aos="zoom-in" data-aos-delay="150">
-            <img src="assets/img/about.gif" class="img-fluid" alt="gif of cowin site">
-          </div>
-          <div class="col-lg-6 pt-4 pt-lg-0 order-2 order-lg-1 content" data-aos="fade-right">
-            <h3> Get vaccinated and stay safe </h3><br>
-            <p class="fst-italic">
-              Two vaccines received approval for emergency use in india <ul>
-                <li>Covishield </li>
-                <li>Covaccine</li>
-              </ul>
-            </p>
-            <p> Vaccine registration can't served by Mr PJ you need to go to the website of cowin and make the
-              registration Mr PJ will give you updates about the availability </p>
-            <a href="https://www.cowin.gov.in/home" class="read-more"> cowin website<i
-                class="bi bi-long-arrow-right"></i></a>
-          </div>
-        </div>
-
-      </div>
-    </section><!-- cowin -->
-
-
-
     <!-- ======= Developers Section ======= -->
-    <section id="testimonials" class="testimonials ">
+    <section id="testimonials" class="testimonials section-bg">
       <div class="container" data-aos="fade-up">
 
         <div class="section-title">
@@ -516,6 +481,37 @@
 
       </div>
     </section><!-- End Developers section -->
+
+    <!-- ======= cowin section ======= -->
+    <section id="cowin" class="about">
+      <div class="container">
+
+        <div class="row">
+          <div class="section-title">
+            <h2>Cowin</h2>
+
+          </div>
+
+          <div class="col-lg-6 order-1 order-lg-2" data-aos="zoom-in" data-aos-delay="150">
+            <video src="assets/videos/cowin.mp4" class="img-fluid" alt="gif of cowin site" autoplay muted loop></video>
+          </div>
+          <div class="col-lg-6 pt-4 pt-lg-0 order-2 order-lg-1 content" data-aos="fade-right">
+            <h3> Get vaccinated and stay safe </h3><br>
+            <p class="fst-italic">
+              Two vaccines received approval for emergency use in india <ul>
+                <li>Covishield </li>
+                <li>Covaccine</li>
+              </ul>
+            </p>
+            <p> Vaccine registration can't served by Mr PJ you need to go to the website of cowin and make the
+              registration Mr PJ will give you updates about the availability </p>
+            <a href="https://www.cowin.gov.in/home" class="read-more"> cowin website<i
+                class="bi bi-long-arrow-right"></i></a>
+          </div>
+        </div>
+
+      </div>
+    </section><!-- cowin -->
 
 
   </main><!-- End #main -->
