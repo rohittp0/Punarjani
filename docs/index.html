@@ -6,15 +6,24 @@
   <meta content="width=device-width, initial-scale=1.0" name="viewport">
 
   <title>Punarjani</title>
-  <meta content="" name="description">
-  <meta content="" name="keywords">
+  
+  <link rel="manifest" href="manifest.json">
+
+  <script>
+    if ('serviceWorker' in navigator)
+      window.addEventListener('load', () =>
+        navigator.serviceWorker.register('/sw.js')
+        .then((registration) => console.log('ServiceWorker registered with scope: ', registration.scope))
+        .catch((err) => console.log('ServiceWorker registration failed: ', err)));
+  </script>
 
   <!-- Favicons -->
-  <link href="assets/img/favicon.png" rel="icon">
-  <link href="assets/img/apple-touch-icon.png" rel="apple-touch-icon">
+  <link href="assets/img/logos/logo-48.png" rel="icon">
 
   <!-- Google Fonts -->
-  <link href="https://fonts.googleapis.com/css?family=Open+Sans:300,300i,400,400i,600,600i,700,700i|Roboto:300,300i,400,400i,500,500i,600,600i,700,700i|Poppins:300,300i,400,400i,500,500i,600,600i,700,700i" rel="stylesheet">
+  <link
+    href="https://fonts.googleapis.com/css?family=Open+Sans:300,300i,400,400i,600,600i,700,700i|Roboto:300,300i,400,400i,500,500i,600,600i,700,700i|Poppins:300,300i,400,400i,500,500i,600,600i,700,700i"
+    rel="stylesheet">
 
   <!-- Vendor CSS Files -->
   <link href="assets/vendor/aos/aos.css" rel="stylesheet">
@@ -33,22 +42,23 @@
   <!-- ====== Nav bar ======= -->
   <header id="header" class="fixed-top ">
     <div class="container d-flex align-items-center justify-content-between">
-      <h1 class="logo"><a >Punarjani</a></h1>
+      <h1 class="logo"><a>Punarjani</a></h1>
       <!-- Uncomment below if you prefer to use an image logo -->
       <!-- <a href="index.html" class="logo"><img src="assets/img/logo.png" alt="" class="img-fluid"></a>-->
 
       <nav id="navbar" class="navbar">
-        <ul class="nav-mob" >
+        <ul class="nav-mob">
           <li class='nav-li-mob'><a class="nav-link scrollto active" href="#hero">Home</a></li>
           <li class='nav-li-mob'><a class="nav-link scrollto" href="#about">About</a></li>
           <li class='nav-li-mob'><a class="nav-link scrollto" href="#services">Services</a></li>
           <li class='nav-li-mob'><a class="nav-link scrollto " href="#features">Features</a></li>
-          <li class='nav-li-mob'><a class="nav-link scrollto" href="#pricing">Set-up</a></li> 
-          <li class='nav-li-mob'><a class="nav-link scrollto" href="#portfolio">Working</a></li> 
-          <li class='nav-li-mob'><a class="nav-link scrollto" href="#cowin">Cowin </a></li> 
-          <li class='nav-li-mob'><a class="nav-link scrollto" href="#testimonials">Developers</a></li> 
-         
-          <li class='nav-li-mob'><a class="getstarted scrollto" href="https://github.com/rohittp0/Punarjani.git">Contribute</a></li>
+          <li class='nav-li-mob'><a class="nav-link scrollto" href="#pricing">Set-up</a></li>
+          <li class='nav-li-mob'><a class="nav-link scrollto" href="#portfolio">Working</a></li>
+          <li class='nav-li-mob'><a class="nav-link scrollto" href="#cowin">Cowin </a></li>
+          <li class='nav-li-mob'><a class="nav-link scrollto" href="#testimonials">Developers</a></li>
+
+          <li class='nav-li-mob'><a class="getstarted scrollto"
+              href="https://github.com/rohittp0/Punarjani.git">Contribute</a></li>
         </ul>
         <i class="bi bi-list mobile-nav-toggle"></i>
       </nav><!-- .navbar -->
@@ -65,7 +75,8 @@
           <h1>Get vaccinated with Mr PJ</h1>
           <h2>Mr PJ is here to assist you in this pandemic scenario to ease your vaccination process .
             What are you waiting for ! Without any further delay click the button and get started </h2>
-          <div><a href="https://discord.com/oauth2/authorize?client_id=843422427185807380&scope=bot&permissions=445504" class="btn-get-started scrollto">Add to your discord</a></div>
+          <div><a href="https://discord.com/oauth2/authorize?client_id=843422427185807380&scope=bot&permissions=445504"
+              class="btn-get-started scrollto">Add to your discord</a></div>
         </div>
         <div class="col-xl-4 col-lg-6 order-1 order-lg-2 hero-img" data-aos="zoom-in" data-aos-delay="150">
           <img src="assets/img/logo.png" class="img-fluid animated" alt="">
@@ -73,33 +84,40 @@
       </div>
     </div>
 
-  </section><!--Home Hero -->
+  </section>
+  <!--Home Hero -->
 
   <main id="main">
 
 
     <!-- About section -->
-   
-     <section id="about" class="features">
+
+    <section id="about" class="features">
       <div class="container" data-aos="fade-up">
 
         <div class="section-title">
           <h2>About</h2>
-      
-        </div>
-        <p style="font-size:25px; color: rgb(19, 19, 114);"> This is a miniature project - 'PUNARJANI' done as a part of 'Build From Home' , an initiative led by <a href="https://tinkerhub.org/">Tinkerhub. </a>
-          The main aim of this program is to minimize the effort on finding available vaccination centers , slots when one
-           register for vaccination. Mr PJ ,the bot runs on discord platform. This is a user friendly bot which acts as an 
-           assistant of covid vaccination system. This is an open source program which means one can contribute more features or
-            build new versions of the same. We believe that everyone must get equal opportunity and equal care when it comes to 
-            critical sectors like health and education. We may not be able to solve the vaccine shortage but we can definitely be part of the solution. </p>
-        <div class="row">
-         <p></p>
-         
 
-      </div>
+        </div>
+        <p style="font-size:25px; color: rgb(19, 19, 114);"> This is a miniature project - 'PUNARJANI' done as a part of
+          'Build From Home' , an initiative led by <a href="https://tinkerhub.org/">Tinkerhub. </a>
+          The main aim of this program is to minimize the effort on finding available vaccination centers , slots when
+          one
+          register for vaccination. Mr PJ ,the bot runs on discord platform. This is a user friendly bot which acts as
+          an
+          assistant of covid vaccination system. This is an open source program which means one can contribute more
+          features or
+          build new versions of the same. We believe that everyone must get equal opportunity and equal care when it
+          comes to
+          critical sectors like health and education. We may not be able to solve the vaccine shortage but we can
+          definitely be part of the solution. </p>
+        <div class="row">
+          <p></p>
+
+
+        </div>
     </section><!-- End About Section -->
-    
+
 
     <!-- =======Services Section ======= -->
     <section id="services" class="services section-bg">
@@ -107,7 +125,7 @@
 
         <div class="section-title">
           <h2>Services</h2>
-          
+
         </div>
 
         <div class="row gy-4">
@@ -115,12 +133,14 @@
             <div class="icon-box iconbox-blue">
               <div class="icon">
                 <svg width="100" height="100" viewBox="0 0 600 600" xmlns="http://www.w3.org/2000/svg">
-                  <path stroke="none" stroke-width="0" fill="#f5f5f5" d="M300,521.0016835830174C376.1290562159157,517.8887921683347,466.0731472004068,529.7835943286574,510.70327084640275,468.03025145048787C554.3714126377745,407.6079735673963,508.03601936045806,328.9844924480964,491.2728898941984,256.3432110539036C474.5976632858925,184.082847569629,479.9380746630129,96.60480741107993,416.23090153303,58.64404602377083C348.86323505073057,18.502131276798302,261.93793281208167,40.57373210992963,193.5410806939664,78.93577620505333C130.42746243093433,114.334589627462,98.30271207620316,179.96522072025542,76.75703585869454,249.04625023123273C51.97151888228291,328.5150500222984,13.704378332031375,421.85034740162234,66.52175969318436,486.19268352777647C119.04800174914682,550.1803526380478,217.28368757567262,524.383925680826,300,521.0016835830174"></path>
+                  <path stroke="none" stroke-width="0" fill="#f5f5f5"
+                    d="M300,521.0016835830174C376.1290562159157,517.8887921683347,466.0731472004068,529.7835943286574,510.70327084640275,468.03025145048787C554.3714126377745,407.6079735673963,508.03601936045806,328.9844924480964,491.2728898941984,256.3432110539036C474.5976632858925,184.082847569629,479.9380746630129,96.60480741107993,416.23090153303,58.64404602377083C348.86323505073057,18.502131276798302,261.93793281208167,40.57373210992963,193.5410806939664,78.93577620505333C130.42746243093433,114.334589627462,98.30271207620316,179.96522072025542,76.75703585869454,249.04625023123273C51.97151888228291,328.5150500222984,13.704378332031375,421.85034740162234,66.52175969318436,486.19268352777647C119.04800174914682,550.1803526380478,217.28368757567262,524.383925680826,300,521.0016835830174">
+                  </path>
                 </svg>
-                <i class='bx bxs-alarm' ></i>
+                <i class='bx bxs-alarm'></i>
               </div>
               <h4><a href="">Get notified hourly</a></h4>
-              <p>You will get hourly notification if the vaccination  slots are available </p>
+              <p>You will get hourly notification if the vaccination slots are available </p>
             </div>
           </div>
 
@@ -128,12 +148,14 @@
             <div class="icon-box iconbox-orange ">
               <div class="icon">
                 <svg width="100" height="100" viewBox="0 0 600 600" xmlns="http://www.w3.org/2000/svg">
-                  <path stroke="none" stroke-width="0" fill="#f5f5f5" d="M300,582.0697525312426C382.5290701553225,586.8405444964366,449.9789794690241,525.3245884688669,502.5850820975895,461.55621195738473C556.606425686781,396.0723002908107,615.8543463187945,314.28637112970534,586.6730223649479,234.56875336149918C558.9533121215079,158.8439757836574,454.9685369536778,164.00468322053177,381.49747125262974,130.76875717737553C312.15926192815925,99.40240125094834,248.97055460311594,18.661163978235184,179.8680185752513,50.54337015887873C110.5421016452524,82.52863877960104,119.82277516462835,180.83849132639028,109.12597500060166,256.43424936330496C100.08760227029461,320.3096726198365,92.17705696193138,384.0621239912766,124.79988738764834,439.7174275375508C164.83382741302287,508.01625554203684,220.96474134820875,577.5009287672846,300,582.0697525312426"></path>
+                  <path stroke="none" stroke-width="0" fill="#f5f5f5"
+                    d="M300,582.0697525312426C382.5290701553225,586.8405444964366,449.9789794690241,525.3245884688669,502.5850820975895,461.55621195738473C556.606425686781,396.0723002908107,615.8543463187945,314.28637112970534,586.6730223649479,234.56875336149918C558.9533121215079,158.8439757836574,454.9685369536778,164.00468322053177,381.49747125262974,130.76875717737553C312.15926192815925,99.40240125094834,248.97055460311594,18.661163978235184,179.8680185752513,50.54337015887873C110.5421016452524,82.52863877960104,119.82277516462835,180.83849132639028,109.12597500060166,256.43424936330496C100.08760227029461,320.3096726198365,92.17705696193138,384.0621239912766,124.79988738764834,439.7174275375508C164.83382741302287,508.01625554203684,220.96474134820875,577.5009287672846,300,582.0697525312426">
+                  </path>
                 </svg>
                 <i class="bx bx-file"></i>
               </div>
               <h4><a href="">Check slots</a></h4>
-              <p>You can manually check the vaccination slots by registering to Punarjani   </p>
+              <p>You can manually check the vaccination slots by registering to Punarjani </p>
             </div>
           </div>
 
@@ -141,12 +163,14 @@
             <div class="icon-box iconbox-pink">
               <div class="icon">
                 <svg width="100" height="100" viewBox="0 0 600 600" xmlns="http://www.w3.org/2000/svg">
-                  <path stroke="none" stroke-width="0" fill="#f5f5f5" d="M300,541.5067337569781C382.14930387511276,545.0595476570109,479.8736841581634,548.3450877840088,526.4010558755058,480.5488172755941C571.5218469581645,414.80211281144784,517.5187510058486,332.0715597781072,496.52539010469104,255.14436215662573C477.37192572678356,184.95920475031193,473.57363656557914,105.61284051026155,413.0603344069578,65.22779650032875C343.27470386102294,18.654635553484475,251.2091493199835,5.337323636656869,175.0934190732945,40.62881213300186C97.87086631185822,76.43348514350839,51.98124368387456,156.15599469081315,36.44837278890362,239.84606092416172C21.716077023791087,319.22268207091537,43.775223500013084,401.1760424656574,96.891909868211,461.97329694683043C147.22146801428983,519.5804099606455,223.5754009179313,538.201503339737,300,541.5067337569781"></path>
+                  <path stroke="none" stroke-width="0" fill="#f5f5f5"
+                    d="M300,541.5067337569781C382.14930387511276,545.0595476570109,479.8736841581634,548.3450877840088,526.4010558755058,480.5488172755941C571.5218469581645,414.80211281144784,517.5187510058486,332.0715597781072,496.52539010469104,255.14436215662573C477.37192572678356,184.95920475031193,473.57363656557914,105.61284051026155,413.0603344069578,65.22779650032875C343.27470386102294,18.654635553484475,251.2091493199835,5.337323636656869,175.0934190732945,40.62881213300186C97.87086631185822,76.43348514350839,51.98124368387456,156.15599469081315,36.44837278890362,239.84606092416172C21.716077023791087,319.22268207091537,43.775223500013084,401.1760424656574,96.891909868211,461.97329694683043C147.22146801428983,519.5804099606455,223.5754009179313,538.201503339737,300,541.5067337569781">
+                  </path>
                 </svg>
-                <i class='bx bx-comment-detail' ></i>
+                <i class='bx bx-comment-detail'></i>
               </div>
-              <h4>Add to discord <a href="">  </a></h4>
-              <p>Discord is a popular chatting  application Mr PJ is designed to run on discord       </p>
+              <h4>Add to discord <a href=""> </a></h4>
+              <p>Discord is a popular chatting application Mr PJ is designed to run on discord </p>
             </div>
           </div>
 
@@ -154,37 +178,44 @@
             <div class="icon-box iconbox-yellow">
               <div class="icon">
                 <svg width="100" height="100" viewBox="0 0 600 600" xmlns="http://www.w3.org/2000/svg">
-                  <path stroke="none" stroke-width="0" fill="#f5f5f5" d="M300,503.46388370962813C374.79870501325706,506.71871716319447,464.8034551963731,527.1746412648533,510.4981551193396,467.86667711651364C555.9287308511215,408.9015244558933,512.6030010748507,327.5744911775523,490.211057578863,256.5855673507754C471.097692560561,195.9906835881958,447.69079081568157,138.11976852964426,395.19560036434837,102.3242989838813C329.3053358748298,57.3949838291264,248.02791733380457,8.279543830951368,175.87071277845988,42.242879143198664C103.41431057327972,76.34704239035025,93.79494320519305,170.9812938413882,81.28167332365135,250.07896920659033C70.17666984294237,320.27484674793965,64.84698225790005,396.69656628748305,111.28512138212992,450.4950937839243C156.20124167950087,502.5303643271138,231.32542653798444,500.4755392045468,300,503.46388370962813"></path>
+                  <path stroke="none" stroke-width="0" fill="#f5f5f5"
+                    d="M300,503.46388370962813C374.79870501325706,506.71871716319447,464.8034551963731,527.1746412648533,510.4981551193396,467.86667711651364C555.9287308511215,408.9015244558933,512.6030010748507,327.5744911775523,490.211057578863,256.5855673507754C471.097692560561,195.9906835881958,447.69079081568157,138.11976852964426,395.19560036434837,102.3242989838813C329.3053358748298,57.3949838291264,248.02791733380457,8.279543830951368,175.87071277845988,42.242879143198664C103.41431057327972,76.34704239035025,93.79494320519305,170.9812938413882,81.28167332365135,250.07896920659033C70.17666984294237,320.27484674793965,64.84698225790005,396.69656628748305,111.28512138212992,450.4950937839243C156.20124167950087,502.5303643271138,231.32542653798444,500.4755392045468,300,503.46388370962813">
+                  </path>
                 </svg>
-                <i class='bx bx-message-square-check' ></i>
+                <i class='bx bx-message-square-check'></i>
               </div>
               <h4><a href="">Free for everyone </a></h4>
-              <p>You don't need to pay anything the only  requirement is you need a discord account </p>
+              <p>You don't need to pay anything the only requirement is you need a discord account </p>
             </div>
           </div>
 
-          
+
           <div class="col-lg-4 col-md-6 d-flex align-items-stretch" data-aos="zoom-in" data-aos-delay="200">
             <div class="icon-box iconbox-orange ">
               <div class="icon">
                 <svg width="100" height="100" viewBox="0 0 600 600" xmlns="http://www.w3.org/2000/svg">
-                  <path stroke="none" stroke-width="0" fill="#f5f5f5" d="M300,582.0697525312426C382.5290701553225,586.8405444964366,449.9789794690241,525.3245884688669,502.5850820975895,461.55621195738473C556.606425686781,396.0723002908107,615.8543463187945,314.28637112970534,586.6730223649479,234.56875336149918C558.9533121215079,158.8439757836574,454.9685369536778,164.00468322053177,381.49747125262974,130.76875717737553C312.15926192815925,99.40240125094834,248.97055460311594,18.661163978235184,179.8680185752513,50.54337015887873C110.5421016452524,82.52863877960104,119.82277516462835,180.83849132639028,109.12597500060166,256.43424936330496C100.08760227029461,320.3096726198365,92.17705696193138,384.0621239912766,124.79988738764834,439.7174275375508C164.83382741302287,508.01625554203684,220.96474134820875,577.5009287672846,300,582.0697525312426"></path>
+                  <path stroke="none" stroke-width="0" fill="#f5f5f5"
+                    d="M300,582.0697525312426C382.5290701553225,586.8405444964366,449.9789794690241,525.3245884688669,502.5850820975895,461.55621195738473C556.606425686781,396.0723002908107,615.8543463187945,314.28637112970534,586.6730223649479,234.56875336149918C558.9533121215079,158.8439757836574,454.9685369536778,164.00468322053177,381.49747125262974,130.76875717737553C312.15926192815925,99.40240125094834,248.97055460311594,18.661163978235184,179.8680185752513,50.54337015887873C110.5421016452524,82.52863877960104,119.82277516462835,180.83849132639028,109.12597500060166,256.43424936330496C100.08760227029461,320.3096726198365,92.17705696193138,384.0621239912766,124.79988738764834,439.7174275375508C164.83382741302287,508.01625554203684,220.96474134820875,577.5009287672846,300,582.0697525312426">
+                  </path>
                 </svg>
                 <i class="bx bx-user"></i>
               </div>
               <h4><a href="">Create a profile</a></h4>
-              <p>Creating your profile on Punarjani database allows you to get hourly notification and you can edit your profile any time. </p>
+              <p>Creating your profile on Punarjani database allows you to get hourly notification and you can edit your
+                profile any time. </p>
             </div>
           </div>
 
-          
+
           <div class="col-lg-4 col-md-6 d-flex align-items-stretch" data-aos="zoom-in" data-aos-delay="200">
             <div class="icon-box iconbox-orange ">
               <div class="icon">
                 <svg width="100" height="100" viewBox="0 0 600 600" xmlns="http://www.w3.org/2000/svg">
-                  <path stroke="none" stroke-width="0" fill="#f5f5f5" d="M300,582.0697525312426C382.5290701553225,586.8405444964366,449.9789794690241,525.3245884688669,502.5850820975895,461.55621195738473C556.606425686781,396.0723002908107,615.8543463187945,314.28637112970534,586.6730223649479,234.56875336149918C558.9533121215079,158.8439757836574,454.9685369536778,164.00468322053177,381.49747125262974,130.76875717737553C312.15926192815925,99.40240125094834,248.97055460311594,18.661163978235184,179.8680185752513,50.54337015887873C110.5421016452524,82.52863877960104,119.82277516462835,180.83849132639028,109.12597500060166,256.43424936330496C100.08760227029461,320.3096726198365,92.17705696193138,384.0621239912766,124.79988738764834,439.7174275375508C164.83382741302287,508.01625554203684,220.96474134820875,577.5009287672846,300,582.0697525312426"></path>
+                  <path stroke="none" stroke-width="0" fill="#f5f5f5"
+                    d="M300,582.0697525312426C382.5290701553225,586.8405444964366,449.9789794690241,525.3245884688669,502.5850820975895,461.55621195738473C556.606425686781,396.0723002908107,615.8543463187945,314.28637112970534,586.6730223649479,234.56875336149918C558.9533121215079,158.8439757836574,454.9685369536778,164.00468322053177,381.49747125262974,130.76875717737553C312.15926192815925,99.40240125094834,248.97055460311594,18.661163978235184,179.8680185752513,50.54337015887873C110.5421016452524,82.52863877960104,119.82277516462835,180.83849132639028,109.12597500060166,256.43424936330496C100.08760227029461,320.3096726198365,92.17705696193138,384.0621239912766,124.79988738764834,439.7174275375508C164.83382741302287,508.01625554203684,220.96474134820875,577.5009287672846,300,582.0697525312426">
+                  </path>
                 </svg>
-                <i class='bx bxs-share-alt' ></i>
+                <i class='bx bxs-share-alt'></i>
               </div>
               <h4><a href="">Share among friends </a></h4>
               <p> Anyone can share the link so that your friends wont miss the experience </p>
@@ -203,7 +234,7 @@
 
         <div class="section-title">
           <h2>Features</h2>
-      
+
         </div>
 
         <div class="row">
@@ -211,24 +242,27 @@
             <div class="icon-box mt-5 mt-lg-0" data-aos="fade-up" data-aos-delay="100">
               <i class="bx bx-receipt bx-tada-hover"></i>
               <h4>Open Source</h4>
-               
-              <p>The source code is publicly  available anyone can use contribute and build your on project form it </p>
-              
+
+              <p>The source code is publicly available anyone can use contribute and build your on project form it </p>
+
             </div>
             <div class="icon-box mt-5 " data-aos="fade-up" data-aos-delay="200">
-              <i class='bx bxs-user bx-tada-hover' ></i>
+              <i class='bx bxs-user bx-tada-hover'></i>
               <h4>User friendly</h4>
-              <p>the interface of discord is just like any chat application any beginner can use discord and  add Mr PJ in it </p>
+              <p>the interface of discord is just like any chat application any beginner can use discord and add Mr PJ
+                in it </p>
             </div>
             <div class="icon-box mt-5" data-aos="fade-up" data-aos-delay="300">
               <i class='bx bx-happy bx-tada-hover'></i>
               <h4>Interactive</h4>
-              <p>MR PJ is very Interactive you can use its services just by chatting to it and it will help you when you stuck </p>
+              <p>MR PJ is very Interactive you can use its services just by chatting to it and it will help you when you
+                stuck </p>
             </div>
             <div class="icon-box mt-5" data-aos="fade-up" data-aos-delay="400">
-              <i class='bx bxs-like bx-tada-hover' ></i>
+              <i class='bx bxs-like bx-tada-hover'></i>
               <h4>Useful</h4>
-              <p>Its very helpful because you wont be able to check the vaccine availability every time its a big task here Mr PJ will assist you  </p>
+              <p>Its very helpful because you wont be able to check the vaccine availability every time its a big task
+                here Mr PJ will assist you </p>
             </div>
           </div>
           <div class="image col-lg-6 order-1 order-lg-2 " data-aos="zoom-in" data-aos-delay="100">
@@ -247,7 +281,8 @@
           <h2>Set-up</h2>
           <p>You can add Mr PJ to your discord server by following the steps </p>
 
-          <div><a href="https://discord.com/oauth2/authorize?client_id=843422427185807380&scope=bot&permissions=445504" class="btn-get-started scrollto">Add to your discord</a></div>
+          <div><a href="https://discord.com/oauth2/authorize?client_id=843422427185807380&scope=bot&permissions=445504"
+              class="btn-get-started scrollto">Add to your discord</a></div>
         </div>
 
         <div class="row">
@@ -256,34 +291,34 @@
             <div class="box featured">
               <h3>STEP 1</h3>
               <img style="width: 100%; height: 100%;" src="assets/img/steps/step1.jpg" alt="">
-              <p style="padding-top: 10px;" >Use the link provided in home section</p>
+              <p style="padding-top: 10px;">Use the link provided in home section</p>
             </div>
           </div>
 
-          
+
           <div class="col-lg-3 col-md-6" data-aos="fade-up" data-aos-delay="100">
             <div class="box featured">
               <h3>STEP 2</h3>
               <img style="width: 100%; height: 100%;" src="assets/img/steps/step2.jpg" alt="">
-              <p style="padding-top: 10px;" >Log in to your discord account using your details</p>
+              <p style="padding-top: 10px;">Log in to your discord account using your details</p>
             </div>
           </div>
 
-          
+
           <div class="col-lg-3 col-md-6" data-aos="fade-up" data-aos-delay="100">
             <div class="box featured">
               <h3>STEP 3</h3>
               <img style="width: 100%; height: 100%;" src="assets/img/steps/step3.jpg" alt="">
-              <p style="padding-top: 10px;" >Select the server for which you like to add Punarjani  </p>
+              <p style="padding-top: 10px;">Select the server for which you like to add Punarjani </p>
             </div>
           </div>
 
-          
+
           <div class="col-lg-3 col-md-6" data-aos="fade-up" data-aos-delay="100">
             <div class="box featured">
               <h3>STEP 4</h3>
               <img style="width: 100%; height: 100%;" src="assets/img/steps/step4.jpg" alt="">
-              <p style="padding-top: 10px;" >Accept the permissions so that for proper functioning</p>
+              <p style="padding-top: 10px;">Accept the permissions so that for proper functioning</p>
             </div>
           </div>
         </div>
@@ -291,7 +326,7 @@
       </div>
     </section><!-- Steps Section -->
 
-  
+
 
     <!-- ======= Working ======= -->
     <section id="portfolio" class="portfolio">
@@ -299,7 +334,7 @@
 
         <div id="working" class="section-title">
           <h2>Working </h2>
-        
+
         </div>
 
         <div class="row">
@@ -311,7 +346,7 @@
               <li data-filter=".filter-slots">!slots</li>
               <li data-filter=".filter-profile">!profile</li>
               <li data-filter=".filter-info">!info</li>
-             
+
             </ul>
           </div>
         </div>
@@ -320,135 +355,120 @@
 
           <div class="col-lg-4 col-md-6 portfolio-item filter-help">
             <div class="portfolio-wrap">
-              <img src="assets/img/Working/help/help.gif" class="img-fluid" alt="">
-             <div style="padding-top: 20px;"> <h2 style="text-align: center;">!help</h2> </div>
-          
+              <video src="assets/videos/help.mp4" class="img-fluid" autoplay muted loop></video>
             </div>
           </div>
 
           <div class="col-lg-4 col-md-6 portfolio-item filter-help">
             <div style="width: 140% ;">
-              <img src="assets/img/Working/help/help.png" class="img-fluid" alt="">
-            
-          
+              <img src="assets/img/Working/help.png" class="img-fluid" alt="help response">
+
+
             </div>
           </div>
 
           <div class="col-lg-4 col-md-6 portfolio-item filter-edit">
             <div class="portfolio-wrap">
-              <img src="assets/img/Working/edit/edit.gif" class="img-fluid" alt="">
-             <div style="padding-top: 20px;"> <h2 style="text-align: center;">!edit</h2> </div>
-          
+              <video src="assets/videos/edit.mp4" class="img-fluid" autoplay muted loop></video>
+            </div>
           </div>
-          </div>
-          
+
 
           <div class="col-lg-4 col-md-6 portfolio-item filter-edit">
             <div class="portfolio-wrap">
-              <img src="assets/img/Working/edit/edit.jpg" class="img-fluid" alt="">
-          
-          
-           </div>
+              <img src="assets/img/Working/edit.jpg" class="img-fluid" alt="edit response">
+            </div>
 
           </div>
           <div class="col-lg-4 col-md-6 portfolio-item filter-info">
             <div class="portfolio-wrap">
-              <img src="assets/img/Working/info/info.gif" class="img-fluid" alt="">
-              <div style="padding-top: 20px;"> <h2 style="text-align: center;">!info</h2> </div>
-          
-           </div>
+              <video src="assets/videos/info.mp4" class="img-fluid" autoplay muted loop></video>
+            </div>
           </div>
           <div class="col-lg-4 col-md-6 portfolio-item filter-info">
             <div class="portfolio-wrap">
-              <img src="assets/img/Working/info/info.png" class="img-fluid" alt="">
-           
-          
+              <img src="assets/img/Working/info.png" class="img-fluid" alt="info response">
+
+
             </div>
           </div>
 
           <div class="col-lg-4 col-md-6 portfolio-item filter-profile">
             <div class="portfolio-wrap">
-              <img src="assets/img/Working/profile/profile.gif" class="img-fluid" alt="">
-             <div style="padding-top: 20px;"> <h2 style="text-align: center;">!profile</h2> </div>
-          
+              <video src="assets/videos/profile.mp4" class="img-fluid" autoplay muted loop></video>
             </div>
           </div>
           <div class="col-lg-4 col-md-6 portfolio-item filter-profile">
             <div class="portfolio-wrap">
-              <img src="assets/img/Working/profile/profile.jpg" class="img-fluid" alt="">
-            
-          
+              <img src="assets/img/Working/profile.jpg" class="img-fluid" alt="profile response">
+
+
             </div>
           </div>
 
           <div class="col-lg-4 col-md-6 portfolio-item filter-register">
             <div class="portfolio-wrap">
-              <img src="assets/img/Working/register/register.gif" class="img-fluid" alt="">
-             <div style="padding-top: 20px;"> <h2 style="text-align: center;">!register</h2> </div>
-          
+              <video src="assets/videos/register.mp4" class="img-fluid" autoplay muted loop></video>
             </div>
           </div>
           <div class="col-lg-4 col-md-6 portfolio-item filter-register">
             <div class="portfolio-wrap">
-              <img src="assets/img/Working/register/register.jpg" class="img-fluid" alt="">
-           
-          
+              <img src="assets/img/Working/register.jpg" class="img-fluid" alt="register response">
             </div>
           </div>
 
 
           <div class="col-lg-4 col-md-6 portfolio-item filter-slots">
             <div class="portfolio-wrap">
-              <img src="assets/img/Working/slots/slots.gif" class="img-fluid" alt="">
-             <div style="padding-top: 20px;"> <h2 style="text-align: center;">!slots</h2> </div>
-          
+              <video src="assets/videos/slots.mp4" class="img-fluid" autoplay muted loop></video>
             </div>
           </div>
           <div class="col-lg-4 col-md-6 portfolio-item filter-slots">
             <div class="portfolio-wrap">
-              <img src="assets/img/Working/slots/slots.jpg" class="img-fluid" alt="">
-            
-          
+              <img src="assets/img/Working/slots.jpg" class="img-fluid" alt="slots response">
             </div>
           </div>
 
         </div>
 
       </div>
-    </section><!--Working -->
+    </section>
+    <!--Working -->
 
-  
+
 
     <!-- ======= cowin section ======= -->
     <section id="cowin" class="about section-bg">
-    <div class="container">
+      <div class="container">
 
-      <div class="row">
-        <div class="section-title">
-          <h2>Cowin</h2>
-      
-        </div>
-       
-        <div class="col-lg-6 order-1 order-lg-2" data-aos="zoom-in" data-aos-delay="150">
-          <img src="assets/img/about.gif" class="img-fluid" alt="">
-        </div>
-        <div class="col-lg-6 pt-4 pt-lg-0 order-2 order-lg-1 content" data-aos="fade-right">
-          <h3> Get vaccinated and stay safe </h3><br>
-          <p class="fst-italic">
-            Two vaccines received approval  for emergency use in india <ul>
-              <li>Covishield  </li>
-              <li>Covaccine</li>
-            </ul> 
+        <div class="row">
+          <div class="section-title">
+            <h2>Cowin</h2>
+
+          </div>
+
+          <div class="col-lg-6 order-1 order-lg-2" data-aos="zoom-in" data-aos-delay="150">
+            <img src="assets/img/about.gif" class="img-fluid" alt="">
+          </div>
+          <div class="col-lg-6 pt-4 pt-lg-0 order-2 order-lg-1 content" data-aos="fade-right">
+            <h3> Get vaccinated and stay safe </h3><br>
+            <p class="fst-italic">
+              Two vaccines received approval for emergency use in india <ul>
+                <li>Covishield </li>
+                <li>Covaccine</li>
+              </ul>
             </p>
-         <p>  Vaccine registration can't served by Mr PJ you need to go to the website of cowin and make the registration Mr PJ will give you updates about the availability </p>
-          <a href="https://www.cowin.gov.in/home" class="read-more"> cowin website<i class="bi bi-long-arrow-right"></i></a>
+            <p> Vaccine registration can't served by Mr PJ you need to go to the website of cowin and make the
+              registration Mr PJ will give you updates about the availability </p>
+            <a href="https://www.cowin.gov.in/home" class="read-more"> cowin website<i
+                class="bi bi-long-arrow-right"></i></a>
+          </div>
         </div>
-      </div>
 
-    </div>
+      </div>
     </section><!-- cowin -->
 
-   
+
 
     <!-- ======= Developers Section ======= -->
     <section id="testimonials" class="testimonials ">
@@ -466,7 +486,7 @@
               <img class="card-img-top" src="assets/img/developers/Rohit.jpg" alt="Card image">
               <div class="card-body">
                 <h4 class="card-title">Rohit T P</h4>
-              
+
                 <a href="https://www.instagram.com/rohit_pnr/" class="btn btn-primary">instagram</a>
               </div>
             </div><!-- Rhith T P -->
@@ -475,7 +495,7 @@
               <img class="card-img-top" src="assets/img/developers/Sunith.png" alt="Card image">
               <div class="card-body">
                 <h4 class="card-title">Sunith V S</h4>
-            
+
                 <a href="https://www.instagram.com/sunith_vs__" class="btn btn-primary">instagram</a>
               </div>
             </div><!-- Sunith V S -->
@@ -490,8 +510,8 @@
               </div>
             </div><!-- Sanu -->
 
-            
-          
+
+
           </div>
           <div class="swiper-pagination"></div>
         </div>
@@ -499,7 +519,7 @@
       </div>
     </section><!-- End Developers section -->
 
-  
+
   </main><!-- End #main -->
 
   <!-- ======= Footer ======= -->
@@ -512,10 +532,10 @@
           <div class="col-lg-3 col-md-6 footer-contact">
             <h4>School of engineering Cusat</h4>
             <p>
-             University Road <br>
-             south Kalamassery<br>
-             Kochi <br>
-             Kerala 682022
+              University Road <br>
+              south Kalamassery<br>
+              Kochi <br>
+              Kerala 682022
             </p>
           </div>
 
@@ -536,44 +556,41 @@
             <ul>
               <li><i class="bx bx-chevron-right"></i> <a href="https://nodejs.org">node js</a></li>
               <li><i class="bx bx-chevron-right"></i> <a href="https://discord.js.org">Discord js</a></li>
-              <li><i class="bx bx-chevron-right"></i> <a href="https://apisetu.gov.in/public/api/cowin">Cowin API</a></li>
+              <li><i class="bx bx-chevron-right"></i> <a href="https://apisetu.gov.in/public/api/cowin">Cowin API</a>
+              </li>
               <li><i class="bx bx-chevron-right"></i> <a href="https://firebase.google.com/">Firebase</a></li>
-              <li><i class="bx bx-chevron-right"></i> <a href="https://code.visualstudio.com/">Visual studio code</a></li>
+              <li><i class="bx bx-chevron-right"></i> <a href="https://code.visualstudio.com/">Visual studio code</a>
+              </li>
             </ul>
           </div>
 
           <div class="col-lg-4 col-md-6 footer-newsletter">
             <h4>Explore</h4>
-            <p> Check the <a class="link" href="https://github.com/rohittp0/Punarjani.git" >Repository</a>  for further information </p> 
-            
-          
+            <p> Check the <a class="link" href="https://github.com/rohittp0/Punarjani.git">Repository</a> for further
+              information </p>
 
-        </div>
-      </div>
-    </div>
 
-    <div class="container">
 
-      <div class="copyright-wrap d-md-flex py-4">
-        <div class="me-md-auto text-center text-md-start">
-          <div class="copyright">
-            &copy; Copyright <strong><span>Punarjani</span></strong>. All Rights Reserved
           </div>
-         
-        </div>
-        <div class="social-links text-center text-md-right pt-3 pt-md-0">
-          <a href="#" class="twitter"><i class="bx bxl-twitter"></i></a>
-          <a href="#" class="facebook"><i class="bx bxl-facebook"></i></a>
-          <a href="#" class="instagram"><i class="bx bxl-instagram"></i></a>
-          <a href="#" class="google-plus"><i class="bx bxl-skype"></i></a>
-          <a href="#" class="linkedin"><i class="bx bxl-linkedin"></i></a>
         </div>
       </div>
 
-    </div>
+      <div class="container">
+
+        <div class="copyright-wrap d-md-flex py-4">
+          <div class="me-md-auto text-center text-md-start">
+            <div class="copyright">
+              &copy; Copyright <strong><span>Punarjani</span></strong>. All Rights Reserved
+            </div>
+
+          </div>
+        </div>
+
+      </div>
   </footer><!-- End Footer -->
 
-  <a href="#" class="back-to-top d-flex align-items-center justify-content-center"><i class="bi bi-arrow-up-short"></i></a>
+  <a href="#" class="back-to-top d-flex align-items-center justify-content-center"><i
+      class="bi bi-arrow-up-short"></i></a>
   <div id="preloader"></div>
 
   <!-- Vendor JS Files -->
