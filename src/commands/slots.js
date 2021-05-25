@@ -1,7 +1,7 @@
 /**
  * Punarjani is a discord bot that notifies you about slot availability at
  * CoWin vaccination centers.
- * Copyright (C) 2021  Sanu Muhammed C
+ * Copyright (C) 2021  Rohit TP, Sunith VS, Sanu Muhammed C
  * 
  *  This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU Affero General Public License as published
@@ -18,10 +18,9 @@
  */
 
 // eslint-disable-next-line no-unused-vars
-import Discord from "discord.js";
-// eslint-disable-next-line no-unused-vars
-import NodeCache from "node-cache";
-import {APIS, getSlotEmbed, sendRequest, TEXTS} from "../common.js";
+import { Message } from "discord.js";
+import {getIndianTime, getSlotEmbed, getSessions} from "../common.js";
+import { TEXTS } from "../consts.js";
 
 /**
  * Converts date from human readable format to the format required by cowin API.
@@ -37,10 +36,8 @@ import {APIS, getSlotEmbed, sendRequest, TEXTS} from "../common.js";
  */
 function getDate(dateString) 
 {
-	const currentTime = new Date();
-	const today = new Date(currentTime.getTime() + (currentTime.getTimezoneOffset() + 330)*60000);
-	
-	const date = new Date(dateString || "").getDate() ? new Date(dateString || "") : today;
+	const today = getIndianTime(undefined);	
+	const date = getIndianTime(dateString);
 	
 	if(date.getFullYear() < today.getFullYear())
 		date.setFullYear(today.getFullYear());
@@ -56,13 +53,12 @@ function getDate(dateString)
  * This function handles manual checking of COWIN slots available  for users district in Punarjani.
  * 
  * @author Sanu Muhammed C
- * @param {Discord.Message} message The message that initiated this command.
+ * @param {Message} message The message that initiated this command.
  * @param {Array<string>} args The arguments passed.
  * @param {{firestore: () => FirebaseFirestore.Firestore}} app The firebase app
- * @param {NodeCache} cache
+ * @param {{get: any, set:any}} cache
  * @returns {Promise<Boolean>} Indicates operation success or failure.
  */
-// eslint-disable-next-line no-unused-vars
 export default async function slots(message, args, app, cache) 
 {
 	// Get an instance of firestore to access the database.
@@ -75,14 +71,10 @@ export default async function slots(message, args, app, cache)
 	if(!user || !user.exists)
 		return message.reply(TEXTS.notRegistered), false;	
 
-	const date = getDate(args.join(" "));	
-	const response = await sendRequest(`${APIS.byDistrict}${user.get("district").id}&date=${date}`, cache)
-		.catch(()=>({sessions: [], time: "never"}));
+	const date = getDate(args.join(" ")); // Create date string to send with the request.	
+	const response = await getSessions(user.get("district").id, date, cache); // Send API request
 	
-	const available = {time: response.time, centers: []};
-
-	available.centers = (response.sessions || [])
-		// @ts-ignore
+	const centers = response.sessions
 		.map(({min_age_limit, name, available_capacity_dose1, available_capacity_dose2, pincode}) =>
 			(
 				{ 
@@ -92,14 +84,13 @@ export default async function slots(message, args, app, cache)
 					pincode 
 				}
 			))
-		// @ts-ignore
 		.filter(({age, slots})=> age && Number(slots) > 0);
 	
-	for(const embed of getSlotEmbed(available))
-		await message.channel.send(embed).catch(console.error);			
-	
-	if(available.centers.length === 0)
-		message.reply(`No slots available in ${user.get("district").name} for ${date}`);	
+	if(centers.length === 0)
+		return message.reply(`No slots available in ${user.get("district").name} for ${date}`), true;	
+
+	for(const embed of getSlotEmbed({centers, time: response.time}, date))
+		await message.channel.send(embed).catch(console.error);				
 		
 	return true;
 }

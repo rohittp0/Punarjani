@@ -1,7 +1,7 @@
 /**
  * Punarjani is a discord bot that notifies you about slot availability at
  * CoWin vaccination centers.
- * Copyright (C) 2021  Rohit T P
+ * Copyright (C) 2021  Rohit TP, Sunith VS, Sanu Muhammed C
  * 
  *  This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU Affero General Public License as published
@@ -20,62 +20,7 @@
 import admin from "firebase-admin";
 import Discord from "discord.js";
 import axios from "axios";
-// eslint-disable-next-line no-unused-vars
-import NodeCache from "node-cache";
-
-export const TEXTS = 
-{
-	helpInfo: "Don't worry you can always ask for !help 😉",
-	tryAgain: "Don't worry you can try again later 🤘",
-	generalError: "Oops something went wrong 😵‍💫",
-	infoCollected: "That's all I need to know 👍 I will write it in my 📖 and let you know.",
-	regSuccess: "Your registration has been completed 🎊 Welcome to Punarjani 🙋",
-	regFailed: "Sorry your registration failed 😞 Looks like I forgot how to write 😵",
-	profileDesc: "I found this written in my 📖 about you.",
-	ageQuestion: "Hmm you look soo young, tell me your real age?",
-	confirmDele: "Are you sure you want to delete your account? 😨",
-	noDelete: "Oof that was close 😌, I was really scared.",
-	cantTalk: "Some one told my developers that I am too noisy 😡 now I am banned from talking here 😭 ",
-	goToDM: "We can still chat in DM 😉,But you have to swear you won't complain on me 🤫",
-	hourlyUpdate: "Do you want to get hourly update for CoWin slots ?",
-	existingUser: "Hmm you look familiar... Aah I know you have registered a while back, no need to do it again.",
-	gotShot: "Did you get your first vaccine shot?",
-	stateQuery: 
-	[ 
-		"Select The Sate", 
-		"Select the state from where you want to get vaccinated. Don't worry you can change it latter." 
-	],
-	districtQuery:
-	[
-		"Select The District",
-		"Select your preferred district. Only showing districts from the state you selected."
-	],
-	embedFields: 
-	{
-		title: "Edit Info",
-		description: "Hmm so you have decided to edit your personal details. You can do the following:",
-		footer: "To see currently saved details use !profile"
-	},
-	ageError: "Did you really forget your age, or are you trolling me 🤔",
-	stateError: "Registration has been canceled due to invalid state selection 😭",
-	districtError: "Registration has been canceled due to invalid district selection 😭",
-	notRegistered: "Looks like you haven't registered yet. Use !register to get yourself registered.",
-	runningError: "You asked me to do something else complete it first."
-};
-
-export const APIS = 
-{
-	byDistrict: "https://cowin.rabeeh.me/api/v2/appointment/sessions/public/findByDistrict?district_id="
-};
-
-export const BOT_AVATAR = "https://raw.githubusercontent.com/rohittp0/Punarjani/main/bot-avatar.png";
-
-// Login to firebase server then exports the logging instance so we can use it in other files. 
-export const getApp = () => admin.initializeApp(
-	{
-		credential: admin.credential.cert(JSON.parse(process.env.FIREBASE_KEY || "")),
-		databaseURL: "https://punarjani-cowin-default-rtdb.firebaseio.com"
-	});
+import { BOT_AVATAR, TEXTS } from "./consts.js";
 
 /**
  * Returns an instance of firebase admin after initalizing it using
@@ -84,77 +29,71 @@ export const getApp = () => admin.initializeApp(
  * @author Rohit T P
  * @returns {admin.app.App} Initialized Firebase App
  */
+export const getApp = () => admin.initializeApp(
+	{
+		credential: admin.credential.cert(JSON.parse(process.env.FIREBASE_KEY || "")),
+		databaseURL: "https://punarjani-cowin-default-rtdb.firebaseio.com"
+	});
 
 /**
- * Sends get request to cowin rest api specified by the url passed.
+ * Gets indian time from the date string passed or returns current time in IST.
  * 
  * @author Rohit T P
- * @param {string} url The url to get.
- * @param {NodeCache} cache A per opened cache.
- * @returns {Promise<{[key: string]: any}>} Response JSON converted to JS object.  
- * @throws If request failed and cache was also not found.
+ * @param {string | undefined} dateString The date string to use
+ * @returns {Date} IST Date
  */
-export async function sendRequest(url, cache) 
+export function getIndianTime(dateString) 
 {
+	const date = new Date(dateString || "").getDate() ? new Date(dateString || "") : new Date();
+	const offset = date.getTimezoneOffset() + 330;   // IST offset UTC +5:30
+ 
+	return new Date(date.getTime() + offset*60000);
+}	
+
+/**
+ * Gets the sessions available by district id for the specified date.
+ * If for some reason API request fails return an object with empty sessions array
+ * and time of fetching Date(0)
+ * 
+ * 
+ * @author Rohit T P
+ * 
+ * @param {string | number} id The district ID
+ * @param {string} date The date for which sessions are needed in the dd-mm-yyyy format 
+ * @param {{set: any, get:any}} cache A per opened cache.
+ * 
+ * 
+ * @returns {Promise<{sessions: any[], time: Date}>} The available sessions and time of fetching.  
+ */
+export async function getSessions(id, date, cache) 
+{
+	const url = `https://cowin.rabeeh.me/api/v2/appointment/sessions/public/findByDistrict?district_id=${id}&date=${date}`;
 	const result = await axios.get(url).then(({data}) => data).catch(() =>undefined);
 
-	let data = result.data;
+	let data = result?.data;
 
-	if(!data)
+	if(!data || !data.sessions) // If no data was got try getting the data from cache
 		data = cache.get(url);
 	else 
-		cache.set(url, data, 5*60*60*1000);	
+		cache.set("slots"+id+date, data, 5*60*60*1000);	// If valid data is got save it in cache
 
-	if(!data) throw "Request failed and cache also didn't hit.";
+	if(!data || !data.sessions) 
+		return { sessions: [], time: new Date(0) }; // If data was not found in cache also then return a place holder.
 	if(!data.time) 
-	{
-		const currentTime = new Date();
-		const offset = currentTime.getTimezoneOffset() + 330;   // IST offset UTC +5:30 
-		data.time = new Date(currentTime.getTime() + offset*60000)
-			.toLocaleString("en-US", { hour: "numeric", minute: "numeric", hour12: true });
-	}
+		data.time = getIndianTime(undefined); // If data dose not have time set set it to current time. 
 
 	return data;
 }
 
 /**
- * Helper function to create embed for selecting state or district.
+ * Helper function to create embed for available slots.
  * 
  * @author Rohit T P
- * @param {string} title The title of the embed.
- * @param {string} description The description of the embed.
- * @param {string} avatar The url to an image to use as avatar.
- * @param {{name: string, id: number}[]} options An object containing options to list.
- * @returns {Discord.MessageEmbed[]} The embed created using given data.
- */
-export function getLocationEmbeds(title, description, avatar, options) 
-{
-	const embeds = [];
-	const fields = options.map((option) => 
-		({ name: `${option.name} - ${option.id}`, value: "‾", inline: true }));
-	
-	while(fields.length)
-		embeds.push(new Discord.MessageEmbed()
-			.setThumbnail(avatar)
-			.setColor("#0099ff")
-			.addFields(fields.splice(0, 25)));
-	
-	embeds[0].setTitle(title)
-		.setDescription(description);
-	
-	embeds[embeds.length-1].setTimestamp()
-		.setFooter("Reply with the appropriate number", avatar); 	
-
-	return embeds;	
-}
-
-
-/**
- * @author Rohit T P
- * @param {{centers: { slots: number; name: string; pincode: number; }[], time: any}} sessions The available sessions for the user.
+ * @param {{centers: { slots: number; name: string; pincode: number; }[], time: Date}} sessions The available sessions for the user.
+ * @param {string} displayDate
  * @returns {Discord.MessageEmbed[]}
  */
-export function getSlotEmbed(sessions)
+export function getSlotEmbed(sessions, displayDate)
 {
 	const embeds = [];
 	const fields = sessions.centers.map(({slots, name, pincode}) => 
@@ -169,10 +108,10 @@ export function getSlotEmbed(sessions)
 	
 	embeds[0].setTitle("Available Slots")
 		.setURL("https://www.cowin.gov.in/home") //url for redirecting user  to cowin website
-		.setDescription("Click ☝️ to go to CoWin site. Only slots for your age and dose type.");
+		.setDescription(`${TEXTS.slotsDescription} ${displayDate}`);
 	
 	embeds[embeds.length-1]
-		.setFooter(`Last checked at ${sessions.time}`); 	
+		.setFooter(`Last checked at ${sessions.time.toLocaleString("en-US", { hour: "numeric", minute: "numeric", hour12: true })}`); 	
 
 	return embeds;	
 }
@@ -189,7 +128,7 @@ export function getSlotEmbed(sessions)
  */
 export async function askPolar(question, channel, uid) 
 {
-	// @ts-ignore A filter to only allow select emoji and user to react.
+	// @ts-ignore
 	const filter = (reaction, user) => ["👍", "👎"].includes(reaction.emoji.name) && user.id === uid;
 
 	// Send the message and wait for reactions.
@@ -208,4 +147,58 @@ export async function askPolar(question, channel, uid)
 
 	return result;
 		
+}
+  
+
+/**
+ * Checks how similar is s1 and s2 using Levenshtein distance.
+ * Returns 1 if s1===s2 or a number between 0 (inclusive) and 1 (exclusive) 
+ * 
+ * @author StackOverflow.overlord1234
+ * @param {string} s1 First string
+ * @param {string} s2 Second string
+ * @returns {number} similarity between s1 and s2 (0 to 1)
+ */
+export function getSimilarity(s1, s2) 
+{
+	let longer = s1.toLowerCase();
+	let shorter = s2.toLowerCase();
+
+	if (s1.length < s2.length) 
+	{
+		longer = s2;
+		shorter = s1;
+	}
+	
+	const longerLength = longer.length;
+	if (longerLength === 0) 
+		return 1.0;
+
+	const costs = new Array();
+	for (let i = 0; i <= longer.length; i++) 
+	{
+		let lastValue = i;
+		for (let j = 0; j <= shorter.length; j++) 
+			if (i === 0)
+				costs[j] = j;
+			else 
+			
+			if (j > 0) 
+			{
+				let newValue = costs[j - 1];
+				
+				if (longer.charAt(i - 1) !== shorter.charAt(j - 1))
+					newValue = Math.min(Math.min(newValue, lastValue), costs[j]) + 1;
+				
+				costs[j - 1] = lastValue;
+				lastValue = newValue;
+			}
+		
+		if (i > 0)
+			costs[shorter.length] = lastValue;
+	}
+	
+	const editDistance = costs[shorter.length];
+	
+	return (longerLength - editDistance) / longerLength;
 }

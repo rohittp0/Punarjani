@@ -1,7 +1,7 @@
 /**
  * Punarjani is a discord bot that notifies you about slot availability at
  * CoWin vaccination centers.
- * Copyright (C) 2021  Rohit T P
+ * Copyright (C) 2021  Rohit TP, Sunith VS, Sanu Muhammed C
  * 
  *  This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU Affero General Public License as published
@@ -17,11 +17,10 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>. 
  */
 
-// eslint-disable-next-line no-unused-vars
-import NodeCache from "node-cache";
 import Discord from "discord.js";
 import {FieldValue} from "@google-cloud/firestore";
-import {getLocationEmbeds, TEXTS, askPolar} from "../common.js";
+import {askPolar} from "../common.js";
+import { TEXTS } from "../consts.js";
 
 const emojiTable = 
 [
@@ -37,22 +36,21 @@ const emojiTable =
 /**
  * A helper function to show a list of states and let the user pick one.
  * 
- * @param {FirebaseFirestore.DocumentSnapshot<FirebaseFirestore.DocumentData>} doc
- * @param {Discord.TextChannel | Discord.DMChannel | Discord.NewsChannel} channel The message channel.
- * @param {FirebaseFirestore.Firestore} firestore
+ * @author Rohit T P
+ * 
+ * @param {FirebaseFirestore.DocumentSnapshot<FirebaseFirestore.DocumentData>} doc Firestore document containing users data.
+ * @param {Discord.TextChannel | Discord.DMChannel | Discord.NewsChannel} channel A channel to send and receive message
+ * @param {FirebaseFirestore.Firestore} firestore An instance of the database.
  * 
  * @returns {Promise<boolean>} True if everything went well
  */
 async function setState(doc, channel, firestore) 
 {
 	// Get the list of state name and id from database.
-	const states = (await firestore.doc("/locations/states").get()).get("list");
+	const states = firestore.doc("/locations/states").get();
 	
-	/** @type {Discord.Message[]} */
-	const sent = [];
-	// Create embeds with the state list and user's avatar and send it.	
-	const embeds = getLocationEmbeds(TEXTS.stateQuery[0], TEXTS.stateQuery[1], doc.get("avatar"), states);	
-	embeds.forEach(async (embed) =>sent.push(await channel.send(embed)));
+	// Send an image with the list of states.
+	const sent = await channel.send({files: ["images/states.png"]});
 
 	// Define a function to filter the replies from the user.
 	const numberFilter = (/** @type {Discord.Message} */ response) => 
@@ -64,10 +62,10 @@ async function setState(doc, channel, firestore)
 		.then((collected) => Number(collected.first()?.content));
 
 	// Delete unwanted messages	
-	sent.forEach((msg) => msg.delete().catch(console.error));	
+	sent.delete().catch(console.error);	
 
 	// Search the states array for the state specified by the state code user sent. 	
-	const state = states.find((/** @type {{ id: number; }} */ state) => state.id === choice);	
+	const state = (await states).get("list").find((/** @type {{ id: number; }} */ state) => state.id === choice);	
 
 	if(!state)
 		return await channel.send(`<@${doc.get("userID")}> You selected an invalid state`), false; 
@@ -86,30 +84,18 @@ async function setState(doc, channel, firestore)
 /**
  * A helper function to show a list of states and let the user pick one.
  * 
- * @param {FirebaseFirestore.DocumentSnapshot<FirebaseFirestore.DocumentData>} doc
- * @param {Discord.TextChannel | Discord.DMChannel | Discord.NewsChannel} channel The message channel.
- * @param {FirebaseFirestore.Firestore} firestore
+ * @author Rohit T P
+ * 
+ * @param {FirebaseFirestore.DocumentSnapshot<FirebaseFirestore.DocumentData>} doc Firestore document containing users data.
+ * @param {Discord.TextChannel | Discord.DMChannel | Discord.NewsChannel} channel A channel to send and receive message
+ * @param {FirebaseFirestore.Firestore} firestore An instance of the database.
  * 
  * @returns {Promise<boolean>} True if everything went well
  */
 async function setDistrict(doc, channel, firestore) 
 {
-	// Get the list of district name and id from database.
-	const response = await firestore.collection("/locations/states/districts")
-		.where("state_id", "==", doc.get("state").id)
-		.orderBy("name").get();
-			
-	/** @type {{ name: any; id: any; ref: FirebaseFirestore.DocumentReference<FirebaseFirestore.DocumentData>; }[]} */
-	const districts = [];	
-	// Format the response we got from the API to an object array.
-	response.forEach((dist) => 
-		districts.push({name: dist.get("name"), id: dist.get("id"), ref: dist.ref}));	
-	
-	/** @type {Discord.Message[]} */
-	const sent = [];	
-	// Create embeds with the district list and user's avatar and send it.	
-	const embeds = getLocationEmbeds(TEXTS.districtQuery[0], TEXTS.districtQuery[1], doc.get("avatar"), districts);	
-	embeds.forEach(async (embed) =>sent.push(await channel.send(embed)));
+	// Send an image with the list of states.
+	const sent = await channel.send({files: [`images/Districts/${Number(doc.get("state").id)}.png`]});
 
 	// Define a function to filter the replies from the user.
 	const numberFilter = (/** @type {Discord.Message} */ response) => 
@@ -120,13 +106,24 @@ async function setDistrict(doc, channel, firestore)
 	const choice = await channel.awaitMessages(numberFilter, {max: 1, errors: ["time"]})
 		.then((collected) => Number(collected.first()?.content));
 	
-	// Delete unwanted messages	
-	sent.forEach((msg) => msg.delete().catch(console.error));	
+	// Get the district from database.
+	const districts = await firestore.collection("/locations/states/districts")
+		.where("state_id", "==", Number(doc.get("state").id))
+		.where("id", "==", Number(choice)).get();	
 
-	// Search the districts array for the code user sent. 	
-	const district = districts.find((/** @type {{ id: number; }} */ state) => state.id === choice);	
+	// Delete unwanted message	
+	if(sent.deletable) sent.delete().catch(console.error);		
+	
+	let district;	// Create the district object.
+	if(!districts.empty)
+		district = 
+		{ 
+			name: districts.docs[0].get("name"), 
+			id: districts.docs[0].get("id"), 
+			ref: districts.docs[0].ref
+		};	
 
-	if(!district)
+	if(!district || !district.ref || !district.id)
 		return await channel.send(`<@${doc.get("userID")}> You selected an invalid district`), false;
 
 	const batch = firestore.batch();
@@ -151,8 +148,13 @@ async function setDistrict(doc, channel, firestore)
 }
 
 /**
- * @param {FirebaseFirestore.DocumentSnapshot<FirebaseFirestore.DocumentData>} doc
- * @param {Discord.TextChannel | Discord.DMChannel | Discord.NewsChannel} channel
+ * A helper function to ask user his/her age and save it to database.
+ * 
+ * @author Rohit T P
+ * 
+ * @param {FirebaseFirestore.DocumentSnapshot<FirebaseFirestore.DocumentData>} doc Firestore document containing users data.
+ * @param {Discord.TextChannel | Discord.DMChannel | Discord.NewsChannel} channel A channel to send and receive message
+ * 
  * @returns {Promise<boolean>} True if everything went well
  */
 async function setAge(doc, channel) 
@@ -172,7 +174,7 @@ async function setAge(doc, channel)
 	(await msg).delete().catch(console.error);
 	
 	// This check would accept 18.123 but I think it is feature not a bug.
-	if(age < 18) // Check if the arguments passed contains a valid age.
+	if(age < 18 || !(age < 120) ) // Check if the arguments passed contains a valid age.
 		return await channel.send(`<@${doc.get("userID")}> ${TEXTS.ageError}\n${TEXTS.helpInfo}`), false;
 	
 	const status = await doc.ref.update({age});	
@@ -186,8 +188,13 @@ async function setAge(doc, channel)
 }
 
 /**
- * @param {FirebaseFirestore.DocumentSnapshot<FirebaseFirestore.DocumentData>} doc
- * @param {Discord.TextChannel | Discord.DMChannel | Discord.NewsChannel} channel
+ * A helper function to ask user if he/she wants hourly update and save it to database.
+ * 
+ * @author Rohit T P
+ * 
+ * @param {FirebaseFirestore.DocumentSnapshot<FirebaseFirestore.DocumentData>} doc Firestore document containing users data.
+ * @param {Discord.TextChannel | Discord.DMChannel | Discord.NewsChannel} channel A channel to send and receive message
+ * 
  * @returns {Promise<boolean>} True if everything went well
  */
 async function toggleUpdate(doc, channel) 
@@ -205,8 +212,13 @@ async function toggleUpdate(doc, channel)
 }
 
 /**
- * @param {FirebaseFirestore.DocumentSnapshot<FirebaseFirestore.DocumentData>} doc
- * @param {Discord.TextChannel | Discord.DMChannel | Discord.NewsChannel} channel
+ * A helper function to ask user if he/she got the first dose and save it to database.
+ * 
+ * @author Rohit T P
+ * 
+ * @param {FirebaseFirestore.DocumentSnapshot<FirebaseFirestore.DocumentData>} doc Firestore document containing users data.
+ * @param {Discord.TextChannel | Discord.DMChannel | Discord.NewsChannel} channel A channel to send and receive message
+ * 
  * @returns {Promise<boolean>} True if everything went well
  */
 async function changeShot(doc, channel) 
@@ -215,7 +227,7 @@ async function changeShot(doc, channel)
  
 	let status = true;
 	if(doc.get("gotFirst") !== update)
-		status = await doc.ref.update({hourlyUpdate: update}).then(() => true).catch(() => false);
+		status = await doc.ref.update({gotFirst: update}).then(() => true).catch(() => false);
  
 	if(status)	
 		channel.send("Your vaccination status changed.");	
@@ -224,10 +236,16 @@ async function changeShot(doc, channel)
 }
 
 /**
- * @param {FirebaseFirestore.DocumentSnapshot<FirebaseFirestore.DocumentData>} doc
- * @param {Discord.TextChannel | Discord.DMChannel | Discord.NewsChannel} channel
- * @param {FirebaseFirestore.Firestore} firestore
- * @param {NodeCache} cache
+ * This function deletes the user referenced by the doc object after asking
+ * the user for confirmation.
+ * 
+ * @author Rohit T P
+ * 
+ * @param {FirebaseFirestore.DocumentSnapshot<FirebaseFirestore.DocumentData>} doc Firestore document containing users data.
+ * @param {Discord.TextChannel | Discord.DMChannel | Discord.NewsChannel} channel A channel to send and receive message
+ * @param {FirebaseFirestore.Firestore} firestore An instance of the database.
+ * @param {{get: any, set:any}} cache A pre opened cache
+ * 
  * @returns {Promise<boolean>} True if everything went well
  */
 async function deleteUser(doc, channel, firestore, cache) 
@@ -242,7 +260,7 @@ async function deleteUser(doc, channel, firestore, cache)
 	if(doc.get("hourlyUpdate") === true)
 		batch.update(doc.get("distRef"), {users: FieldValue.increment(-1)});
 	
-	const status = await batch.commit().catch(console.error);
+	const status = await batch.commit().then(() => true).catch(() => false);
 
 	if(!status)
 		return await channel.send(`<@${doc.get("userID")}> ${TEXTS.generalError} ${TEXTS.tryAgain}`), false; 
@@ -255,13 +273,15 @@ async function deleteUser(doc, channel, firestore, cache)
 }
 
 /**
- * This function handles the user registration for Punarjani.
+ * This function handles the !edit command.
  * 
  * @author Rohit T P
+ * 
  * @param {Discord.Message} message The message that initiated this command.
  * @param {string[]} args The arguments.
  * @param {{firestore: () => FirebaseFirestore.Firestore}} app The firebase app
- * @param {NodeCache} cache
+ * @param {{get: any, set:any}} cache A pre opened cache
+ * 
  * @returns {Promise<Boolean>} Indicates operation success or failure.
  */
 export default async function edit(message, args, app, cache) 

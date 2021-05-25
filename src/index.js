@@ -1,7 +1,7 @@
 /**
  * Punarjani is a discord bot that notifies you about slot availability at
  * CoWin vaccination centers.
- * Copyright (C) 2021  Rohit T P
+ * Copyright (C) 2021  Rohit TP, Sunith VS, Sanu Muhammed C
  * 
  *  This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU Affero General Public License as published
@@ -19,8 +19,7 @@
 
 import Discord from "discord.js";
 import NodeCache from "node-cache";
-import cron from "node-cron";
-import {APIS, getApp, getSlotEmbed, sendRequest, TEXTS } from "./common.js";
+import {askPolar, getApp, getIndianTime, getSimilarity, getSlotEmbed, getSessions } from "./common.js";
 // Importing command handlers.
 import register from "./commands/register.js";
 import help from "./commands/help.js";
@@ -28,17 +27,14 @@ import slots from "./commands/slots.js";
 import edit from "./commands/edit.js";
 import info from "./commands/info.js";
 import profile from "./commands/profile.js";
+import { TEXTS, UPDATE_FREQUENCY } from "./consts.js";
 
-// Opens a cache.
-const cache = new NodeCache();
-// Create an instance of Client 
-const client = new Discord.Client();
-// Create an instance of firebase app
-const app = getApp();
-// Get a ref to active node
-const active = app.database().ref("/active");
-// Define a prefix to use when sending commands to bot.
-const prefix = process.env.PREFIX || "!";
+const cache = new NodeCache(); // Opens a cache.
+const client = new Discord.Client(); // Create an instance of Client 
+const app = getApp(); // Create an instance of firebase app
+
+const active = app.database().ref("/active"); // Get a ref to active node
+const prefix = process.env.PREFIX || "!"; // Define a prefix to use when sending commands to bot.
 
 // An array of commands and functions to handle them.
 const commands = 
@@ -53,70 +49,125 @@ const commands =
 
 console.log("All globals set.");
 
+// set firebase realtime database to delete active users collection if server turns off.
 active.onDisconnect().remove();
 
 /**
- * @param {FirebaseFirestore.Firestore} firestore
- * @param {Discord.Client} dsClient
- * @param {NodeCache} cache
+ * This function sends slot updates to all subscribed users. 
+ * @author Rohit T P
+ * @param {FirebaseFirestore.Firestore} firestore An instance of firestore database
+ * @param {Discord.Client} dsClient The discord client using which to send update
+ * @param {NodeCache} hrCache A pre opened cache to store requests.
  */
-async function sendHourlyUpdates(firestore, dsClient, cache)
+async function sendUpdates(firestore, dsClient, hrCache)
 {
-	const currentTime = new Date();
-	const today = new Date(currentTime.getTime() + (currentTime.getTimezoneOffset() + 330)*60000);
+	// Get current IST time.
+	const today = getIndianTime(undefined);
+	const todayString = `${today.getDate()}-${today.getMonth()+1}-${today.getFullYear()}`;
 
-	console.log("Hourly updates ", today.toTimeString());
+	console.log("Hourly update at", today.toTimeString());
 
-	const districts = await firestore.collection("/locations/states/districts")
-		.where("users", ">", 0).get();	
+	// Get the list of districts from firestore in which more than 0 users have opted for hourly update.
+	const districts = await firestore.collection("/locations/states/districts").where("users", ">", 0).get();
 
-	/** @type {Promise<any>[]} The promises got when sending embeds. */
-	const promises = [];	
-	
-	districts.forEach(async (dist) => 
+	districts.forEach(async (district) => 
 	{
-		const date = `${today.getDate()}-${today.getMonth()+1}-${today.getFullYear()}`;
-		const response = sendRequest(`${APIS.byDistrict}${dist.get("id")}&date=${date}`, cache)
-			.catch(()=>({sessions: [], time: "never"}));
+		const distId = district.get("id");
 
-		const users = await firestore.collection("users")
-			.where("district.id", "==", dist.get("id"))
+		// Use cowin API to get available sessions for this district.
+		const sessionsResponse = await getSessions(distId, todayString, hrCache);
+		const sessions = sessionsResponse.sessions;
+		const responseTime = sessionsResponse.time;
+
+		// Get the user of this districts who have hourly updates enabled.
+		const usersOfDist = await firestore.collection("/users")
 			.where("hourlyUpdate", "==", true)
+			.where("district.id", "==", distId)
 			.get();
 
-		users.forEach(async (user) => 
-		{
-			const available = {time: (await response).time, centers: []};
+		if(sessions.length === 0)
+			return console.log("No slots in the district", district.get("name"), distId);	
 
-			available.centers = ((await response).sessions || [])
-			// @ts-ignore
+		usersOfDist.forEach(async (user) => 
+		{
+			const userAge = user.get("age");
+			const gotFirstDose = user.get("gotFirst");
+
+			const availableCenters = sessions // Filter the sessions to get sessions that are applicable to the user.
 				.map(({min_age_limit, name, available_capacity_dose1, available_capacity_dose2, pincode}) =>
 					(
 						{ 
-							age: (Number(min_age_limit) <= user.get("age")), 
-							slots: user.get("gotFirst") ? available_capacity_dose2 : available_capacity_dose1,
+							age: (Number(min_age_limit) <= userAge), 
+							slots: gotFirstDose ? available_capacity_dose2 : available_capacity_dose1,
 							name, 
 							pincode 
 						}
 					))
-			// @ts-ignore
 				.filter(({age, slots})=> age && Number(slots) > 0);
 
-			const dm = await dsClient.users.fetch(user.get("userID")).catch(console.error);
+			if(availableCenters.length === 0)
+				return console.log("No thing to send to", user.get("userName"), sessions.length, availableCenters.length);
 
-			for(const embed of getSlotEmbed(available))
-				if(dm)
-					promises.push(dm.send(embed));	
-		});
+			// Fetch user's DM channel using his Discord user ID.
+			const dmChannel = await dsClient.users.fetch(user.get("userID")).catch(console.error);	
+
+			if(!dmChannel) return console.log("User can't be DMd");
+
+			// Create embeds using data we have.
+			const slotEmbeds = getSlotEmbed({centers: availableCenters, time: responseTime}, todayString);
+
+			for(const embed of slotEmbeds)
+				await dmChannel.send(embed).catch(() => console.error("Cant DM", user.get("userName")));						
+			
+		});	
 	});
 
-	return Promise.all(promises).catch(console.error);
 }
 
 
 /**
+ * A helper function that gets the appropriate handler for the command passed.
+ * If command is invalid suggests the user the correct command and returns it's handler.
+ * 
+ * @author Rohit T P
+ * @param {string} input
+ * @param {Discord.TextChannel | Discord.DMChannel | Discord.NewsChannel} channel
+ * @param {string} id
+ * @returns {Promise<((message: Discord.Message, args: string[], app: any, cache: NodeCache) => Promise<any>) | undefined>}
+ */
+async function getCommand(input, channel, id) 
+{
+	let similarity = 0;
+	/** @type {{handler: ((message: Discord.Message, args: string[], app: any, cache: NodeCache) => Promise<any>) | undefined, name: string | undefined}}	 */
+	const command = {handler: undefined, name: ""};
+
+	for(const cmd of commands) // Searches the commands array to find the most similar command
+	{
+		const sim = getSimilarity(cmd.name, input);
+		if(sim > similarity)
+		{
+			command.handler = cmd.handler;
+			command.name = cmd.name;
+			similarity = sim;
+		}
+
+		if(sim === 1) break; // If there is an exact match break immediately
+	}
+
+	// Set the user to doing something in cache.
+	cache.set(id+"running", true);
+
+	if(similarity < 1 && !(await askPolar(`!${input} is not a valid command, did you mean !${command.name} ?`, channel, id))) 
+		return undefined; // If there is no exact match and the user rejects the suggestion return undefined.
+	
+	return command.handler;	
+}
+
+/**
   * Add an on message handler to the discord bot. This handler will be 
   * the starting point for most of the functions handled by the bot.
+  * 
+  * @param {Discord.Message} message The message that triggered this listener.
   */
 client.on("message", async (message) =>
 {
@@ -124,17 +175,15 @@ client.on("message", async (message) =>
 	if (!message.content.startsWith(prefix) || message.author.bot || message.content.length < 2) 
 		return;
 	
+	// Check if the user is doing something else	
 	const userRef = active.child(message.author.id); 	
-	// Check if the user is doing something else
-	const running = new Promise((resolve) => userRef.once("value", snapshot => resolve(snapshot.exists())));	
-		
-	// Removes prefix from input string then splits into words. 	
-	const args = message.content.slice(prefix.length).trim().split(/ +/);
-	// Gets the command to command variable.
-	const command = args.shift()?.toLowerCase();
+	const running = new Promise((resolve) => userRef.once("value", snapshot => resolve(snapshot.exists())));		
+
+	const args = message.content.slice(prefix.length).trim().split(/ +/); // Removes prefix from input string then splits into words.
+	const command = args.shift()?.toLowerCase(); 	// Gets the command to command variable.
 
 	if(message.channel.type !== "dm" && command !== "help" && command !== "info")
-		return message.reply(TEXTS.cantTalk+TEXTS.goToDM);	
+		return message.reply(TEXTS.cantTalk+TEXTS.goToDM); // If the message was sent not in a DM channel return.	
 	
 	// Don't run if user has some other commands running for him/her/they
 	if(command !== "help" && (cache.get(message.author.id+"running") || await running))
@@ -142,12 +191,16 @@ client.on("message", async (message) =>
 
 	// Set the ser as trying to do something.
 	const setRunning =  userRef.set(true).catch(console.error);	
-	cache.set(message.author.id+"running", true);
 
+	// Get the correct handler for the command user wants to run.
+	const handler = await getCommand(command || "", message.channel, message.author.id);
+
+	let result;	
+	if(handler)
 	// Execute the command.
-	const result = await commands.find(cmd => cmd.name === command)
-		?.handler(message, args, app, cache).catch(console.error);
+		result = await handler(message, args, app, cache).catch(console.error);	
 	
+	// Reset the users running status to false.
 	cache.set(message.author.id+"running", false);	
 	await setRunning;	
 	await userRef.remove().catch(console.error);	
@@ -155,18 +208,33 @@ client.on("message", async (message) =>
 	console.log(`${command} execution ${result}`); 
 });
 
+/**
+ * Runs once the bot is ready.
+ */
 client.on("ready", () => 
 {
 	console.log("Bot ready");
-	cron.schedule(
-		"0 5-12 * * *", 
-		() => sendHourlyUpdates(app.firestore(), client, cache), 
-		{timezone: "Asia/Colombo", scheduled: true}
-	);
+	setInterval(sendUpdates, UPDATE_FREQUENCY, app.firestore(), client, cache);
+	sendUpdates(app.firestore(), client, cache); // Call the function to send an update as soon as the server starts.
+});
+
+/**
+ * Runs when the bot is added to a new server (guild).
+ * @param {Discord.Guild} guild
+ */
+client.on("guildCreate", async (guild) => 
+{
+	// Check if we can send message in system channel.
+	if(!guild.systemChannel?.send) return;
+	// Create a message object to send message.
+	const message = {channel: guild.systemChannel};
+	// Send the info message.
+	await info(message).catch(console.error);
+
 });
  
 //Login to discord using TOKEN
 if(process.env.BOT_TOKEN)
 	client.login(process.env.BOT_TOKEN);
 else 
-	console.error("Discord-Bot Token missing."); // Print error message if token is missing.		
+	throw new Error("Discord-Bot Token missing."); // Throws error if token is missing.		
