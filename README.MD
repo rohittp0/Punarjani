@@ -42,6 +42,7 @@ Our bot Mr. PJ follows a chatbot-like scheme. You can tell him to do what you wa
 
 ## Want To Know More?
 Check out our [website](https://punarjani-cowin.web.app/) for a detailed walk-through, or see this video for a glance.
+[<img src = "https://yt-embed.herokuapp.com/embed?v=q0N_seKQvqg" />](https://youtu.be/q0N_seKQvqg)
 
 ## Team members
 1. [Rohit T P](https://github.com/rohittp0)
