@@ -4,6 +4,8 @@
 name: Deploy to Firebase Hosting
 'on':
   push:
+    paths:
+      - "docs/**"
     branches:
       - main
 jobs:
