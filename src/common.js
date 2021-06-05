@@ -80,16 +80,14 @@ export async function getSessions(id, date, cache)
 		})
 		.catch(() =>undefined);
 
-	const data = result?.data;
-
-	if(!data || !data.centers) // If no data was got try getting the data from cache if not found return placeholder.
+	if(!result?.data || !result.data.centers) // If no data was got try getting the data from cache if not found return placeholder.
 		return cache.get(url) || { sessions: [], time: new Date(0) };
 	
 	/** @type {any[]} */
 	const availableSessions = [];
 
 	// @ts-ignore Loop through all the centers available.
-	data.centers.forEach(({name, pincode, sessions}) => 
+	result.data.centers.forEach(({name, pincode, sessions}) => 
 
 		// @ts-ignore Filter for sessions where solts are available for current date.
 		sessions.filter((session) => session.date.replaceAll(/^0|(?<=-)0/g, "") === date)
@@ -107,8 +105,11 @@ export async function getSessions(id, date, cache)
 				))
 	);	
 
-	data.sessions = availableSessions; // Set sessions eual to sessions available for current date.
-	data.time = getIndianTime(undefined); // Since data does not have time set, set it to current time. 	
+	const data = {
+		sessions: availableSessions, // Set sessions eual to sessions available for current date.
+		time: getIndianTime(undefined) // Since data does not have time set, set it to current time. 
+	};
+	
 	cache.set("slots"+id+date, data, 5*60*60*1000);	// Save the processed data to cahce.
 	
 	return data;
