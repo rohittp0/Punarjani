@@ -67,7 +67,7 @@ export function getIndianTime(dateString)
  */
 export async function getSessions(id, date, cache) 
 {
-	const url = `https://cdn-api.co-vin.in/api/v2/appointment/sessions/public/findByDistrict?district_id=${id}&date=${date}`;
+	const url = `https://cdn-api.co-vin.in/api/v2/appointment/sessions/public/calendarByDistrict?district_id=${id}&date=${date}`;
 	const result = await axios.get(url,
 		{
 			headers: 
@@ -80,18 +80,37 @@ export async function getSessions(id, date, cache)
 		})
 		.catch(() =>undefined);
 
-	let data = result?.data;
+	const data = result?.data;
 
-	if(!data || !data.sessions) // If no data was got try getting the data from cache
-		data = cache.get(url);
-	else 
-		cache.set("slots"+id+date, data, 5*60*60*1000);	// If valid data is got save it in cache
+	if(!data || !data.centers) // If no data was got try getting the data from cache if not found return placeholder.
+		return cache.get(url) || { sessions: [], time: new Date(0) };
+	
+	/** @type {any[]} */
+	const availableSessions = [];
 
-	if(!data || !data.sessions) 
-		return { sessions: [], time: new Date(0) }; // If data was not found in cache also then return a place holder.
-	if(!data.time) 
-		data.time = getIndianTime(undefined); // If data dose not have time set set it to current time. 
+	// @ts-ignore Loop through all the centers available.
+	data.centers.forEach(({name, pincode, sessions}) => 
 
+		// @ts-ignore Filter for sessions where solts are available for current date.
+		sessions.filter((session) => session.date.replaceAll(/^0|(?<=-)0/g, "") === date)
+
+			// @ts-ignore Map the filtered sessions to required format.
+			.forEach(({min_age_limit, available_capacity_dose1, available_capacity_dose2}) => 
+				availableSessions.push(
+					{
+						name,
+						pincode,
+						min_age_limit,
+						available_capacity_dose1,
+						available_capacity_dose2
+					}
+				))
+	);	
+
+	data.sessions = availableSessions; // Set sessions eual to sessions available for current date.
+	data.time = getIndianTime(undefined); // Since data does not have time set, set it to current time. 	
+	cache.set("slots"+id+date, data, 5*60*60*1000);	// Save the processed data to cahce.
+	
 	return data;
 }
 
