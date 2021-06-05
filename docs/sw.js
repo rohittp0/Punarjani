@@ -1,8 +1,24 @@
-const CACHE_NAME = "punarjani-cache-v2";
+const VERSIONED_CACHE = "punarjani-cache-v2";
+const PERSISTANT_CACHE = "persistant-cache-punarjani";
 
-const urlsToCache = [
+const versioned_urls = [
 	"/",
 	"./assets/css/style.css",
+	"./assets/js/main.js",
+	"./assets/vendor/aos/aos.css",
+	"./assets/vendor/aos/aos.js",
+	"./assets/vendor/bootstrap/css/bootstrap-icons.css",
+	"./assets/vendor/bootstrap/css/bootstrap.min.css",
+	"./assets/vendor/bootstrap/js/bootstrap.bundle.min.js",
+	"./assets/vendor/glightbox/js/glightbox.min.js",
+	"./assets/vendor/isotope-layout/isotope.pkgd.min.js",
+	"./assets/vendor/swiper/swiper-bundle.min.css",
+	"./assets/vendor/swiper/swiper-bundle.min.js",
+];
+
+const persistant_urls = [
+	"./assets/fonts/boxicons.woff2",
+	"./assets/fonts/bootstrap-icons.woff2",
 	"./assets/img/Working/edit.jpg",
 	"./assets/img/Working/help.png",
 	"./assets/img/Working/info.png",
@@ -22,40 +38,29 @@ const urlsToCache = [
 	"./assets/img/counts-bg.png",
 	"./assets/img/features.png",
 	"./assets/img/footer-bg.jpg",
-	"./assets/img/hero-bg.jpg",
-	"./assets/js/main.js",
-	"./assets/vendor/aos/aos.css",
-	"./assets/vendor/aos/aos.js",
-	"./assets/vendor/bootstrap/css/bootstrap-icons.css",
-	"./assets/vendor/bootstrap/css/bootstrap.min.css",
-	"./assets/vendor/bootstrap/js/bootstrap.bundle.min.js",
-	"./assets/vendor/glightbox/js/glightbox.min.js",
-	"./assets/vendor/isotope-layout/isotope.pkgd.min.js",
-	"./assets/vendor/swiper/swiper-bundle.min.css",
-	"./assets/vendor/swiper/swiper-bundle.min.js",
-	"./assets/fonts/boxicons.woff2",
-	"./assets/fonts/bootstrap-icons.woff2"
+	"./assets/img/hero-bg.jpg"
 ];
 
-self.addEventListener("install", (event) => 
+async function cacheAll(name, urls) 
 {
+	const cache = await caches.open(name);
+	return await cache.addAll(urls);
+}
+
+self.addEventListener("install", (event) => 
 	// Perform install steps
 	event.waitUntil(
-		caches.open(CACHE_NAME)
-			.then(function(cache) 
-			{
-				console.log("Opened cache");
-				return cache.addAll(urlsToCache);
-			})
-	);
-});
+		Promise.all(
+			cacheAll(VERSIONED_CACHE, versioned_urls),
+			cacheAll(PERSISTANT_CACHE, persistant_urls)
+		)));
 
 self.addEventListener("activate", (event) =>
 	event.waitUntil(
 		caches.keys().then((cacheNames) => 
 			Promise.all(cacheNames.map((cacheName) =>
 			{
-				if (CACHE_NAME !== cacheName &&  !cacheName.startsWith("persistant")) 
+				if (VERSIONED_CACHE !== cacheName &&  PERSISTANT_CACHE !== cacheName) 
 					return caches.delete(cacheName);
 			}))
 		)
@@ -81,7 +86,7 @@ self.addEventListener("fetch", function(event)
 
 						const responseToCache = response.clone();
   
-						caches.open(CACHE_NAME)
+						caches.open(VERSIONED_CACHE)
 							.then(function(cache) 
 							{
 								cache.put(event.request, responseToCache);
