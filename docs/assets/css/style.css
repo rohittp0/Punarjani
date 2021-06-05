@@ -8,6 +8,97 @@
 /*--------------------------------------------------------------
 # General
 --------------------------------------------------------------*/
+@font-face {
+  font-family: "bootstrap-icons";
+  src: url("../fonts/bootstrap-icons.woff2") format("woff2");
+}
+
+@font-face
+{
+    font-family: 'boxicons';
+    font-weight: normal;
+    font-style: normal;
+    src: url('../fonts/boxicons.woff2') format('woff2');
+}
+
+[class^="bi-"]::before, [class*=" bi-"]::before {
+  display: inline-block;
+  font-family: bootstrap-icons !important;
+  font-style: normal;
+  font-weight: normal !important;
+  font-variant: normal;
+  text-transform: none;
+  line-height: 1;
+  vertical-align: -.125em;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+.bi-x::before {
+  content: "\f62a";
+}
+
+.bx {
+  font-family: 'boxicons'!important;
+  font-weight: normal;
+  font-style: normal;
+  font-variant: normal;
+  line-height: 1;
+  display: inline-block;
+  text-transform: none;
+  speak: none;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale
+}
+
+.bi-arrow-up-short::before { content: "\f145"; }
+
+.bi-list::before { content: "\f479"; }
+
+.bx-chevron-right:before {
+  content: "\e9b2"
+}
+
+.bx-comment-detail:before {
+  content: "\e9db"
+}
+
+.bx-file:before {
+  content: "\ea37"
+}
+
+.bx-happy:before {
+  content: "\ea63"
+}
+
+.bx-message-square-check:before {
+  content: "\eae1"
+}
+
+.bx-receipt:before {
+  content: "\eb33"
+}
+
+.bx-user:before {
+  content: "\ebbf"
+}
+
+.bxs-alarm:before {
+  content: "\ebf1"
+}
+
+.bxs-like:before {
+  content: "\ed5f"
+}
+
+.bxs-share-alt:before {
+  content: "\edf4"
+}
+
+.bxs-user:before {
+  content: "\ee33"
+}
+
 body {
   font-family: "Open Sans", sans-serif;
   color: #444444;
