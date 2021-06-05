@@ -88,27 +88,28 @@ export async function getSessions(id, date, cache)
 	/** @type {any[]} */
 	const availableSessions = [];
 
-	// @ts-ignore
+	// @ts-ignore Loop through all the centers available.
 	data.centers.forEach(({name, pincode, sessions}) => 
-	{
-		// @ts-ignore
-		const todaySessions = sessions.filter((session) => session.date.replaceAll(/^0|(?<=-)0/g, "") === date)
-			// @ts-ignore
-			.map(({min_age_limit, available_capacity_dose1, available_capacity_dose2}) => 
-				({
-					name,
-					pincode,
-					min_age_limit,
-					available_capacity_dose1,
-					available_capacity_dose2
-				}));
-				
-		availableSessions.push(...todaySessions);		
-	});	
 
-	data.sessions = availableSessions;
-	data.time = getIndianTime(undefined); // Since data dose not have time set set it to current time. 	
-	cache.set("slots"+id+date, data, 5*60*60*1000);	// If valid data is got save it in cache
+		// @ts-ignore Filter for sessions where solts are available for current date.
+		sessions.filter((session) => session.date.replaceAll(/^0|(?<=-)0/g, "") === date)
+
+			// @ts-ignore Map the filtered sessions to required format.
+			.forEach(({min_age_limit, available_capacity_dose1, available_capacity_dose2}) => 
+				availableSessions.push(
+					{
+						name,
+						pincode,
+						min_age_limit,
+						available_capacity_dose1,
+						available_capacity_dose2
+					}
+				))
+	);	
+
+	data.sessions = availableSessions; // Set sessions eual to sessions available for current date.
+	data.time = getIndianTime(undefined); // Since data does not have time set, set it to current time. 	
+	cache.set("slots"+id+date, data, 5*60*60*1000);	// Save the processed data to cahce.
 	
 	return data;
 }
