@@ -1,5 +1,5 @@
-const VERSIONED_CACHE = "punarjani-cache-v2";
-const PERSISTANT_CACHE = "persistant-cache-punarjani";
+const VERSIONED_CACHE = "punarjani-cache-v3";
+const PERSISTENT_CACHE = "persistent-cache-punarjani";
 
 const versioned_urls = [
 	"/",
@@ -16,7 +16,7 @@ const versioned_urls = [
 	"./assets/vendor/swiper/swiper-bundle.min.js",
 ];
 
-const persistant_urls = [
+const persistent_urls = [
 	"./assets/fonts/boxicons.woff2",
 	"./assets/fonts/bootstrap-icons.woff2",
 	"./assets/img/Working/edit.jpg",
@@ -52,7 +52,7 @@ self.addEventListener("install", (event) =>
 	event.waitUntil(
 		Promise.all(
 			cacheAll(VERSIONED_CACHE, versioned_urls),
-			cacheAll(PERSISTANT_CACHE, persistant_urls)
+			cacheAll(PERSISTENT_CACHE, persistent_urls)
 		)));
 
 self.addEventListener("activate", (event) =>
@@ -60,7 +60,7 @@ self.addEventListener("activate", (event) =>
 		caches.keys().then((cacheNames) => 
 			Promise.all(cacheNames.map((cacheName) =>
 			{
-				if (VERSIONED_CACHE !== cacheName &&  PERSISTANT_CACHE !== cacheName) 
+				if (VERSIONED_CACHE !== cacheName &&  PERSISTENT_CACHE !== cacheName) 
 					return caches.delete(cacheName);
 			}))
 		)
