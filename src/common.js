@@ -89,7 +89,7 @@ export async function getSessions(id, date, cache)
 	// @ts-ignore Loop through all the centers available.
 	result.data.centers.forEach(({name, pincode, sessions}) => 
 
-		// @ts-ignore Filter for sessions where solts are available for current date.
+		// @ts-ignore Filter for sessions where slots are available for current date.
 		sessions.filter((session) => session.date.replaceAll(/^0|(?<=-)0/g, "") === date)
 
 			// @ts-ignore Map the filtered sessions to required format.
@@ -106,11 +106,11 @@ export async function getSessions(id, date, cache)
 	);	
 
 	const data = {
-		sessions: availableSessions, // Set sessions eual to sessions available for current date.
+		sessions: availableSessions, // Set sessions equal to sessions available for current date.
 		time: getIndianTime(undefined) // Since data does not have time set, set it to current time. 
 	};
 	
-	cache.set("slots"+id+date, data, 5*60*60*1000);	// Save the processed data to cahce.
+	cache.set("slots"+id+date, data, 5*60*60*1000);	// Save the processed data to cache.
 	
 	return data;
 }
